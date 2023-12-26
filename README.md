@@ -1,4 +1,4 @@
-### VCore: Open Source Computer Vision Library
+### VCore: Open Source libuv extend Library
 
 #### Resources
 
