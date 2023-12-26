@@ -1,4 +1,4 @@
-### VCore: Open Source libuv extend Library
+### VCore: Open Source libuv extend core Library
 
 #### Resources
 
