@@ -40,7 +40,8 @@ int VStream::write(VWrite* req,
   return uv_write(OBJ_VWRITE_REQ(*req), VSTREAM_HANDLE, (const uv_buf_t*)bufs,
                   nbufs, VWrite::callback_write);
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 41
 int VStream::write(VWrite* req,
                           const VBuf bufs[],
                           unsigned int nbufs,
@@ -52,17 +53,21 @@ int VStream::write(VWrite* req,
                    nbufs, (uv_stream_t*)send_handle->getHandle(),
                    VWrite::callback_write);
 }
+#endif
+#endif
 
 int VStream::tryWrite(const VBuf bufs[], unsigned int nbufs) {
   return uv_try_write(VSTREAM_HANDLE, (uv_buf_t*)bufs, nbufs);
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 42
 int VStream::tryWrite(const VBuf bufs[], unsigned int nbufs,
                       VStream* send_handle) {
   return uv_try_write2(VSTREAM_HANDLE, (uv_buf_t*)bufs, nbufs,
                        OBJ_VSTREAM_HANDLE(*send_handle));
 }
-
+#endif
+#endif
 int VStream::isReadable() { return uv_is_readable(VSTREAM_HANDLE); }
 
 int VStream::isWritable() { return uv_is_writable(VSTREAM_HANDLE); }

@@ -16,11 +16,18 @@ class VProcess : public VHandle {
                   unsigned int flags = 0);
   void setOptions(const std::string args);
   int kill(int signum);
+
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 18
   int getPid();
+  static int processGetPid(const VProcess* hd);
+#endif
+#endif
+
 
   static int processKill(VProcess* hd, int signum);
   static int kill(int pid, int signum);
-  static int processGetPid(const VProcess* hd);
+
 
   int start(std::function<void(VProcess*, int64_t, int)> start_cb);
 

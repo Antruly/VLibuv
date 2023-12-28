@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "VObject.h"
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 45
 class VGroup :
     public VObject
 {
@@ -13,4 +15,7 @@ class VGroup :
  private:
   uv_group_t* group = nullptr;
 };
+#endif
+#endif
+
 

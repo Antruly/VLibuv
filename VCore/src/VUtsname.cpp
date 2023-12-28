@@ -1,4 +1,6 @@
 ﻿#include "VUtsname.h"
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 25
 VUtsname::VUtsname() {
   this->utsname = (uv_utsname_t*)VCore::malloc(sizeof(uv_utsname_t));
   this->init();
@@ -30,3 +32,5 @@ int VUtsname::init() {
   memset(this->utsname, 0, sizeof(uv_utsname_t));
   return 0;
 }
+#endif
+#endif

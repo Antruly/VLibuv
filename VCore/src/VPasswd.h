@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "VObject.h"
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 9
 class VPasswd :
     public VObject
 {
@@ -13,4 +15,7 @@ class VPasswd :
  private:
   uv_passwd_t* passwd = nullptr;
 };
+
+#endif
+#endif
 

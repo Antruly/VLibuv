@@ -1,4 +1,6 @@
 ﻿#include "VGroup.h"
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 45
 VGroup::VGroup() {
   this->group = (uv_group_t*)VCore::malloc(sizeof(uv_group_t));
   this->init();
@@ -30,3 +32,5 @@ int VGroup::init() {
   memset(this->group, 0, sizeof(uv_group_t));
   return 0;
 }
+#endif
+#endif

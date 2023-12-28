@@ -26,17 +26,22 @@ int VTty::init(VLoop* loop, uv_file fd, int readable) {
   this->setHandleData();
   return ret;
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 1
 int VTty::setMode(uv_tty_mode_t mode) {
   return uv_tty_set_mode(VTTY_HANDLE, mode);
 }
+#endif
+#endif
+
 
 int VTty::resetMode(void) { return uv_tty_reset_mode(); }
 
 int VTty::getWinsize(int* width, int* height) {
   return uv_tty_get_winsize(VTTY_HANDLE, width, height);
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 33
 void VTty::setVtermState(uv_tty_vtermstate_t state) {
   uv_tty_set_vterm_state(state);
   return;
@@ -45,3 +50,6 @@ void VTty::setVtermState(uv_tty_vtermstate_t state) {
 int VTty::getVtermState(uv_tty_vtermstate_t* state) {
   return uv_tty_get_vterm_state(state);
 }
+#endif
+#endif
+

@@ -9,6 +9,11 @@ extern "C" {
 #include <map>
 #include <string>
 #include <vector>
+
+#ifndef NDIS_IF_MAX_STRING_SIZE
+#define NDIS_IF_MAX_STRING_SIZE 256
+#endif  // !NDIS_IF_MAX_STRING_SIZE
+
 #define VFREE(_data) \
   if (_data != nullptr) { \
     free(_data);          \

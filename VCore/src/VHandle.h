@@ -77,12 +77,18 @@ class VHandle : public VObject {
   void unref();
   int hasRef();
 
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 18
   VHandleType handleGetType();
-  size_t handleSize();
   const char* handleTypeName();
   void* handleGetData();
   void* handleGetLoop();
   void handleSetData(void* data);
+#endif
+#endif
+
+  size_t handleSize();
+
   void close();
   int isClosing();
 
@@ -99,12 +105,18 @@ class VHandle : public VObject {
   static void unref(void* hd);
   static int hasRef(const void* hd);
 
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 18
   static VHandleType handleGetType(const VHandle* vhd);
-  static size_t handleSize(VHandle* vhd);
   static const char* handleTypeName(VHandle* vhd);
   static void* handleGetData(const VHandle* vhd);
   static void* handleGetLoop(const VHandle* vhd);
   static void handleSetData(VHandle* vhd, void* data);
+#endif
+#endif
+
+  static size_t handleSize(VHandle* vhd);
+
 
   static int isActive(const VHandle* vhd);
 

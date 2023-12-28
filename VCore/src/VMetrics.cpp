@@ -1,4 +1,7 @@
 ﻿#include "VMetrics.h"
+
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 45
 VMetrics::VMetrics() {
   this->metrics = (uv_metrics_t*)VCore::malloc(sizeof(uv_metrics_t));
   this->init();
@@ -30,3 +33,8 @@ int VMetrics::init() {
   memset(this->metrics, 0, sizeof(uv_metrics_t));
   return 0;
 }
+
+#endif  // UV_VERSION_MINOR >= 45
+#endif  // UV_VERSION_MAJOR >= 1
+
+

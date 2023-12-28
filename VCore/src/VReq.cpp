@@ -44,29 +44,42 @@ VReq& VReq::operator=(const VReq& obj) {
 
 size_t VReq::reqSize() { return uv_req_size(req->type); }
 
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 19
 void* VReq::reqGetData() { return uv_req_get_data(req); }
 
 void VReq::reqSetData(void* data) { uv_req_set_data(req, data); }
 
+const char* VReq::reqTypeName() { return uv_req_type_name(req->type); }
+#endif
+#endif
+
+
 VReqType VReq::reqGetType() { return req->type; }
 
-const char* VReq::reqTypeName() { return uv_req_type_name(req->type); }
+
 
 int VReq::cancel() { return uv_cancel(req); }
 
 size_t VReq::reqSize(VReq* vReq) { return uv_req_size(vReq->req->type); }
 
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 19
 void* VReq::reqGetData(const VReq* vReq) { return uv_req_get_data(vReq->req); }
 
 void VReq::reqSetData(VReq* vReq, void* data) {
   uv_req_set_data(vReq->req, data);
 }
-
-VReqType VReq::reqGetType(const VReq* vReq) { return vReq->req->type; }
-
 const char* VReq::reqTypeName(VReq* vReq) {
   return uv_req_type_name(vReq->req->type);
 }
+#endif
+#endif
+
+
+VReqType VReq::reqGetType(const VReq* vReq) { return vReq->req->type; }
+
+
 
 uv_req_t* VReq::getReq() const {
   return req;

@@ -19,18 +19,27 @@ VTcp::VTcp(VLoop* loop) : VStream(this) {
   this->setHandle(tcp);
   this->init(loop);
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 7
 VTcp::VTcp(VLoop* loop, unsigned int flags) : VStream(this) {
   uv_tcp_t* tcp = (uv_tcp_t*)VCore::malloc(sizeof(uv_tcp_t));
   this->setHandle(tcp);
   init(loop, flags);
 }
+#endif
+#endif
+
 VTcp::VTcp(VTcp* t_p) : VStream(t_p) {}
 
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 7
 int VTcp::init(VLoop* loop, unsigned int flags) {
   return uv_tcp_init_ex((uv_loop_t*)loop->getHandle(),
                         (uv_tcp_t*)this->getHandle(), flags);
 }
+#endif
+#endif
+
 
 int VTcp::init() { 
   memset(VTCP_HANDLE, 0, sizeof(uv_tcp_t));
@@ -104,8 +113,12 @@ int VTcp::connect(VConnect* req,
   return uv_tcp_connect(OBJ_VCONNECT_REQ(*req), VTCP_HANDLE, addr,
                         VConnect::callback_connect);
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 32
 int VTcp::closeReset(std::function<void(VHandle*)> close_cb) {
   this->handle_close_cb = close_cb;
   return uv_tcp_close_reset(VTCP_HANDLE, VHandle::callback_close);
 }
+#endif
+#endif
+

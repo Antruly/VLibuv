@@ -31,7 +31,8 @@ int VSignal::start(std::function<void(VSignal*, int)> start_cb,
   signal_start_cb = start_cb;
   return uv_signal_start(VSIGNAL_HANDLE, callback_start, signum);
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 12
 int VSignal::startOneshot(
     std::function<void(VSignal*, int)> start_oneshot_cb,
     int signum) {
@@ -40,6 +41,9 @@ int VSignal::startOneshot(
   return uv_signal_start_oneshot(VSIGNAL_HANDLE, callback_start_oneshot,
                                  signum);
 }
+#endif
+#endif
+
 
 int VSignal::stop() { return uv_signal_stop(VSIGNAL_HANDLE); }
 

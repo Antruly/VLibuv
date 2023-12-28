@@ -20,13 +20,19 @@ class VStream : public VHandle {
 
   int write(VWrite* req, const VBuf bufs[], unsigned int nbufs,
             std::function<void(VWrite*, int)> write_cb);
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 41
   int write(VWrite* req, const VBuf bufs[], unsigned int nbufs,
             VStream* send_handle,
             std::function<void(VWrite*, int)> write_cb);
+#endif
+#endif
   int tryWrite(const VBuf bufs[], unsigned int nbufs);
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 42
   int tryWrite(const VBuf bufs[], unsigned int nbufs, VStream* send_handle);
-
+#endif
+#endif
   int isReadable();
   int isWritable();
 

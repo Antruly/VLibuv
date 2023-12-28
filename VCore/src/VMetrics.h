@@ -1,5 +1,8 @@
 ﻿#pragma once
 #include "VObject.h"
+
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 45
 class VMetrics :
     public VObject
 {
@@ -13,4 +16,5 @@ class VMetrics :
  private:
   uv_metrics_t* metrics = nullptr;
 };
-
+#endif
+#endif

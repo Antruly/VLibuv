@@ -30,19 +30,14 @@ void VHandle::unref() {
 int VHandle::hasRef() {
   return uv_has_ref(handle);
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 18
 VHandleType VHandle::handleGetType() {
   return uv_handle_get_type(handle);
 }
-
-size_t VHandle::handleSize() {
-  return uv_handle_size(handle->type);
-}
-
 const char* VHandle::handleTypeName() {
   return uv_handle_type_name(handle->type);
 }
-
 void* VHandle::handleGetData() {
   return uv_handle_get_data(handle);
 }
@@ -53,6 +48,12 @@ void* VHandle::handleGetLoop() {
 
 void VHandle::handleSetData(void* data) {
   uv_handle_set_data(handle, data);
+}
+#endif
+#endif
+
+size_t VHandle::handleSize() {
+  return uv_handle_size(handle->type);
 }
 
 int VHandle::isActive() {
@@ -144,15 +145,11 @@ void VHandle::unref(void* hd) {
 int VHandle::hasRef(const void* hd) {
   return uv_has_ref((uv_handle_t*)hd);
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 18
 VHandleType VHandle::handleGetType(const VHandle* vhd) {
   return uv_handle_get_type(vhd->handle);
 }
-
-size_t VHandle::handleSize(VHandle* vhd) {
-  return uv_handle_size(vhd->handle->type);
-}
-
 const char* VHandle::handleTypeName(VHandle* vhd) {
   return uv_handle_type_name(vhd->handle->type);
 }
@@ -168,10 +165,15 @@ void* VHandle::handleGetLoop(const VHandle* vhd) {
 void VHandle::handleSetData(VHandle* vhd, void* data) {
   uv_handle_set_data(vhd->handle, data);
 }
+#endif
+#endif
 
+
+size_t VHandle::handleSize(VHandle* vhd) {
+  return uv_handle_size(vhd->handle->type);
+}
 
 // std::function<void(int)> funcBind = std::bind(&MyClass::myMethod, &obj, std::placeholders::_1);
-
 void VHandle::close(std::function<void(VHandle*)> closeCallback) {
   handle_close_cb = closeCallback;
   uv_close(handle, callback_close);

@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "VObject.h"
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 28
 #include "VDirent.h"
 class VDir : public VObject {
  public:
@@ -17,3 +19,6 @@ class VDir : public VObject {
  private:
   uv_dir_t* dir = nullptr;
 };
+#endif
+#endif
+

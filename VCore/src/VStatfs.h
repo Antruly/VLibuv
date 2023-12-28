@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "VObject.h"
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 29
 class VStatfs :
     public VObject
 {
@@ -13,4 +15,7 @@ class VStatfs :
  private:
   uv_statfs_t* statfs = nullptr;
 };
+#endif
+#endif
+
 

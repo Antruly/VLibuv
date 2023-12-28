@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "VObject.h"
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 30
 class VEnvItem :
     public VObject
 {
@@ -13,4 +15,7 @@ class VEnvItem :
  private:
   uv_env_item_t* env_item = nullptr;
 };
+#endif
+#endif
+
 

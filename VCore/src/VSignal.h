@@ -13,8 +13,13 @@ class VSignal : public VHandle {
   int init(VLoop* loop);
 
   int start(std::function<void(VSignal*, int)> start_cb, int signum);
-  int startOneshot(std::function<void(VSignal*, int)> start_oneshot_cb,
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 12
+ int startOneshot(std::function<void(VSignal*, int)> start_oneshot_cb,
                    int signum);
+#endif
+#endif
+ 
   int stop();
 
   void loadavg(double avg[3]);

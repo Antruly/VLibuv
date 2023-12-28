@@ -21,11 +21,21 @@ class VPipe : public VStream {
                const char* name,
                std::function<void(VConnect*, int)> connect_cb);
   int getsockname(char* buffer, size_t* size);
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 2
   int getpeername(char* buffer, size_t* size);
+#endif
+#endif
+
   void pendingInstances(int count);
   int pendingCount();
   VHandleType pendingType();
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 16
   int chmod(int flags);
+#endif
+#endif
+
 
  protected:
  private:

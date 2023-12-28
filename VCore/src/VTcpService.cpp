@@ -89,7 +89,9 @@ int VTcpService::listenIpv4(const char* addripv4, int port, int flags) {
 }
 
 void VTcpService::newConnection(VTcp* client) {
-  sockaddr_in addrs;
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 19
+ sockaddr_in addrs;
   int peer_ip_len = sizeof(addrs);
   client->getpeername((sockaddr*)&addrs, &peer_ip_len);
   char peer_ip[INET_ADDRSTRLEN];
@@ -99,6 +101,9 @@ void VTcpService::newConnection(VTcp* client) {
   } else {
     fprintf(stderr, "Failed to get peer IP address\n");
   }
+#endif
+#endif
+ 
 }
 
 void VTcpService::writeData(VTcp* client, const VBuf& data) {
@@ -111,6 +116,8 @@ void VTcpService::writeData(VTcp* client, const VBuf& data) {
 }
 
 void VTcpService::readData(VTcp* client, const VBuf data) {
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 19
   sockaddr_in addrs;
   int peer_ip_len = sizeof(addrs);
   client->getpeername((sockaddr*)&addrs, &peer_ip_len);
@@ -123,4 +130,7 @@ void VTcpService::readData(VTcp* client, const VBuf data) {
   } else {
     fprintf(stderr, "Failed to get peer IP address\n");
   }
+#endif
+#endif
+
 }

@@ -67,17 +67,29 @@ class VReq : public VObject {
   void* getData();
 
   size_t reqSize();
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 19
   void* reqGetData();
   void reqSetData(void* data);
-  VReqType reqGetType();
   const char* reqTypeName();
+#endif
+#endif
+
+  VReqType reqGetType();
+
   int cancel();
 
   static size_t reqSize(VReq* vReq);
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 19
   static void* reqGetData(const VReq* vReq);
   static void reqSetData(VReq* vReq, void* data);
-  static VReqType reqGetType(const VReq* vReq);
   static const char* reqTypeName(VReq* vReq);
+#endif
+#endif
+
+  static VReqType reqGetType(const VReq* vReq);
+
   static int cancel(VReq* vReq);
   VReq* clone(VReq* obj, int memSize);
 

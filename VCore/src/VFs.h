@@ -11,12 +11,24 @@ class VFs : public VReq {
   DEFINE_COPY_FUNC_DELETE(VFs);
 
   int init();
+
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 19
   uv_fs_type getType();
   ssize_t getResult();
-  int getSystemError();
   void* getPtr();
   const char* getPath();
   uv_stat_t* getStatbuf();
+#endif
+#endif
+
+
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 38
+  int getSystemError();
+#endif
+#endif
+ 
 
   void reqCleanup();
 
@@ -38,23 +50,34 @@ class VFs : public VReq {
             unsigned int nbufs,
             int64_t offset);
 
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 14
   int copyfile(VLoop* loop, const char* path, const char* new_path, int flags);
-
+#endif
+#endif
   int mkdir(VLoop* loop, const char* path, int mode);
 
   int mkdtemp(VLoop* loop, const char* tpl);
 
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 36
   int mkstemp(VLoop* loop, const char* tpl);
+#endif
+#endif
 
   int rmdir(VLoop* loop, const char* path);
 
   int scandir(VLoop* loop, const char* path, int flags);
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 28
   int opendir(VLoop* loop, const char* path);
 
   int readdir(VLoop* loop, VDir* dir);
 
   int closedir(VLoop* loop, VDir* dir);
+#endif
+#endif
+
 
   int stat(VLoop* loop, const char* path);
 
@@ -82,8 +105,12 @@ class VFs : public VReq {
 
   int futime(VLoop* loop, uv_file file, double atime, double mtime);
 
-  int lutime(VLoop* loop, const char* path, double atime, double mtime);
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 36
+int lutime(VLoop* loop, const char* path, double atime, double mtime);
+#endif
+#endif
+  
   int lstat(VLoop* loop, const char* path);
 
   int link(VLoop* loop, const char* path, const char* new_path);
@@ -91,12 +118,27 @@ class VFs : public VReq {
   int symlink(VLoop* loop, const char* path, const char* new_path, int flags);
 
   int readlink(VLoop* loop, const char* path);
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 8
   int realpath(VLoop* loop, const char* path);
+#endif
+#endif
+
   int fchmod(VLoop* loop, uv_file file, int mode);
   int chown(VLoop* loop, const char* path, uv_uid_t uid, uv_gid_t gid);
   int fchown(VLoop* loop, uv_file file, uv_uid_t uid, uv_gid_t gid);
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 21
   int lchown(VLoop* loop, const char* path, uv_uid_t uid, uv_gid_t gid);
+#endif
+#endif
+
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 30
   int statfs(VLoop* loop, const char* path);
+#endif
+#endif
+
 
   int close(VLoop* loop, uv_file file, std::function<void(VFs*)> close_cb);
 
@@ -123,12 +165,17 @@ class VFs : public VReq {
             unsigned int nbufs,
             int64_t offset,
             std::function<void(VFs*)> write_cb);
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 14
   int copyfile(VLoop* loop,
                const char* path,
                const char* new_path,
                int flags,
                std::function<void(VFs*)> copyfile_cb);
+
+#endif
+#endif
+
 
   int mkdir(VLoop* loop,
             const char* path,
@@ -138,18 +185,21 @@ class VFs : public VReq {
   int mkdtemp(VLoop* loop,
               const char* tpl,
               std::function<void(VFs*)> mkdtemp_cb);
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 34
   int mkstemp(VLoop* loop,
               const char* tpl,
               std::function<void(VFs*)> mkstemp_cb);
+#endif
+#endif
 
-  int rmdir(VLoop* loop, const char* path, std::function<void(VFs*)> rmdir_cb);
-
+  int rmdir(VLoop* loop, const char* path, std::function<void(VFs*)> rmdir_cb);  
   int scandir(VLoop* loop,
               const char* path,
               int flags,
               std::function<void(VFs*)> scandir_cb);
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 28
   int opendir(VLoop* loop,
               const char* path,
               std::function<void(VFs*)> opendir_cb);
@@ -157,6 +207,9 @@ class VFs : public VReq {
   int readdir(VLoop* loop, VDir* dir, std::function<void(VFs*)> readdir_cb);
 
   int closedir(VLoop* loop, VDir* dir, std::function<void(VFs*)> closedir_cb);
+#endif
+#endif
+
 
   int stat(VLoop* loop, const char* path, std::function<void(VFs*)> stat_cb);
 
@@ -206,12 +259,16 @@ class VFs : public VReq {
              double atime,
              double mtime,
              std::function<void(VFs*)> futime_cb);
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 34
   int lutime(VLoop* loop,
              const char* path,
              double atime,
              double mtime,
              std::function<void(VFs*)> lutime_cb);
+#endif
+#endif
+
 
   int lstat(VLoop* loop, const char* path, std::function<void(VFs*)> lstat_cb);
 
@@ -229,10 +286,14 @@ class VFs : public VReq {
   int readlink(VLoop* loop,
                const char* path,
                std::function<void(VFs*)> readlink_cb);
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 8
   int realpath(VLoop* loop,
                const char* path,
                std::function<void(VFs*)> realpath_cb);
+#endif
+#endif
+
 
   int fchmod(VLoop* loop,
              uv_file file,
@@ -250,16 +311,24 @@ class VFs : public VReq {
              uv_uid_t uid,
              uv_gid_t gid,
              std::function<void(VFs*)> fchown_cb);
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 21
   int lchown(VLoop* loop,
              const char* path,
              uv_uid_t uid,
              uv_gid_t gid,
              std::function<void(VFs*)> lchown_cb);
+#endif
+#endif
 
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 30
   int statfs(VLoop* loop,
              const char* path,
              std::function<void(VFs*)> statfs_cb);
+#endif
+#endif
+
   int scandirNext(uv_dirent_t* ent);
  protected:
   std::function<void(VFs*)> fs_close_cb;

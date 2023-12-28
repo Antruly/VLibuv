@@ -14,17 +14,27 @@ int VFs::init() {
   return 0;
 }
 
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 19
 uv_fs_type VFs::getType() { return uv_fs_get_type(VFS_REQ); }
 
 ssize_t VFs::getResult() { return uv_fs_get_result(VFS_REQ); }
-
-int VFs::getSystemError() { return uv_fs_get_system_error(VFS_REQ); }
 
 void* VFs::getPtr() { return uv_fs_get_ptr(VFS_REQ); }
 
 const char* VFs::getPath() { return uv_fs_get_path(VFS_REQ); }
 
 uv_stat_t* VFs::getStatbuf() { return uv_fs_get_statbuf(VFS_REQ); }
+#endif
+#endif
+
+
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 38
+int VFs::getSystemError() { return uv_fs_get_system_error(VFS_REQ); }
+#endif
+#endif
+
 
 void VFs::reqCleanup() { uv_fs_req_cleanup(VFS_REQ); }
 
@@ -52,12 +62,16 @@ int VFs::write(VLoop* loop, uv_file file, const VBuf bufs[], unsigned int nbufs,
   return uv_fs_write(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, file,
                      (const uv_buf_t*)bufs, nbufs, offset, nullptr);
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 14
 int VFs::copyfile(VLoop* loop, const char* path, const char* new_path,
                   int flags) {
   return uv_fs_copyfile(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, path, new_path, flags,
                         nullptr);
 }
+#endif
+#endif
+
 
 int VFs::mkdir(VLoop* loop, const char* path, int mode) {
   return uv_fs_mkdir(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, path, mode, nullptr);
@@ -67,9 +81,14 @@ int VFs::mkdtemp(VLoop* loop, const char* tpl) {
   return uv_fs_mkdtemp(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, tpl, nullptr);
 }
 
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 34
 int VFs::mkstemp(VLoop* loop, const char* tpl) {
   return uv_fs_mkstemp(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, tpl, nullptr);
 }
+#endif
+#endif
+
 
 int VFs::rmdir(VLoop* loop, const char* path) {
   return uv_fs_rmdir(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, path, nullptr);
@@ -78,7 +97,8 @@ int VFs::rmdir(VLoop* loop, const char* path) {
 int VFs::scandir(VLoop* loop, const char* path, int flags) {
   return uv_fs_scandir(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, path, flags, nullptr);
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 28
 int VFs::opendir(VLoop* loop, const char* path) {
   return uv_fs_opendir(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, path, nullptr);
 }
@@ -92,6 +112,9 @@ int VFs::closedir(VLoop* loop, VDir* dir) {
   return uv_fs_closedir(OBJ_VLOOP_HANDLE(*loop), VFS_REQ,
                         (uv_dir_t*)dir->getDir(), nullptr);
 }
+#endif
+#endif
+
 
 int VFs::stat(VLoop* loop, const char* path) {
   return uv_fs_stat(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, path, nullptr);
@@ -142,11 +165,15 @@ int VFs::futime(VLoop* loop, uv_file file, double atime, double mtime) {
   return uv_fs_futime(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, file, atime, mtime,
                       nullptr);
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 36
 int VFs::lutime(VLoop* loop, const char* path, double atime, double mtime) {
   return uv_fs_lutime(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, path, atime, mtime,
                       nullptr);
 }
+#endif
+#endif
+
 
 int VFs::lstat(VLoop* loop, const char* path) {
   return uv_fs_lstat(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, path, nullptr);
@@ -165,10 +192,14 @@ int VFs::symlink(VLoop* loop, const char* path, const char* new_path,
 int VFs::readlink(VLoop* loop, const char* path) {
   return uv_fs_readlink(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, path, nullptr);
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 8
 int VFs::realpath(VLoop* loop, const char* path) {
   return uv_fs_realpath(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, path, nullptr);
 }
+#endif
+#endif
+
 
 int VFs::fchmod(VLoop* loop, uv_file file, int mode) {
   return uv_fs_fchmod(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, file, mode, nullptr);
@@ -182,15 +213,23 @@ int VFs::fchown(VLoop* loop, uv_file file, uv_uid_t uid, uv_gid_t gid) {
   return uv_fs_fchown(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, file, uid, gid,
                       nullptr);
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 21
 int VFs::lchown(VLoop* loop, const char* path, uv_uid_t uid, uv_gid_t gid) {
   return uv_fs_lchown(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, path, uid, gid,
                       nullptr);
 }
+#endif
+#endif
 
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 30
 int VFs::statfs(VLoop* loop, const char* path) {
   return uv_fs_statfs(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, path, nullptr);
 }
+#endif
+#endif
+
 
 int VFs::close(VLoop* loop,
                       uv_file file,
@@ -237,7 +276,8 @@ int VFs::write(VLoop* loop,
   return uv_fs_write(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, file,
                      (const uv_buf_t*)bufs, nbufs, offset, callback_write);
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 14
 int VFs::copyfile(VLoop* loop,
                          const char* path,
                          const char* new_path,
@@ -247,6 +287,9 @@ int VFs::copyfile(VLoop* loop,
   return uv_fs_copyfile(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, path, new_path, flags,
                         callback_copyfile);
 }
+#endif
+#endif
+
 
 int VFs::mkdir(VLoop* loop,
                       const char* path,
@@ -264,12 +307,17 @@ int VFs::mkdtemp(VLoop* loop,
   return uv_fs_mkdtemp(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, tpl, callback_mkdtemp);
 }
 
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 34
 int VFs::mkstemp(VLoop* loop,
                         const char* tpl,
                         std::function<void(VFs*)> mkstemp_cb) {
   fs_mkstemp_cb = mkstemp_cb;
   return uv_fs_mkstemp(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, tpl, callback_mkstemp);
 }
+#endif
+#endif
+
 
 int VFs::rmdir(VLoop* loop,
                       const char* path,
@@ -286,7 +334,8 @@ int VFs::scandir(VLoop* loop,
   return uv_fs_scandir(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, path, flags,
                        callback_scandir);
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 28
 int VFs::opendir(VLoop* loop,
                         const char* path,
                         std::function<void(VFs*)> opendir_cb) {
@@ -310,6 +359,9 @@ int VFs::closedir(VLoop* loop,
   return uv_fs_closedir(OBJ_VLOOP_HANDLE(*loop), VFS_REQ,
                         (uv_dir_t*)dir->getDir(), callback_closedir);
 }
+#endif
+#endif
+
 
 int VFs::stat(VLoop* loop,
                      const char* path,
@@ -407,6 +459,8 @@ int VFs::futime(VLoop* loop,
                       callback_futime);
 }
 
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 36
 int VFs::lutime(VLoop* loop,
                        const char* path,
                        double atime,
@@ -416,6 +470,9 @@ int VFs::lutime(VLoop* loop,
   return uv_fs_lutime(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, path, atime, mtime,
                       callback_lutime);
 }
+#endif
+#endif
+
 
 int VFs::lstat(VLoop* loop,
                       const char* path,
@@ -450,7 +507,8 @@ int VFs::readlink(VLoop* loop,
   return uv_fs_readlink(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, path,
                         callback_readlink);
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 8
 int VFs::realpath(VLoop* loop,
                          const char* path,
                          std::function<void(VFs*)> realpath_cb) {
@@ -458,6 +516,9 @@ int VFs::realpath(VLoop* loop,
   return uv_fs_realpath(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, path,
                         callback_realpath);
 }
+#endif
+#endif
+
 
 int VFs::fchmod(VLoop* loop,
                        uv_file file,
@@ -487,7 +548,8 @@ int VFs::fchown(VLoop* loop,
   return uv_fs_fchown(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, file, uid, gid,
                       callback_fchown);
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 21
 int VFs::lchown(VLoop* loop,
                        const char* path,
                        uv_uid_t uid,
@@ -497,13 +559,20 @@ int VFs::lchown(VLoop* loop,
   return uv_fs_lchown(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, path, uid, gid,
                       callback_lchown);
 }
+#endif
+#endif
 
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 30
 int VFs::statfs(VLoop* loop,
                        const char* path,
                        std::function<void(VFs*)> statfs_cb) {
   fs_statfs_cb = statfs_cb;
   return uv_fs_statfs(OBJ_VLOOP_HANDLE(*loop), VFS_REQ, path, callback_statfs);
 }
+#endif
+#endif
+
 
 int VFs::scandirNext(uv_dirent_t* ent) {
   return uv_fs_scandir_next(VFS_REQ, ent);

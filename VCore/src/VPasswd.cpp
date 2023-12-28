@@ -1,4 +1,6 @@
 ﻿#include "VPasswd.h"
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 9
 VPasswd::VPasswd() {
   this->passwd = (uv_passwd_t*)VCore::malloc(sizeof(uv_passwd_t));
   this->init();
@@ -30,3 +32,5 @@ int VPasswd::init() {
   memset(this->passwd, 0, sizeof(uv_passwd_t));
   return 0;
 }
+#endif
+#endif

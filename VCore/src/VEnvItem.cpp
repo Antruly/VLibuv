@@ -1,4 +1,6 @@
 ﻿#include "VEnvItem.h"
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 30
 VEnvItem::VEnvItem() {
   this->env_item = (uv_env_item_t*)VCore::malloc(sizeof(uv_env_item_t));
   this->init();
@@ -30,3 +32,5 @@ int VEnvItem::init() {
   memset(this->env_item, 0, sizeof(uv_env_item_t));
   return 0;
 }
+#endif
+#endif

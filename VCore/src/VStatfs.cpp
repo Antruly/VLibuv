@@ -1,4 +1,6 @@
 ﻿#include "VStatfs.h"
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 29
 VStatfs::VStatfs() {
   this->statfs = (uv_statfs_t*)VCore::malloc(sizeof(uv_statfs_t));
   this->init();
@@ -30,3 +32,5 @@ int VStatfs::init() {
   memset(this->statfs, 0, sizeof(uv_statfs_t));
   return 0;
 }
+#endif
+#endif

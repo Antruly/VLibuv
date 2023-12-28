@@ -47,10 +47,14 @@ int VPipe::bind(const char* name) { return uv_pipe_bind(VPIPE_HANDLE, name); }
 int VPipe::getsockname(char* buffer, size_t* size) {
   return uv_pipe_getsockname(VPIPE_HANDLE, buffer, size);
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 2
 int VPipe::getpeername(char* buffer, size_t* size) {
   return uv_pipe_getpeername(VPIPE_HANDLE, buffer, size);
 }
+#endif
+#endif
+
 
 void VPipe::pendingInstances(int count) {
   uv_pipe_pending_instances(VPIPE_HANDLE, count);
@@ -60,4 +64,9 @@ int VPipe::pendingCount() { return uv_pipe_pending_count(VPIPE_HANDLE); }
 
 VHandleType VPipe::pendingType() { return uv_pipe_pending_type(VPIPE_HANDLE); }
 
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 16
 int VPipe::chmod(int flags) { return uv_pipe_chmod(VPIPE_HANDLE, flags); }
+#endif
+#endif
+

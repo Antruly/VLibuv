@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "VObject.h"
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 25
 class VUtsname :
     public VObject
 {
@@ -13,4 +15,7 @@ class VUtsname :
  private:
   uv_utsname_t* utsname = nullptr;
 };
+#endif
+#endif
+
 

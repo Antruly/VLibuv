@@ -14,7 +14,12 @@ class VTcp : public VStream {
 
   int init();
   int init(VLoop* loop);
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 7
   int init(VLoop* loop, unsigned int flags);
+#endif
+#endif
+
   int open(uv_os_sock_t sock);
   int nodelay(int enable);
   int keepalive(int enable, unsigned int delay);
@@ -31,8 +36,12 @@ class VTcp : public VStream {
   int connect(VConnect* req,
               const struct sockaddr* addr,
               std::function<void(VConnect*, int)> connect_cb);
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 32
   int closeReset(std::function<void(VHandle*)> close_cb);
+#endif
+#endif
+
 
  protected:
 

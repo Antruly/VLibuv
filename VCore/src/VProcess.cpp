@@ -100,7 +100,15 @@ int VProcess::kill(int signum) {
   return uv_process_kill(VPROCESS_HANDLE, signum);
 }
 
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 18
 int VProcess::getPid() { return uv_process_get_pid(VPROCESS_HANDLE); }
+int VProcess::processGetPid(const VProcess* hd) {
+  return uv_process_get_pid(OBJ_VPROCESS_HANDLE(*hd));
+}
+#endif
+#endif
+
 
 int VProcess::processKill(VProcess* hd, int signum) {
   return uv_process_kill(OBJ_VPROCESS_HANDLE(*hd), signum);
@@ -108,9 +116,7 @@ int VProcess::processKill(VProcess* hd, int signum) {
 
 int VProcess::kill(int pid, int signum) { return uv_kill(pid, signum); }
 
-int VProcess::processGetPid(const VProcess* hd) {
-  return uv_process_get_pid(OBJ_VPROCESS_HANDLE(*hd));
-}
+
 
  int VProcess::start(
     std::function<void(VProcess*, int64_t, int)> start_cb) {

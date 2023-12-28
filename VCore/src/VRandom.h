@@ -2,7 +2,8 @@
 #include "VLoop.h"
 #include "VReq.h"
 
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 33
 class VRandom : public VReq {
  public:
   DEFINE_INHERIT_FUNC(VRandom);
@@ -22,3 +23,5 @@ class VRandom : public VReq {
                               size_t buflen);
  private:
 };
+#endif
+#endif

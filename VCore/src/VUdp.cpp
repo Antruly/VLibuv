@@ -13,12 +13,16 @@ VUdp::VUdp(VLoop* loop) : VHandle(this) {
   this->setHandle(udp);
   this->init(loop);
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 6
 VUdp::VUdp(VLoop* loop, unsigned int flags) : VHandle(this) {
   uv_udp_t* udp = (uv_udp_t*)VCore::malloc(sizeof(uv_udp_t));
   this->setHandle(udp);
   this->init(loop, flags);
 }
+#endif
+#endif
+
 
 int VUdp::init() { 
   memset(VUDP_HANDLE, 0, sizeof(uv_udp_t));
@@ -32,18 +36,24 @@ int VUdp::init(VLoop* loop) {
   return ret;
 }
 
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 6
 int VUdp::init(VLoop* loop, unsigned int flags) {
   int ret = uv_udp_init_ex(OBJ_VLOOP_HANDLE(*loop), VUDP_HANDLE, flags);
   this->setHandleData();
   return ret;
 }
+#endif
+#endif
+
 
 int VUdp::open(uv_os_sock_t sock) { return uv_udp_open(VUDP_HANDLE, sock); }
 
 int VUdp::bind(const sockaddr* addr, unsigned int flags) {
   return uv_udp_bind(VUDP_HANDLE, addr, flags);
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 27
 int VUdp::connect(const sockaddr* addr) {
   return uv_udp_connect(VUDP_HANDLE, addr);
 }
@@ -51,6 +61,9 @@ int VUdp::connect(const sockaddr* addr) {
 int VUdp::getpeername(sockaddr* name, int* namelen) {
   return uv_udp_getpeername(VUDP_HANDLE, name, namelen);
 }
+#endif
+#endif
+
 
 int VUdp::getsockname(sockaddr* name, int* namelen) {
   return uv_udp_getsockname(VUDP_HANDLE, name, namelen);
@@ -61,7 +74,8 @@ int VUdp::setMembership(const char* multicast_addr, const char* interface_addr,
   return uv_udp_set_membership(VUDP_HANDLE, multicast_addr, interface_addr,
                                membership);
 }
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 32
 int VUdp::setSourceMembership(const char* multicast_addr,
                               const char* interface_addr,
                               const char* source_addr,
@@ -69,6 +83,9 @@ int VUdp::setSourceMembership(const char* multicast_addr,
   return uv_udp_set_source_membership(VUDP_HANDLE, multicast_addr,
                                       interface_addr, source_addr, membership);
 }
+#endif
+#endif
+
 
 int VUdp::setMulticastLoop(int on) {
   return uv_udp_set_multicast_loop(VUDP_HANDLE, on);
@@ -105,7 +122,25 @@ int VUdp::recvStart(
   return uv_udp_recv_start(VUDP_HANDLE, VHandle::callback_alloc,
                            callback_udp_recv);
 }
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 39
+int VUdp::usingRecvmmsg() {
+  return uv_udp_using_recvmmsg(VUDP_HANDLE);
+}
 
+#endif
+#endif
+
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 19
+size_t VUdp::getSendQueueSize() {
+  return uv_udp_get_send_queue_size(VUDP_HANDLE);
+}
+size_t VUdp::getSendQueueCount() {
+  return uv_udp_get_send_queue_count(VUDP_HANDLE);
+}
+#endif
+#endif
 // uv_udp_recv_cb
 void VUdp::callback_udp_recv(uv_udp_t* handle,
                                     ssize_t nread,

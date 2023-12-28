@@ -1,5 +1,6 @@
 ﻿#include "VDir.h"
-
+#if UV_VERSION_MAJOR >= 1
+#if UV_VERSION_MINOR >= 28
 VDir::VDir() {
   dir = (uv_dir_t*)VCore::malloc(sizeof(uv_dir_t)); 
   init();
@@ -21,3 +22,6 @@ int VDir::init() {
 void VDir::setDirent(VDirent* dr) { dir->dirents = dr->getDirent(); }
 
 uv_dir_t* VDir::getDir() { return dir; }
+
+#endif
+#endif
