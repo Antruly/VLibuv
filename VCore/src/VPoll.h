@@ -7,11 +7,15 @@ class VPoll : public VHandle {
   DEFINE_INHERIT_FUNC(VPoll);
   DEFINE_COPY_FUNC_DELETE(VPoll);
 
-  VPoll(VLoop* loop, int fd);
-  VPoll(VLoop* loop, uv_os_sock_t socket);
+#ifdef WIN32
+explicit VPoll(VLoop* loop, int fd);
+#endif
+explicit VPoll(VLoop* loop, uv_os_sock_t socket);
 
   int init();
+#ifdef WIN32  
   int init(VLoop* loop, int fd);
+#endif
   int init(VLoop* loop, uv_os_sock_t socket);
 
   int start(int events, std::function<void(VPoll*, int, int)> start_cb);

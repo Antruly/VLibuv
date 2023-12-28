@@ -63,8 +63,15 @@ std::string ANSIToUTF8(const std::string& str) {
 }
 
 std::string GBKToUTF8(const std::string& gbkData) {
-  const char* GBK_LOCALE_NAME = "CHS";  // GBK在windows下的locale name(.936, CHS
-                                        // ), linux下的locale名可能是"zh_CN.GBK"
+
+#ifdef WIN32
+  const char* GBK_LOCALE_NAME = "CHS";// GBK在windows下的locale name(.936, CHS)
+#else
+  const char* GBK_LOCALE_NAME = "zh_CN.GBK";  // linux下的locale名是"zh_CN.GBK"
+
+#endif  // WIN32
+
+
 
   std::wstring_convert<std::codecvt<wchar_t, char, mbstate_t>> conv(
       new std::codecvt<wchar_t, char, mbstate_t>(GBK_LOCALE_NAME));

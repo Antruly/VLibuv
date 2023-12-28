@@ -1,8 +1,14 @@
 ﻿#pragma once
-
+extern "C" {
+#include "uv.h"
+}
+#include <cstring>
+#include <stdio.h>
+#include <stdlib.h>
+#include <list>
+#include <map>
+#include <string>
 #include <vector>
-
-#include "VLibuv.h"
 #define VFREE(_data) \
   if (_data != nullptr) { \
     free(_data);          \
