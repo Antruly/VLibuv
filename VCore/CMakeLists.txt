@@ -212,8 +212,8 @@ endif()
 
 # 创建可执行文件并添加源文件以及相应的头文件
 if (UNIX)
-add_library(VCore STATIC ${CORE_FILES} ${HANDLE_FILES} ${LIBUV_FILES} ${LIBUV_UNIX_FILES} ${NETWORK_FILES} ${OTHER_FILES})
-#add_executable(VCore ${CORE_FILES} ${HANDLE_FILES} ${LIBUV_FILES} ${LIBUV_UNIX_FILES} ${NETWORK_FILES} ${OTHER_FILES})
+add_library(VCore STATIC ${CORE_FILES} ${HANDLE_FILES} ${LIBUV_FILES} ${LIBUV_UNIX_FILES} ${NETWORK_FILES} ${OTHER_FILES} ${REQ_FILES})
+#add_executable(VCore ${CORE_FILES} ${HANDLE_FILES} ${LIBUV_FILES} ${LIBUV_UNIX_FILES} ${NETWORK_FILES} ${OTHER_FILES} ${REQ_FILES})
 target_link_libraries(VCore
     pthread   # 线程库
     dl        # 动态链接库
@@ -225,8 +225,8 @@ install(FILES
         DESTINATION include/libuv/unix)
 
 elseif(WIN32)
-add_library(VCore STATIC ${CORE_FILES} ${HANDLE_FILES} ${LIBUV_FILES} ${LIBUV_WIN_FILES} ${NETWORK_FILES} ${OTHER_FILES})
-#add_executable(VCore ${CORE_FILES} ${HANDLE_FILES} ${LIBUV_FILES} ${LIBUV_WIN_FILES} ${NETWORK_FILES} ${OTHER_FILES})
+add_library(VCore STATIC ${CORE_FILES} ${HANDLE_FILES} ${LIBUV_FILES} ${LIBUV_WIN_FILES} ${NETWORK_FILES} ${OTHER_FILES} ${REQ_FILES})
+#add_executable(VCore ${CORE_FILES} ${HANDLE_FILES} ${LIBUV_FILES} ${LIBUV_WIN_FILES} ${NETWORK_FILES} ${OTHER_FILES} ${REQ_FILES})
 target_link_libraries(VCore
     psapi.lib
     user32.lib
