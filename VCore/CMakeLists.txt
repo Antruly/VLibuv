@@ -180,6 +180,7 @@ file(GLOB INSTALL_INCLUDE_VCORE_FILES
 # install include libuv files
 file(GLOB INSTALL_INCLUDE_LIBUV_FILES
     "${LIBUV_SOURCE_DIR}/*.h"
+	"${LIBUV_INCLUDE_DIR}/*.h"
 )
 # install include libuv/unix files
 file(GLOB INSTALL_INCLUDE_LIBUV_UNIX_FILES
@@ -189,6 +190,11 @@ file(GLOB INSTALL_INCLUDE_LIBUV_UNIX_FILES
 # install include libuv/win files
 file(GLOB INSTALL_INCLUDE_LIBUV_WIN_FILES
     "${LIBUV_SOURCE_DIR}/win/*.h"
+)
+
+# install include libuv/uv files
+file(GLOB INSTALL_INCLUDE_LIBUV_UV_FILES
+    "${LIBUV_INCLUDE_DIR}/uv/*.h"
 )
 # # # # # # # # # # # # install# # # # # # # # # # # # 
 
@@ -221,7 +227,7 @@ target_link_libraries(VCore
 
 install(FILES 
         ${INSTALL_INCLUDE_LIBUV_UNIX_FILES}
-        # 列出其他头文件
+        # include/libuv/unix
         DESTINATION include/libuv/unix)
 
 elseif(WIN32)
@@ -247,7 +253,7 @@ target_link_libraries(VCore
 
 install(FILES 
         ${INSTALL_INCLUDE_LIBUV_WIN_FILES}
-        # 列出其他头文件
+        # include/libuv/win
         DESTINATION include/libuv/win)
 
 endif()
@@ -263,9 +269,14 @@ install(TARGETS VCore DESTINATION lib)
 # 将头文件安装到 include 目录
 install(FILES 
         ${INSTALL_INCLUDE_VCORE_FILES}
-        # 列出其他头文件
+        # include
         DESTINATION include)
 install(FILES 
         ${INSTALL_INCLUDE_LIBUV_FILES}
-        # 列出其他头文件
+        # include/libuv
         DESTINATION include/libuv)
+install(FILES 
+        ${INSTALL_INCLUDE_LIBUV_FILES}
+        # include/libuv/uv
+        DESTINATION include/libuv)
+		
