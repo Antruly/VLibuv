@@ -266,6 +266,6 @@ install(FILES
         # 列出其他头文件
         DESTINATION include)
 install(FILES 
-        ${INSTALL_INCLUDE_VCORE_FILES}
+        ${INSTALL_INCLUDE_LIBUV_FILES}
         # 列出其他头文件
         DESTINATION include/libuv)
