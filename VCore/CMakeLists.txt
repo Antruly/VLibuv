@@ -248,6 +248,7 @@ target_link_libraries(VCore
     oleaut32.lib
     uuid.lib
     comdlg32.lib
+	dbghelp.lib
 )
 
 
@@ -276,7 +277,7 @@ install(FILES
         # include/libuv
         DESTINATION include/libuv)
 install(FILES 
-        ${INSTALL_INCLUDE_LIBUV_FILES}
+        ${INSTALL_INCLUDE_LIBUV_UV_FILES}
         # include/libuv/uv
-        DESTINATION include/libuv)
+        DESTINATION include/libuv/uv)
 		

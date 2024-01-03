@@ -81,8 +81,11 @@ void VBuf::resize(size_t sz) {
 }
 
 void VBuf::setData(const char* bf, size_t sz) {
-  this->resize(sz);
-  memcpy(buf.base, bf, sz);
+	if (buf.base != nullptr){
+		this->resize(0);
+	}
+	buf.base = const_cast<char*>(bf);
+	buf.len = sz;
 }
 
 char* VBuf::getData() const { return buf.base; }
@@ -96,6 +99,12 @@ void VBuf::clean() {
 }
 
 void VBuf::clone(const VBuf& srcBuf) {
+
   this->resize(srcBuf.size());
   memcpy(buf.base, srcBuf.getData(), srcBuf.size());
+}
+
+void VBuf::cloneData(const char* bf, size_t sz){
+	this->resize(sz);
+	memcpy(buf.base, bf, sz);	
 }

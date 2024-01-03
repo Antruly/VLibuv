@@ -16,7 +16,7 @@ extern "C" {
 
 #define VFREE(_data) \
   if (_data != nullptr) { \
-    free(_data);          \
+    VCore::free(_data);          \
     _data = nullptr;};
 #define VFREE_ARRAY(_data, minNum, maxNum)       \
   {                                      \

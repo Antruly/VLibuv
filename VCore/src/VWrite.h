@@ -11,9 +11,10 @@ class VWrite : public VReq {
 
   int init();
 
-  void setBuf(VBuf* bf);
-  VBuf* getBuf();
-
+  void setBuf(const VBuf* bf);
+  const VBuf* getBuf();
+  void setBuf2(const VBuf* bf);
+  const VBuf* getBuf2();
   std::function<void(VWrite*,int)> m_write_cb;
  public:
 
@@ -25,5 +26,6 @@ class VWrite : public VReq {
   }
 
   private:
-   VBuf* buf = nullptr;
+	  const VBuf* buf = nullptr;
+	  const VBuf* buf2 = nullptr;
 };

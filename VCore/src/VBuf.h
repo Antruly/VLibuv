@@ -20,6 +20,7 @@ class VBuf final : public VObject {
 
   void resize(size_t sz);
   void setData(const char* bf, size_t sz);
+  void cloneData(const char* bf, size_t sz);
   char* getData()const;
   const char* getConstData() const;
 

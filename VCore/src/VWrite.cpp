@@ -15,6 +15,10 @@ int VWrite::init() {
 }
 
 
-void VWrite::setBuf(VBuf* bf) { buf = bf; }
+void VWrite::setBuf(const VBuf* bf) { buf = bf; }
 
-VBuf* VWrite::getBuf() { return buf; }
+const VBuf* VWrite::getBuf() { return buf; }
+
+void VWrite::setBuf2(const VBuf* bf) { buf2 = bf; }
+
+const VBuf* VWrite::getBuf2() { return buf2; }
