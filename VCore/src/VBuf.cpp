@@ -39,12 +39,12 @@ VBuf::VBuf(const char* bf, size_t sz) : buf() {
 }
 
 void* VBuf::operator new(size_t size) {
-  return (VBuf*)VCore::malloc(size);
+  return VCore::malloc(size);
 }
 
 void VBuf::operator delete(void* p) {
   //((VBuf*)p)->~VBuf();
-  free(p);
+  VCore::free(p);
 }
 
 VBuf::operator uv_buf_t() { return buf; }

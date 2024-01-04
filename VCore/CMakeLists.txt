@@ -42,6 +42,7 @@ set(CORE_FILES
     ${VCORE_SRC_DIR}/VObject.h
     ${VCORE_SRC_DIR}/VObject.cpp
     ${VCORE_SRC_DIR}/VString.h
+    ${VCORE_SRC_DIR}/VVersion.h
 )
 source_group(Core FILES ${CORE_FILES})
 
