@@ -16,5 +16,4 @@ class VLoop : public VHandle {
 
  protected:
  private:
- private:
 };
