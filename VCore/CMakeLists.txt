@@ -17,14 +17,15 @@ set(VCORE_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 # 设置默认的 libuv 路径
 set(DEFAULT_LIBUV_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libuv/include")
 set(DEFAULT_LIBUV_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libuv/src")
-set(LIBUV_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libuv/include" CACHE PATH "Path to libuv include directory")
-set(LIBUV_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libuv/src" CACHE PATH "Path to libuv source directory")
+set(LIBUV_DIR "" CACHE PATH "Path to libuv directory")
+set(LIBUV_INCLUDE_DIR "${LIBUV_DIR}/include")
+set(LIBUV_SOURCE_DIR "${LIBUV_DIR}/src")
 # 如果未提供路径，则使用默认路径
-if(NOT LIBUV_INCLUDE_DIR)
+if(NOT LIBUV_DIR)
     set(LIBUV_INCLUDE_DIR ${DEFAULT_LIBUV_INCLUDE_DIR})
 endif()
 
-if(NOT LIBUV_SOURCE_DIR)
+if(NOT LIBUV_DIR)
     set(LIBUV_SOURCE_DIR ${DEFAULT_LIBUV_SOURCE_DIR})
 endif()
 
@@ -42,7 +43,6 @@ set(CORE_FILES
     ${VCORE_SRC_DIR}/VObject.h
     ${VCORE_SRC_DIR}/VObject.cpp
     ${VCORE_SRC_DIR}/VString.h
-    ${VCORE_SRC_DIR}/VVersion.h
 )
 source_group(Core FILES ${CORE_FILES})
 
@@ -85,12 +85,6 @@ set(HANDLE_FILES
 )
 source_group(Hanlde FILES ${HANDLE_FILES})
 
-# NetWork
-set(NETWORK_FILES
-    ${VCORE_SRC_DIR}/VTcpService.h
-    ${VCORE_SRC_DIR}/VTcpService.cpp
-)
-source_group(NetWork FILES ${NETWORK_FILES})
 
 # Other
 set(OTHER_FILES
@@ -146,11 +140,6 @@ set(REQ_FILES
 )
 source_group(Req FILES ${REQ_FILES})
 
-# Uv
-set(UV
-    ${VCORE_SRC_DIR}/VLibuv.h
-#    ${VCORE_SRC_DIR}/main.cpp
-)
 
 # libuv
 file(GLOB LIBUV_FILES
@@ -219,8 +208,8 @@ endif()
 
 # 创建可执行文件并添加源文件以及相应的头文件
 if (UNIX)
-add_library(VCore STATIC ${CORE_FILES} ${HANDLE_FILES} ${LIBUV_FILES} ${LIBUV_UNIX_FILES} ${NETWORK_FILES} ${OTHER_FILES} ${REQ_FILES})
-#add_executable(VCore ${CORE_FILES} ${HANDLE_FILES} ${LIBUV_FILES} ${LIBUV_UNIX_FILES} ${NETWORK_FILES} ${OTHER_FILES} ${REQ_FILES})
+add_library(VCore STATIC ${CORE_FILES} ${HANDLE_FILES} ${LIBUV_FILES} ${LIBUV_UNIX_FILES} ${OTHER_FILES} ${REQ_FILES})
+#add_executable(VCore ${CORE_FILES} ${HANDLE_FILES} ${LIBUV_FILES} ${LIBUV_UNIX_FILES} ${OTHER_FILES} ${REQ_FILES})
 target_link_libraries(VCore
     pthread   # 线程库
     dl        # 动态链接库
@@ -232,8 +221,8 @@ install(FILES
         DESTINATION include/libuv/unix)
 
 elseif(WIN32)
-add_library(VCore STATIC ${CORE_FILES} ${HANDLE_FILES} ${LIBUV_FILES} ${LIBUV_WIN_FILES} ${NETWORK_FILES} ${OTHER_FILES} ${REQ_FILES})
-#add_executable(VCore ${CORE_FILES} ${HANDLE_FILES} ${LIBUV_FILES} ${LIBUV_WIN_FILES} ${NETWORK_FILES} ${OTHER_FILES} ${REQ_FILES})
+add_library(VCore STATIC ${CORE_FILES} ${HANDLE_FILES} ${LIBUV_FILES} ${LIBUV_WIN_FILES} ${OTHER_FILES} ${REQ_FILES})
+#add_executable(VCore ${CORE_FILES} ${HANDLE_FILES} ${LIBUV_FILES} ${LIBUV_WIN_FILES} ${OTHER_FILES} ${REQ_FILES})
 target_link_libraries(VCore
     psapi.lib
     user32.lib
@@ -272,7 +261,7 @@ install(TARGETS VCore DESTINATION lib)
 install(FILES 
         ${INSTALL_INCLUDE_VCORE_FILES}
         # include
-        DESTINATION include)
+        DESTINATION include/VCore)
 install(FILES 
         ${INSTALL_INCLUDE_LIBUV_FILES}
         # include/libuv
