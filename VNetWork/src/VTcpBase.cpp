@@ -120,7 +120,6 @@ void VTcpBase::close() {
   this->tcp->close(std::bind(&VTcpBase::on_close, this, std::placeholders::_1));
 }
 
-
 VTCP_WORKER_STATUS VTcpBase::getStatus() {
   return this->status;
 }
