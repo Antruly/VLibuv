@@ -76,7 +76,10 @@ void VTcpBase::idleStart() {
 }
 
 void VTcpBase::idleClose() {
-  this->idle->close();
+	if (!this->idle->isClosing()){
+		this->idle->close();
+	}
+  
 }
 
 void VTcpBase::writeData(VTcp* client, const VBuf& data) {
@@ -117,7 +120,10 @@ void VTcpBase::setReadCb(std::function<void(VTcp*, const VBuf*)> read_cb) {
 }
 
 void VTcpBase::close() {
-  this->tcp->close(std::bind(&VTcpBase::on_close, this, std::placeholders::_1));
+	if (!this->tcp->isClosing()){
+		this->tcp->close(std::bind(&VTcpBase::on_close, this, std::placeholders::_1));
+	}
+  
 }
 
 VTCP_WORKER_STATUS VTcpBase::getStatus() {
