@@ -12,7 +12,7 @@ VLibuv is a C++ wrapper based on libuv, designed to provide a convenient object-
 
 - **Extension of `uv_buf_t`:** Enhances flexibility in buffer operations with extended methods.
 
-- **Derived Types:** Introduces derived types, such as `VTcpService`, for rapid establishment of a TCP service.
+- **Derived Types:** Introduces derived types, such as `VTcpServer`, for rapid establishment of a TCP service.
 
 - **Compatibility:** Maintains compatibility with all versions of libuv 1.0 series, incorporating new features and improvements promptly.
 
