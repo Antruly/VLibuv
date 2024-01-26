@@ -2,7 +2,7 @@
 #if UV_VERSION_MAJOR >= 1
 #if UV_VERSION_MINOR >= 45
 VGroup::VGroup() {
-  this->group = (uv_group_t*)VCore::malloc(sizeof(uv_group_t));
+  this->group = (uv_group_t*)VMemory::malloc(sizeof(uv_group_t));
   this->init();
 }
 
@@ -10,7 +10,7 @@ VGroup::~VGroup() {}
 
 VGroup::VGroup(const VGroup& obj) {
   if (this->group != nullptr) {
-    uv_group_t* hd = (uv_group_t*)VCore::malloc(sizeof(uv_group_t));
+    uv_group_t* hd = (uv_group_t*)VMemory::malloc(sizeof(uv_group_t));
     memcpy(hd, this->group, sizeof(uv_group_t));
     this->group = hd;
   } else {
@@ -19,7 +19,7 @@ VGroup::VGroup(const VGroup& obj) {
 }
 VGroup& VGroup::operator=(const VGroup& obj) {
   if (this->group != nullptr) {
-    uv_group_t* hd = (uv_group_t*)VCore::malloc(sizeof(uv_group_t));
+    uv_group_t* hd = (uv_group_t*)VMemory::malloc(sizeof(uv_group_t));
     memcpy(hd, this->group, sizeof(uv_group_t));
     this->group = hd;
   } else {

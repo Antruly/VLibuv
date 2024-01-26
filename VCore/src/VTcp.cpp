@@ -1,7 +1,7 @@
 ﻿#include "VTcp.h"
 
 VTcp::VTcp() : VStream(this) {
-  uv_tcp_t* tcp = (uv_tcp_t*)VCore::malloc(sizeof(uv_tcp_t));
+  uv_tcp_t* tcp = (uv_tcp_t*)VMemory::malloc(sizeof(uv_tcp_t));
   this->setHandle(tcp);
   this->init();
 }
@@ -15,14 +15,14 @@ VTcp::~VTcp() {
 }
 
 VTcp::VTcp(VLoop* loop) : VStream(this) {
-  uv_tcp_t* tcp = (uv_tcp_t*)VCore::malloc(sizeof(uv_tcp_t));
+  uv_tcp_t* tcp = (uv_tcp_t*)VMemory::malloc(sizeof(uv_tcp_t));
   this->setHandle(tcp);
   this->init(loop);
 }
 #if UV_VERSION_MAJOR >= 1
 #if UV_VERSION_MINOR >= 7
 VTcp::VTcp(VLoop* loop, unsigned int flags) : VStream(this) {
-  uv_tcp_t* tcp = (uv_tcp_t*)VCore::malloc(sizeof(uv_tcp_t));
+  uv_tcp_t* tcp = (uv_tcp_t*)VMemory::malloc(sizeof(uv_tcp_t));
   this->setHandle(tcp);
   init(loop, flags);
 }

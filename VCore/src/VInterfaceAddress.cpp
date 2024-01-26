@@ -1,10 +1,12 @@
 ﻿#include "VInterfaceAddress.h"
+#include "VMemory.h"
+
 
 std::vector<VInterfaceAddress> VInterfaceAddress::addrs;
 
 VInterfaceAddress::VInterfaceAddress(const VInterfaceAddress& addrs) {
   interface_address =
-      (uv_interface_address_t*)VCore::malloc(sizeof(uv_interface_address_t));
+      (uv_interface_address_t*)VMemory::malloc(sizeof(uv_interface_address_t));
   memcpy(interface_address, addrs.interface_address,
          sizeof(uv_interface_address_t));
 }
@@ -25,7 +27,7 @@ std::vector<VInterfaceAddress> VInterfaceAddress::getAllInterfaceAddresses() {
   for (int i = 0; i < count; i++) {
     VInterfaceAddress vaddrs;
     if (vaddrs.interface_address == nullptr) {
-      vaddrs.interface_address = (uv_interface_address_t*)VCore::malloc(
+      vaddrs.interface_address = (uv_interface_address_t*)VMemory::malloc(
           sizeof(uv_interface_address_t));
     }
 
@@ -45,7 +47,7 @@ void* VInterfaceAddress::getInterfaceAddress() const {
 
 VInterfaceAddress::VInterfaceAddress() {
   interface_address =
-      (uv_interface_address_t*)VCore::malloc(sizeof(uv_interface_address_t));
+      (uv_interface_address_t*)VMemory::malloc(sizeof(uv_interface_address_t));
 }
 
 VInterfaceAddress::~VInterfaceAddress() {

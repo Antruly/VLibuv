@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "VConnect.h"
 #include "VStream.h"
+#include <list>
 
 
 

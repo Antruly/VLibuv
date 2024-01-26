@@ -1,13 +1,13 @@
 ﻿#include "VIdle.h"
 
 VIdle::VIdle() : VHandle(nullptr) {
-  uv_idle_t* idle = (uv_idle_t*)VCore::malloc(sizeof(uv_idle_t));
+  uv_idle_t* idle = (uv_idle_t*)VMemory::malloc(sizeof(uv_idle_t));
   this->setHandle(idle);
   this->init();
 }
 VIdle::VIdle(VIdle* t_p) : VHandle(t_p) {}
 VIdle::VIdle(VLoop* loop) : VHandle(this) {
-  uv_idle_t* idle = (uv_idle_t*)VCore::malloc(sizeof(uv_idle_t));
+  uv_idle_t* idle = (uv_idle_t*)VMemory::malloc(sizeof(uv_idle_t));
   this->setHandle(idle);
   this->init(loop);
 }

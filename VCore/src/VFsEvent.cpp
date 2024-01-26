@@ -2,7 +2,7 @@
 
 VFsEvent::VFsEvent() : VHandle(this) {
   uv_fs_event_t* fs_event =
-      (uv_fs_event_t*)VCore::malloc(sizeof(uv_fs_event_t));
+      (uv_fs_event_t*)VMemory::malloc(sizeof(uv_fs_event_t));
   this->setHandle(fs_event);
   this->init();
 }
@@ -11,7 +11,7 @@ VFsEvent::~VFsEvent() {}
 
 VFsEvent::VFsEvent(VLoop* loop) : VHandle(this) {
   uv_fs_event_t* fs_event =
-      (uv_fs_event_t*)VCore::malloc(sizeof(uv_fs_event_t));
+      (uv_fs_event_t*)VMemory::malloc(sizeof(uv_fs_event_t));
   this->setHandle(fs_event);
   this->init(loop);
 }

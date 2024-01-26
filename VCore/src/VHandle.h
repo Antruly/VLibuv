@@ -1,7 +1,5 @@
 ﻿#pragma once
-#include "VBuf.h"
-#include "VIntPtr.h"
-#include "VObject.h"
+#include "VCore.h"
 #include <functional>
 
 #define VLOOP_HANDLE reinterpret_cast<uv_loop_t*>(this->getHandle())
@@ -45,7 +43,7 @@
 #define DEFINE_COPY_FUNC_HANDLE_CPP(type, uvname)          \
   type::type(const type& obj) {                            \
     if (obj.getHandle() != nullptr) {                      \
-      uvname* hd = (uvname*)VCore::malloc(sizeof(uvname)); \
+      uvname* hd = (uvname*)VMemory::malloc(sizeof(uvname)); \
       memcpy(hd, obj.getHandle(), sizeof(uvname));         \
       this->setHandle(hd);                                 \
     } else {                                               \
@@ -54,7 +52,7 @@
   }                                                        \
   type& type::operator=(const type& obj) {                 \
     if (obj.getHandle() != nullptr) {                      \
-      uvname* hd = (uvname*)VCore::malloc(sizeof(uvname)); \
+      uvname* hd = (uvname*)VMemory::malloc(sizeof(uvname)); \
       memcpy(hd, obj.getHandle(), sizeof(uvname));         \
       this->setHandle(hd);                                 \
     } else {                                               \

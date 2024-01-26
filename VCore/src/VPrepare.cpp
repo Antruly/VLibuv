@@ -1,13 +1,13 @@
 ﻿#include "VPrepare.h"
 
 VPrepare::VPrepare() : VHandle(this) {
-  uv_prepare_t* prepare = (uv_prepare_t*)VCore::malloc(sizeof(uv_prepare_t));
+  uv_prepare_t* prepare = (uv_prepare_t*)VMemory::malloc(sizeof(uv_prepare_t));
   this->setHandle(prepare);
   this->init();
 }
 VPrepare::VPrepare(VPrepare* t_p) : VHandle(t_p) {}
 VPrepare::VPrepare(VLoop* loop) : VHandle(this) {
-  uv_prepare_t* prepare = (uv_prepare_t*)VCore::malloc(sizeof(uv_prepare_t));
+  uv_prepare_t* prepare = (uv_prepare_t*)VMemory::malloc(sizeof(uv_prepare_t));
   this->setHandle(prepare);
   init(loop);
 }

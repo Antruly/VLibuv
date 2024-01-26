@@ -2,7 +2,7 @@
 DEFINE_COPY_FUNC_HANDLE_CPP(VTty, uv_tty_t);
 
 VTty::VTty() : VHandle(this) {
-  uv_tty_t* tty = (uv_tty_t*)VCore::malloc(sizeof(uv_tty_t));
+  uv_tty_t* tty = (uv_tty_t*)VMemory::malloc(sizeof(uv_tty_t));
   this->setHandle(tty);
   this->init();
 }
@@ -10,7 +10,7 @@ VTty::VTty(VTty* t_p) : VHandle(t_p) {}
 VTty::~VTty() {}
 
 VTty::VTty(VLoop* loop, uv_file fd, int readable) : VHandle(this) {
-  uv_tty_t* tty = (uv_tty_t*)VCore::malloc(sizeof(uv_tty_t));
+  uv_tty_t* tty = (uv_tty_t*)VMemory::malloc(sizeof(uv_tty_t));
   this->setHandle(tty);
   this->init(loop, fd, readable);
 }

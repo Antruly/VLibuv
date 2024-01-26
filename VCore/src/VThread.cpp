@@ -1,7 +1,8 @@
 ﻿#include "VThread.h"
+#include "VMemory.h"
 
 VThread::VThread() {
-  thread = (uv_thread_t*)VCore::malloc(sizeof(uv_thread_t));
+  thread = (uv_thread_t*)VMemory::malloc(sizeof(uv_thread_t));
 }
 
 VThread::~VThread() {

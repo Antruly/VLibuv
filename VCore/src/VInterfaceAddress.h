@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "VObject.h"
+#include <string>
+#include <vector>
 
 class VInterfaceAddress : public VObject {
  public:

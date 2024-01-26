@@ -1,15 +1,16 @@
 ﻿#include "VDir.h"
+#include "VMemory.h"
 #if UV_VERSION_MAJOR >= 1
 #if UV_VERSION_MINOR >= 28
 VDir::VDir() {
-  dir = (uv_dir_t*)VCore::malloc(sizeof(uv_dir_t)); 
+  dir = (uv_dir_t*)VMemory::malloc(sizeof(uv_dir_t)); 
   init();
 }
 
 VDir::~VDir() { VFREE(dir); }
 
 VDir::VDir(VDirent* dr) {
-  dir = (uv_dir_t*)VCore::malloc(sizeof(uv_dir_t));
+  dir = (uv_dir_t*)VMemory::malloc(sizeof(uv_dir_t));
   init();
   dir->dirents = dr->getDirent();
 }

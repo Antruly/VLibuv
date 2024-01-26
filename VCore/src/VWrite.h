@@ -13,8 +13,8 @@ class VWrite : public VReq {
 
   void setBuf(const VBuf* bf);
   const VBuf* getBuf();
-  void setBuf2(const VBuf* bf);
-  const VBuf* getBuf2();
+  void setSrcBuf(const VBuf* bf);
+  const VBuf* getSrcBuf();
   std::function<void(VWrite*,int)> m_write_cb;
  public:
 
@@ -27,5 +27,5 @@ class VWrite : public VReq {
 
   private:
 	  const VBuf* buf = nullptr;
-	  const VBuf* buf2 = nullptr;
+	  const VBuf* src_buf = nullptr;
 };

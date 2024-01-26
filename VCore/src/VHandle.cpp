@@ -1,7 +1,9 @@
 ﻿#include "VHandle.h"
 
-VHandle::VHandle() : VObject(this) {
-  handle = (uv_handle_t*)VCore::malloc(sizeof(uv_handle_t));
+VHandle::VHandle() : VObject(this)
+,handle_close_cb()
+,handle_alloc_cb() {
+  handle = (uv_handle_t*)VMemory::malloc(sizeof(uv_handle_t));
   memset(handle, 0, sizeof(uv_handle_t));
   this->setHandleData();
 }
@@ -103,7 +105,7 @@ int VHandle::isClosing() {
 
 VHandle::VHandle(const VHandle& obj) : VObject(nullptr) {
   if (obj.handle != nullptr) {
-    handle = (uv_handle_t*)VCore::malloc(sizeof(uv_handle_t));
+    handle = (uv_handle_t*)VMemory::malloc(sizeof(uv_handle_t));
     memcpy(obj.handle, this->handle, sizeof(uv_handle_t));
    this->setHandleData();
     vdata = obj.vdata;
@@ -116,7 +118,7 @@ VHandle& VHandle::operator=(const VHandle& obj) {
   this->freeHandle();
 
   if (obj.handle != nullptr) {
-    handle = (uv_handle_t*)VCore::malloc(sizeof(uv_handle_t));
+    handle = (uv_handle_t*)VMemory::malloc(sizeof(uv_handle_t));
     memcpy(obj.handle, this->handle, sizeof(uv_handle_t));
     this->setHandleData();
     vdata = obj.vdata;
@@ -196,7 +198,7 @@ void VHandle::freeHandle() {
     if (uv_is_closing(handle) && !handle->flags) {
       uv_close(handle, nullptr);
     }
-    VCore::free(handle);
+    VMemory::free(handle);
     handle = nullptr;
   }
 }

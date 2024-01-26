@@ -1,6 +1,5 @@
 ﻿#pragma once
-#include "VIntPtr.h"
-#include "VObject.h"
+#include "VCore.h"
 #include <functional>
 
 #define VREQ_REQ ((uv_req_t*)getReq())
@@ -27,7 +26,7 @@
 
 #define DEFINE_FUNC_REQ_CPP(type, uvname)               \
   type::type() : VReq(nullptr) {                        \
-    uvname* r = (uvname*)VCore::malloc(sizeof(uvname)); \
+    uvname* r = (uvname*)VMemory::malloc(sizeof(uvname)); \
     this->setReq(r);                                    \
     this->init();                                       \
   }                                                     \
@@ -37,7 +36,7 @@
 #define DEFINE_COPY_FUNC_REQ_CPP(type, uvname)             \
   type::type(const type& obj) {                            \
     if (obj.getReq() != nullptr) {                         \
-      uvname* hd = (uvname*)VCore::malloc(sizeof(uvname)); \
+      uvname* hd = (uvname*)VMemory::malloc(sizeof(uvname)); \
       memcpy(hd, obj.getReq(), sizeof(uvname));            \
       this->setReq(hd);                                    \
     } else {                                               \
@@ -46,7 +45,7 @@
   }                                                        \
   type& type::operator=(const type& obj) {                 \
     if (obj.getReq() != nullptr) {                         \
-      uvname* hd = (uvname*)VCore::malloc(sizeof(uvname)); \
+      uvname* hd = (uvname*)VMemory::malloc(sizeof(uvname)); \
       memcpy(hd, obj.getReq(), sizeof(uvname));            \
       this->setReq(hd);                                    \
     } else {                                               \

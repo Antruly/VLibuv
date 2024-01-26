@@ -1,7 +1,7 @@
 ﻿#include "VPoll.h"
 
 VPoll::VPoll() : VHandle(this) {
-  uv_poll_t* poll = (uv_poll_t*)VCore::malloc(sizeof(uv_poll_t));
+  uv_poll_t* poll = (uv_poll_t*)VMemory::malloc(sizeof(uv_poll_t));
   this->setHandle(poll);
   this->init();
 }
@@ -9,13 +9,13 @@ VPoll::VPoll() : VHandle(this) {
 VPoll::~VPoll() {}
 #ifdef WIN32
 VPoll::VPoll(VLoop* loop, int fd) : VHandle(this) {
-  uv_poll_t* poll = (uv_poll_t*)VCore::malloc(sizeof(uv_poll_t));
+  uv_poll_t* poll = (uv_poll_t*)VMemory::malloc(sizeof(uv_poll_t));
   this->setHandle(poll);
   init(loop, fd);
 }
 #endif
 VPoll::VPoll(VLoop* loop, uv_os_sock_t socket) : VHandle(this) {
-  uv_poll_t* poll = (uv_poll_t*)VCore::malloc(sizeof(uv_poll_t));
+  uv_poll_t* poll = (uv_poll_t*)VMemory::malloc(sizeof(uv_poll_t));
   this->setHandle(poll);
   init(loop, socket);
 }

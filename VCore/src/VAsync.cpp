@@ -1,7 +1,7 @@
 ﻿#include "VAsync.h"
 
 VAsync::VAsync() : VHandle(this) {
-  uv_async_t* async = (uv_async_t*)VCore::malloc(sizeof(uv_async_t));
+  uv_async_t* async = (uv_async_t*)VMemory::malloc(sizeof(uv_async_t));
   this->setHandle(async);
   this->init();
 }
@@ -9,7 +9,7 @@ VAsync::VAsync(VAsync* t_p) : VHandle(t_p) {}
 VAsync::~VAsync() {}
 
 VAsync::VAsync(VLoop* loop) {
-  uv_async_t* async = (uv_async_t*)VCore::malloc(sizeof(uv_async_t));
+  uv_async_t* async = (uv_async_t*)VMemory::malloc(sizeof(uv_async_t));
   this->setHandle(async);
   this->init(loop);
 }

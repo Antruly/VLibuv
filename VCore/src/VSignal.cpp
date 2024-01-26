@@ -1,7 +1,7 @@
 ﻿#include "VSignal.h"
 
 VSignal::VSignal() : VHandle(this) {
-  uv_signal_t* signal = (uv_signal_t*)VCore::malloc(sizeof(uv_signal_t));
+  uv_signal_t* signal = (uv_signal_t*)VMemory::malloc(sizeof(uv_signal_t));
   this->setHandle(signal);
   this->init();
 }
@@ -9,7 +9,7 @@ VSignal::VSignal() : VHandle(this) {
 VSignal::~VSignal() { }
 
 VSignal::VSignal(VLoop* loop) : VHandle(this) {
-  uv_signal_t* signal = (uv_signal_t*)VCore::malloc(sizeof(uv_signal_t));
+  uv_signal_t* signal = (uv_signal_t*)VMemory::malloc(sizeof(uv_signal_t));
   this->setHandle(signal);
   this->init(loop);
 }

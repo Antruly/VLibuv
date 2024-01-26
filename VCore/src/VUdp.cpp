@@ -1,7 +1,7 @@
 ﻿#include "VUdp.h"
 
 VUdp::VUdp() : VHandle(this) {
-  uv_udp_t* udp = (uv_udp_t*)VCore::malloc(sizeof(uv_udp_t));
+  uv_udp_t* udp = (uv_udp_t*)VMemory::malloc(sizeof(uv_udp_t));
   this->setHandle(udp);
   this->init();
 }
@@ -9,14 +9,14 @@ VUdp::VUdp(VUdp* t_p) : VHandle(t_p) {}
 VUdp::~VUdp() {  }
 
 VUdp::VUdp(VLoop* loop) : VHandle(this) {
-  uv_udp_t* udp = (uv_udp_t*)VCore::malloc(sizeof(uv_udp_t));
+  uv_udp_t* udp = (uv_udp_t*)VMemory::malloc(sizeof(uv_udp_t));
   this->setHandle(udp);
   this->init(loop);
 }
 #if UV_VERSION_MAJOR >= 1
 #if UV_VERSION_MINOR >= 6
 VUdp::VUdp(VLoop* loop, unsigned int flags) : VHandle(this) {
-  uv_udp_t* udp = (uv_udp_t*)VCore::malloc(sizeof(uv_udp_t));
+  uv_udp_t* udp = (uv_udp_t*)VMemory::malloc(sizeof(uv_udp_t));
   this->setHandle(udp);
   this->init(loop, flags);
 }

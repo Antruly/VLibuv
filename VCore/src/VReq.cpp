@@ -1,7 +1,7 @@
 ﻿#include "VReq.h"
 
 VReq::VReq() : VObject(nullptr) {
-  req = (uv_req_t*)VCore::malloc(sizeof(uv_req_t));
+  req = (uv_req_t*)VMemory::malloc(sizeof(uv_req_t));
   memset(req, 0, sizeof(uv_req_t));
   this->setReqData();
 }
@@ -22,7 +22,7 @@ VReq::~VReq() {
 }
 VReq::VReq(const VReq& obj) : VObject(nullptr) {
   if (obj.req != nullptr) {
-    req = (uv_req_t*)VCore::malloc(sizeof(uv_req_t));
+    req = (uv_req_t*)VMemory::malloc(sizeof(uv_req_t));
     memcpy(obj.req, this->req, sizeof(uv_req_t));
     this->setReqData();
   } else {
@@ -33,7 +33,7 @@ VReq::VReq(const VReq& obj) : VObject(nullptr) {
 VReq& VReq::operator=(const VReq& obj) {
   this->freeReq();
   if (obj.req != nullptr) {
-    req = (uv_req_t*)VCore::malloc(sizeof(uv_req_t));
+    req = (uv_req_t*)VMemory::malloc(sizeof(uv_req_t));
     memcpy(obj.req, this->req, sizeof(uv_req_t));
     this->setReqData();
   } else {
@@ -98,7 +98,7 @@ void VReq::setReqData() {
 
 void VReq::freeReq() {
   if (req != nullptr) {
-    VCore::free(req);
+    VMemory::free(req);
     req = nullptr;
   }
 }

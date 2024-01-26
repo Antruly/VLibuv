@@ -1,6 +1,6 @@
 ﻿#include "VWrite.h"
 VWrite::VWrite() : VReq(this) {
-  uv_write_t* write = (uv_write_t*)VCore::malloc(sizeof(uv_write_t));
+  uv_write_t* write = (uv_write_t*)VMemory::malloc(sizeof(uv_write_t));
   this->setReq(write);
   this->init();
 }
@@ -19,6 +19,6 @@ void VWrite::setBuf(const VBuf* bf) { buf = bf; }
 
 const VBuf* VWrite::getBuf() { return buf; }
 
-void VWrite::setBuf2(const VBuf* bf) { buf2 = bf; }
+void VWrite::setSrcBuf(const VBuf* bf) { src_buf = bf; }
 
-const VBuf* VWrite::getBuf2() { return buf2; }
+const VBuf* VWrite::getSrcBuf() { return src_buf; }

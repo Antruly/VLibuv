@@ -1,7 +1,8 @@
 ﻿#include "VRwlock.h"
+#include "VMemory.h"
 
 VRwlock::VRwlock() : VObject() {
-  rwlock = (uv_rwlock_t*)VCore::malloc(sizeof(uv_rwlock_t));
+  rwlock = (uv_rwlock_t*)VMemory::malloc(sizeof(uv_rwlock_t));
 }
 
 VRwlock::~VRwlock() { free(rwlock); }

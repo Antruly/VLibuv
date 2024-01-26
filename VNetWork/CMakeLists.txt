@@ -11,16 +11,51 @@ set(CMAKE_DEBUG_POSTFIX "d")
 # 设置SDL为否
 set(SDL_FOUND FALSE)
 
+# 对于 C++ 项目
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+
+# 或者对于 C 项目
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP")
+
 # 设置 VCore 路径
 set(VCORE_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../VCore/src")
 
 # 设置 VNetWork 路径
 set(VNETWORK_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/VNetWork/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/VNetWork/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/VNetWork/lib)
+
+# install include libuv/win files
+file(GLOB PDB_FILE
+    "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/Debug/*.pdb"
+    "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/Release/*.pdb"
+)
+
+if(MSVC)
+    add_compile_options("/Zi")
+else()
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        message(STATUS "Configuring for Debug build")
+        target_compile_options(VCore PRIVATE "/Zi")
+    elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+        message(STATUS "Configuring for Release build")
+        target_compile_options(VCore PRIVATE "/Zi")
+    else()
+    endif()
+endif()
+
 # NetWork
 set(NETWORK_FILES
-    ${VNETWORK_SRC_DIR}/VTcpService.h
-    ${VNETWORK_SRC_DIR}/VTcpService.cpp
+    ${VNETWORK_SRC_DIR}/VNetWork.h
+    ${VNETWORK_SRC_DIR}/VNetWork.cpp
+    ${VNETWORK_SRC_DIR}/VTcpBase.h
+    ${VNETWORK_SRC_DIR}/VTcpBase.cpp
+    ${VNETWORK_SRC_DIR}/VTcpServer.h
+    ${VNETWORK_SRC_DIR}/VTcpServer.cpp
+    ${VNETWORK_SRC_DIR}/VTcpClient.h
+    ${VNETWORK_SRC_DIR}/VTcpClient.cpp
 )
 source_group(NetWork FILES ${NETWORK_FILES})
 
@@ -124,6 +159,9 @@ endif()
 
 # 将库文件安装到 lib 目录
 install(TARGETS VNetWork DESTINATION lib)
+
+# 在调试模式下安装 .pdb 文件
+install(FILES ${PDB_FILE} DESTINATION lib OPTIONAL) 
 
 # 将头文件安装到 include 目录
 install(FILES 

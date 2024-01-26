@@ -1,6 +1,7 @@
 ﻿#include "VDirent.h"
+#include "VMemory.h"
 VDirent::VDirent() {
-  this->dirent = (uv_dirent_t*)VCore::malloc(sizeof(uv_dirent_t));
+  this->dirent = (uv_dirent_t*)VMemory::malloc(sizeof(uv_dirent_t));
   this->init();
 }
 
@@ -8,7 +9,7 @@ VDirent::~VDirent() {}
 
 VDirent::VDirent(const VDirent& obj) {
   if (this->dirent != nullptr) {
-    uv_dirent_t* hd = (uv_dirent_t*)VCore::malloc(sizeof(uv_dirent_t));
+    uv_dirent_t* hd = (uv_dirent_t*)VMemory::malloc(sizeof(uv_dirent_t));
     memcpy(hd, this->dirent, sizeof(uv_dirent_t));
     this->dirent = hd;
   } else {
@@ -17,7 +18,7 @@ VDirent::VDirent(const VDirent& obj) {
 }
 VDirent& VDirent::operator=(const VDirent& obj) {
   if (this->dirent != nullptr) {
-    uv_dirent_t* hd = (uv_dirent_t*)VCore::malloc(sizeof(uv_dirent_t));
+    uv_dirent_t* hd = (uv_dirent_t*)VMemory::malloc(sizeof(uv_dirent_t));
     memcpy(hd, this->dirent, sizeof(uv_dirent_t));
     this->dirent = hd;
   } else {

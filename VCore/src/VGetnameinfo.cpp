@@ -1,7 +1,7 @@
 ﻿#include "VGetnameinfo.h"
 VGetnameinfo::VGetnameinfo() : VReq(this) {
   uv_getnameinfo_t* getnameinfo =
-      (uv_getnameinfo_t*)VCore::malloc(sizeof(uv_getnameinfo_t));
+      (uv_getnameinfo_t*)VMemory::malloc(sizeof(uv_getnameinfo_t));
   this->setReq(getnameinfo);
   this->init();
 

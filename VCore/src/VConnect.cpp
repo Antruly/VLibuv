@@ -1,6 +1,6 @@
 ﻿#include "VConnect.h"
 VConnect::VConnect() : VReq(this) {
-  uv_connect_t* r = (uv_connect_t*)VCore::malloc(sizeof(uv_connect_t));
+  uv_connect_t* r = (uv_connect_t*)VMemory::malloc(sizeof(uv_connect_t));
   this->setReq(r);
   this->init();
 }

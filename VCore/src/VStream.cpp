@@ -1,6 +1,6 @@
 ﻿#include "VStream.h"
 VStream::VStream() : VHandle(this) {
-  uv_stream_t* stream = (uv_stream_t*)VCore::malloc(sizeof(uv_stream_t));
+  uv_stream_t* stream = (uv_stream_t*)VMemory::malloc(sizeof(uv_stream_t));
   this->setHandle(stream);
   this->init();
 }

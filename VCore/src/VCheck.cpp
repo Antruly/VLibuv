@@ -1,7 +1,7 @@
 ﻿#include "VCheck.h"
 
 VCheck::VCheck() : VHandle(this) {
-  uv_check_t* check = (uv_check_t*)VCore::malloc(sizeof(uv_check_t));
+  uv_check_t* check = (uv_check_t*)VMemory::malloc(sizeof(uv_check_t));
   this->setHandle(check);
   init();
 }
@@ -11,7 +11,7 @@ VCheck::VCheck(VCheck* t_p) : VHandle(t_p) {}
 VCheck::~VCheck() {  }
 
 VCheck::VCheck(VLoop* loop) : VHandle(this) {
-  uv_check_t* check = (uv_check_t*)VCore::malloc(sizeof(uv_check_t));
+  uv_check_t* check = (uv_check_t*)VMemory::malloc(sizeof(uv_check_t));
   this->setHandle(check);
   init(loop);
 }

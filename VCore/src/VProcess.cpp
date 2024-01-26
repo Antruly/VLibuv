@@ -1,5 +1,6 @@
 ﻿#include "VProcess.h"
 
+
 const char* _STR_NULL = "";
 const char* _STR_NULL_ARRY[] = {_STR_NULL, nullptr};
 
@@ -21,24 +22,24 @@ std::vector<std::string> stringSplit(const std::string& str, char delim) {
 }
 
 VProcess::VProcess() : VHandle(this) {
-  uv_process_t* process = (uv_process_t*)VCore::malloc(sizeof(uv_process_t));
+  uv_process_t* process = (uv_process_t*)VMemory::malloc(sizeof(uv_process_t));
   this->setHandle(process);
   this->init();
-  options = (uv_process_options_t*)VCore::malloc(sizeof(uv_process_options_t));
+  options = (uv_process_options_t*)VMemory::malloc(sizeof(uv_process_options_t));
   memset(options, 0, sizeof(uv_process_options_t));
 }
 
 VProcess::VProcess(VLoop* loop) : VHandle(this) {
-  uv_process_t* process = (uv_process_t*)VCore::malloc(sizeof(uv_process_t));
+  uv_process_t* process = (uv_process_t*)VMemory::malloc(sizeof(uv_process_t));
   this->setHandle(process);
   this->init(loop);
-  options = (uv_process_options_t*)VCore::malloc(sizeof(uv_process_options_t));
+  options = (uv_process_options_t*)VMemory::malloc(sizeof(uv_process_options_t));
   memset(options, 0, sizeof(uv_process_options_t));
  
 }
 VProcess::VProcess(VProcess* t_p) : VHandle(t_p) {}
 VProcess::~VProcess() {
-  VCore::free(options);
+  VMemory::free(options);
   if (op_args != nullptr) {
     delete op_args;
     op_args = nullptr;

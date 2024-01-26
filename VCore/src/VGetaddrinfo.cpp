@@ -2,7 +2,7 @@
 
 VGetaddrinfo::VGetaddrinfo() : VReq(this) {
   uv_getaddrinfo_t* getaddrinfo =
-      (uv_getaddrinfo_t*)VCore::malloc(sizeof(uv_getaddrinfo_t));
+      (uv_getaddrinfo_t*)VMemory::malloc(sizeof(uv_getaddrinfo_t));
   this->setReq(getaddrinfo);
   this->init();
 }

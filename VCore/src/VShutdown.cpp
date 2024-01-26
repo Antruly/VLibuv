@@ -1,7 +1,7 @@
 ﻿#include "VShutdown.h"
 VShutdown::VShutdown() : VReq(this) {
   uv_shutdown_t* shutdown =
-      (uv_shutdown_t*)VCore::malloc(sizeof(uv_shutdown_t));
+      (uv_shutdown_t*)VMemory::malloc(sizeof(uv_shutdown_t));
   this->setReq(shutdown);
   this->init();
 }

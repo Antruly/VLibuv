@@ -1,7 +1,7 @@
 ﻿#include "VLoop.h"
 
 VLoop::VLoop() : VHandle(this) {
-  uv_loop_t *loop = (uv_loop_t *)VCore::malloc(sizeof(uv_loop_t));
+  uv_loop_t *loop = (uv_loop_t *)VMemory::malloc(sizeof(uv_loop_t));
   VHandle::setHandle(loop);
   this->init();
 }

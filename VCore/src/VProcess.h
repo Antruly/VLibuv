@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "VHandle.h"
 #include "VLoop.h"
-
+#include <vector>
 
 class VProcess : public VHandle {
  public:

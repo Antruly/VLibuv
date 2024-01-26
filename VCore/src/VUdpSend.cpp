@@ -1,6 +1,6 @@
 ﻿#include "VUdpSend.h"
 VUdpSend::VUdpSend() : VReq(this) {
-  uv_udp_send_t* r = (uv_udp_send_t*)VCore::malloc(sizeof(uv_udp_send_t));
+  uv_udp_send_t* r = (uv_udp_send_t*)VMemory::malloc(sizeof(uv_udp_send_t));
   this->setReq(r);
   this->init();
 }

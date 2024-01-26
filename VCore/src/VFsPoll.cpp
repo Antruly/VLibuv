@@ -1,7 +1,7 @@
 ﻿#include "VFsPoll.h"
 
 VFsPoll::VFsPoll() : VHandle(this) {
-  uv_fs_poll_t* async = (uv_fs_poll_t*)VCore::malloc(sizeof(uv_fs_poll_t));
+  uv_fs_poll_t* async = (uv_fs_poll_t*)VMemory::malloc(sizeof(uv_fs_poll_t));
   this->setHandle(async);
   this->init();
 }
@@ -9,7 +9,7 @@ VFsPoll::VFsPoll(VFsPoll* t_p) : VHandle(t_p) {}
 VFsPoll::~VFsPoll() { }
 
 VFsPoll::VFsPoll(VLoop* loop) : VHandle(this) {
-  uv_fs_poll_t* async = (uv_fs_poll_t*)VCore::malloc(sizeof(uv_fs_poll_t));
+  uv_fs_poll_t* async = (uv_fs_poll_t*)VMemory::malloc(sizeof(uv_fs_poll_t));
   this->setHandle(async);
   this->init(loop);
 }

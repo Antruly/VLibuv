@@ -11,6 +11,43 @@ set(CMAKE_DEBUG_POSTFIX "d")
 # 设置SDL为否
 set(SDL_FOUND FALSE)
 
+# 对于 C++ 项目
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+
+# 或者对于 C 项目
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP")
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/VCore/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/VCore/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/VCore/lib)
+
+# install include libuv/win files
+file(GLOB PDB_FILE
+    "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/Debug/*.pdb"
+    "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/Release/*.pdb"
+)
+
+message(STATUS "Project Binary Directory: ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
+
+#get_target_property(VCORE_TARGET_LOCATION VCore LOCATION)
+#set(PDB_FILE "${VCORE_TARGET_LOCATION}.pdb")
+#message(STATUS "Executable Location: ${VCORE_TARGET_LOCATION}")
+
+if(MSVC)
+    add_compile_options("/Zi")
+else()
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        message(STATUS "Configuring for Debug build")
+        target_compile_options(VCore PRIVATE "/Zi")
+    elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+        message(STATUS "Configuring for Release build")
+        target_compile_options(VCore PRIVATE "/Zi")
+    else()
+    endif()
+endif()
+
+
+
 # 设置 VCore 路径
 set(VCORE_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
@@ -40,9 +77,12 @@ set(CORE_FILES
     ${VCORE_SRC_DIR}/VDir.cpp
     ${VCORE_SRC_DIR}/VIntPtr.h
     ${VCORE_SRC_DIR}/VIntPtr.cpp
+    ${VCORE_SRC_DIR}/VMemory.h
+    ${VCORE_SRC_DIR}/VMemory.cpp
     ${VCORE_SRC_DIR}/VObject.h
     ${VCORE_SRC_DIR}/VObject.cpp
     ${VCORE_SRC_DIR}/VString.h
+    ${VCORE_SRC_DIR}/VString.cpp
 )
 source_group(Core FILES ${CORE_FILES})
 
@@ -196,7 +236,7 @@ include_directories(
 )
 if (MSVC)
     # 禁用特定的警告
-    add_compile_options(/wd4100 /wd4127 /wd4201 /wd4206 /wd4210 /wd4232 /wd4456 /wd4457 /wd4459 /wd4706 /wd4996)
+    add_compile_options(/wd4100 /wd4127 /wd4201 /wd4206 /wd4210 /wd4221 /wd4232 /wd4456 /wd4457 /wd4459 /wd4706 /wd4996)
 elseif (UNIX)
     # 对于 GNU 或 Clang 编译器
     add_compile_options(-Wno-unused-parameter -Wno-unused-variable -Wno-unused-function)
@@ -257,6 +297,9 @@ endif()
 # 将库文件安装到 lib 目录
 install(TARGETS VCore DESTINATION lib)
 
+# 在调试模式下安装 .pdb 文件
+install(FILES ${PDB_FILE} DESTINATION lib OPTIONAL) 
+
 # 将头文件安装到 include 目录
 install(FILES 
         ${INSTALL_INCLUDE_VCORE_FILES}
@@ -270,4 +313,3 @@ install(FILES
         ${INSTALL_INCLUDE_LIBUV_UV_FILES}
         # include/libuv/uv
         DESTINATION include/libuv/uv)
-		

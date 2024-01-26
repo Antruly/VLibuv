@@ -1,8 +1,9 @@
 ﻿#include "VUtsname.h"
+#include "VMemory.h"
 #if UV_VERSION_MAJOR >= 1
 #if UV_VERSION_MINOR >= 25
 VUtsname::VUtsname() {
-  this->utsname = (uv_utsname_t*)VCore::malloc(sizeof(uv_utsname_t));
+  this->utsname = (uv_utsname_t*)VMemory::malloc(sizeof(uv_utsname_t));
   this->init();
 }
 
@@ -10,7 +11,7 @@ VUtsname::~VUtsname() {}
 
 VUtsname::VUtsname(const VUtsname& obj) {
   if (this->utsname != nullptr) {
-    uv_utsname_t* hd = (uv_utsname_t*)VCore::malloc(sizeof(uv_utsname_t));
+    uv_utsname_t* hd = (uv_utsname_t*)VMemory::malloc(sizeof(uv_utsname_t));
     memcpy(hd, this->utsname, sizeof(uv_utsname_t));
     this->utsname = hd;
   } else {
@@ -19,7 +20,7 @@ VUtsname::VUtsname(const VUtsname& obj) {
 }
 VUtsname& VUtsname::operator=(const VUtsname& obj) {
   if (this->utsname != nullptr) {
-    uv_utsname_t* hd = (uv_utsname_t*)VCore::malloc(sizeof(uv_utsname_t));
+    uv_utsname_t* hd = (uv_utsname_t*)VMemory::malloc(sizeof(uv_utsname_t));
     memcpy(hd, this->utsname, sizeof(uv_utsname_t));
     this->utsname = hd;
   } else {

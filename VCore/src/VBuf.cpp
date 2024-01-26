@@ -1,4 +1,5 @@
 ﻿#include "VBuf.h"
+#include "VMemory.h"
 
 VBuf::VBuf():buf() {
   buf.base = nullptr;
@@ -39,12 +40,12 @@ VBuf::VBuf(const char* bf, size_t sz) : buf() {
 }
 
 void* VBuf::operator new(size_t size) {
-  return VCore::malloc(size);
+  return VMemory::malloc(size);
 }
 
 void VBuf::operator delete(void* p) {
   //((VBuf*)p)->~VBuf();
-  VCore::free(p);
+  VMemory::free(p);
 }
 
 VBuf::operator uv_buf_t() { return buf; }
@@ -67,14 +68,14 @@ void VBuf::resize(size_t sz) {
   }
 
   if (buf.base != nullptr) {
-    buf.base = (char*)VCore::realloc(buf.base, sz);
+    buf.base = (char*)VMemory::realloc(buf.base, sz);
     if (buf.len < sz) {
       memset(buf.base + buf.len, 0, sz - buf.len);
     }
 
     buf.len = sz;
   } else {
-    buf.base = (char*)VCore::malloc(sz);
+    buf.base = (char*)VMemory::malloc(sz);
     memset(buf.base, 0, sz);
     buf.len = sz;
   }

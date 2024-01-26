@@ -1,7 +1,7 @@
 ﻿#include "VPipe.h"
 
 VPipe::VPipe(): VStream(nullptr) {
-  uv_pipe_t* pipe = (uv_pipe_t*)VCore::malloc(sizeof(uv_pipe_t));
+  uv_pipe_t* pipe = (uv_pipe_t*)VMemory::malloc(sizeof(uv_pipe_t));
   this->setHandle(pipe);
   this->init();
 
@@ -10,7 +10,7 @@ VPipe::VPipe(VPipe* t_p) : VStream(t_p) {}
 VPipe::~VPipe() { }
 
 VPipe::VPipe(VLoop* loop, int pic) : VStream(this) {
-  uv_pipe_t* pipe = (uv_pipe_t*)VCore::malloc(sizeof(uv_pipe_t));
+  uv_pipe_t* pipe = (uv_pipe_t*)VMemory::malloc(sizeof(uv_pipe_t));
   this->setHandle(pipe);
   this->init(loop, pic);
 }

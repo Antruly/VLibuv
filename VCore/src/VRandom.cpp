@@ -2,7 +2,7 @@
 #if UV_VERSION_MAJOR >= 1
 #if UV_VERSION_MINOR >= 33
 VRandom::VRandom() : VReq(this) {
-  uv_random_t* random = (uv_random_t*)VCore::malloc(sizeof(uv_random_t));
+  uv_random_t* random = (uv_random_t*)VMemory::malloc(sizeof(uv_random_t));
   this->setReq(random);
   this->init();
 }

@@ -1,7 +1,8 @@
 ﻿#include "VBarrier.h"
+#include "VMemory.h"
 
 VBarrier::VBarrier() {
-  barrier = (uv_barrier_t*)VCore::malloc(sizeof(uv_barrier_t));
+  barrier = (uv_barrier_t*)VMemory::malloc(sizeof(uv_barrier_t));
 }
 
 VBarrier::~VBarrier() { free(barrier); }

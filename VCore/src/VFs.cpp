@@ -1,7 +1,7 @@
 ﻿#include "VFs.h"
 
 VFs::VFs() : VReq(this) {
-  uv_fs_t* fs = (uv_fs_t*)VCore::malloc(sizeof(uv_fs_t));
+  uv_fs_t* fs = (uv_fs_t*)VMemory::malloc(sizeof(uv_fs_t));
   this->setReq(fs);
   this->init();
 }
