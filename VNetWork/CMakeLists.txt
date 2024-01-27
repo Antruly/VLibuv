@@ -11,11 +11,13 @@ set(CMAKE_DEBUG_POSTFIX "d")
 # 设置SDL为否
 set(SDL_FOUND FALSE)
 
+if(MSVC)
 # 对于 C++ 项目
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 
 # 或者对于 C 项目
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP")
+endif()
 
 # 设置 VCore 路径
 set(VCORE_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../VCore/src")
