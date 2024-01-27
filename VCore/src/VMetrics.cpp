@@ -1,4 +1,5 @@
 ﻿#include "VMetrics.h"
+#include "VMemory.h"
 
 #if UV_VERSION_MAJOR >= 1
 #if UV_VERSION_MINOR >= 45
