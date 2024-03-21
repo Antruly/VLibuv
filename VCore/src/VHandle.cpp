@@ -74,6 +74,8 @@ int VHandle::isClosing(const VHandle* vhd) {
   return uv_is_closing(vhd->handle);
 }
 
+
+
 void VHandle::setHandleData() {
     handle->data = this;
 }

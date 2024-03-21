@@ -121,6 +121,7 @@ class VHandle : public VObject {
   static void close(VHandle* vhd);
   static int isClosing(const VHandle* vhd);
 
+
  protected:
   void setHandleData();
   static void callback_alloc(uv_handle_t* handle, size_t suggested_size,
@@ -138,6 +139,7 @@ class VHandle : public VObject {
  protected:
   std::function<void(VHandle*)> handle_close_cb;
   std::function<void(VHandle*, size_t, VBuf*)> handle_alloc_cb;
+
  private:
   uv_handle_t* handle = nullptr;
   void* vdata = nullptr;

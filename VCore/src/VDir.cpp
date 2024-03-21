@@ -1,7 +1,8 @@
 ﻿#include "VDir.h"
-#include "VMemory.h"
 #if UV_VERSION_MAJOR >= 1
 #if UV_VERSION_MINOR >= 28
+
+#include "VMemory.h"
 VDir::VDir() {
   dir = (uv_dir_t*)VMemory::malloc(sizeof(uv_dir_t)); 
   init();

@@ -2,7 +2,6 @@
 #include "VCore.h"
 #include "VHandle.h"
 
-
 class VLoop : public VHandle {
  public:
   DEFINE_INHERIT_FUNC(VLoop);
@@ -10,10 +9,24 @@ class VLoop : public VHandle {
 
   int init();
 
+  int loopAlive();
+  void stop();
+
+  int loopClose();
+
   int close();
+
+  int run(uv_run_mode md = UV_RUN_DEFAULT);
+
+  void walk(std::function<void(VHandle*, void*)> walk_cb, void* arg);
 
   int exec(uv_run_mode md = UV_RUN_DEFAULT);
 
  protected:
+  std::function<void(VHandle*, void*)> handle_walk_cb;
+
+  static void callback_walk(uv_handle_t* handle, void* arg);
+
  private:
+  void* walk_arg_ = nullptr;
 };

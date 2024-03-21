@@ -1,7 +1,8 @@
 ﻿#include "VUtsname.h"
-#include "VMemory.h"
+
 #if UV_VERSION_MAJOR >= 1
 #if UV_VERSION_MINOR >= 25
+#include "VMemory.h"
 VUtsname::VUtsname() {
   this->utsname = (uv_utsname_t*)VMemory::malloc(sizeof(uv_utsname_t));
   this->init();

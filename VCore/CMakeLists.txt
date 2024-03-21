@@ -35,6 +35,17 @@ message(STATUS "Project Binary Directory: ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
 #set(PDB_FILE "${VCORE_TARGET_LOCATION}.pdb")
 #message(STATUS "Executable Location: ${VCORE_TARGET_LOCATION}")
 
+set(ENABLE_VMEMORY_MEMORY_POOL ON CACHE BOOL "using VMemory memory pool")
+if(ENABLE_VMEMORY_MEMORY_POOL)
+    add_definitions(-DVMEMORY_MEMORY_POOL)
+endif()
+
+set(ENABLE_VMEMORY_THREAD_SAFETY ON CACHE BOOL "using VMemory thread safety")
+if(ENABLE_VMEMORY_THREAD_SAFETY)
+    add_definitions(-DVMEMORY_THREAD_SAFETY)
+endif()
+
+
 if(MSVC)
     add_compile_options("/Zi")
 else()
@@ -75,12 +86,18 @@ set(CORE_FILES
     ${VCORE_SRC_DIR}/VBuf.cpp
     ${VCORE_SRC_DIR}/VCore.h
     ${VCORE_SRC_DIR}/VCore.cpp
+    ${VCORE_SRC_DIR}/VCoreDefine.h
+    ${VCORE_SRC_DIR}/VLibuvInclude.h
     ${VCORE_SRC_DIR}/VDir.h
     ${VCORE_SRC_DIR}/VDir.cpp
     ${VCORE_SRC_DIR}/VIntPtr.h
     ${VCORE_SRC_DIR}/VIntPtr.cpp
     ${VCORE_SRC_DIR}/VMemory.h
     ${VCORE_SRC_DIR}/VMemory.cpp
+    ${VCORE_SRC_DIR}/VMemoryPool.h
+    ${VCORE_SRC_DIR}/VMemoryPool.cpp
+    ${VCORE_SRC_DIR}/VThreadPool.h
+    ${VCORE_SRC_DIR}/VThreadPool.cpp
     ${VCORE_SRC_DIR}/VObject.h
     ${VCORE_SRC_DIR}/VObject.cpp
     ${VCORE_SRC_DIR}/VString.h

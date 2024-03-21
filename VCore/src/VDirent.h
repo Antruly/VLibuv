@@ -1,4 +1,6 @@
 ﻿#pragma once
+#include "VCoreDefine.h"
+#include "VLibuvInclude.h"
 #include "VObject.h"
 class VDirent :
     public VObject

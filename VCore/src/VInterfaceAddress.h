@@ -1,4 +1,6 @@
 ﻿#pragma once
+#include "VLibuvInclude.h"
+#include "VCoreDefine.h"
 #include "VObject.h"
 #include <string>
 #include <vector>

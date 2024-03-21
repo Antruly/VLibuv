@@ -1,8 +1,10 @@
 ﻿#pragma once
-#include "VObject.h"
+#include "VLibuvInclude.h"
 
 #if UV_VERSION_MAJOR >= 1
 #if UV_VERSION_MINOR >= 45
+#include "VCoreDefine.h"
+#include "VObject.h"
 class VMetrics :
     public VObject
 {

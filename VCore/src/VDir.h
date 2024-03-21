@@ -1,7 +1,8 @@
 ﻿#pragma once
-#include "VObject.h"
+#include "VCoreDefine.h"
 #if UV_VERSION_MAJOR >= 1
 #if UV_VERSION_MINOR >= 28
+#include "VObject.h"
 #include "VDirent.h"
 class VDir : public VObject {
  public:

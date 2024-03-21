@@ -14,10 +14,14 @@ class VIdle : public VHandle {
   int start();
   int start(std::function<void(VIdle*)> start_cb);
 
+  int stop();
+  int stop(std::function<void(VIdle*)> stop_cb);
+
  protected:
   std::function<void(VIdle*)> idle_start_cb;
+  std::function<void(VIdle*)> idle_stop_cb;
  private:
   static void callback_start(uv_idle_t* handle);
-
+  void callback_stop(VHandle* handle);
  private:
 };

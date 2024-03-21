@@ -18,7 +18,7 @@ set(VLIBUV_FILES
 # 添加子目录（src和library）
 add_subdirectory(VCore)
 add_subdirectory(VNetWork)
-
+add_subdirectory(VWeb)
 install(FILES 
         ${VLIBUV_FILES}
         # include

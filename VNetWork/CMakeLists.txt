@@ -52,8 +52,6 @@ endif()
 set(NETWORK_FILES
     ${VNETWORK_SRC_DIR}/VNetWork.h
     ${VNETWORK_SRC_DIR}/VNetWork.cpp
-    ${VNETWORK_SRC_DIR}/VTcpBase.h
-    ${VNETWORK_SRC_DIR}/VTcpBase.cpp
     ${VNETWORK_SRC_DIR}/VTcpServer.h
     ${VNETWORK_SRC_DIR}/VTcpServer.cpp
     ${VNETWORK_SRC_DIR}/VTcpClient.h

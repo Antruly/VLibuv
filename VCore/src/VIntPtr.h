@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "VObject.h"
-
+#include "VCoreDefine.h"
 class VBasePtr : public VObject {
  public:
   VBasePtr();

@@ -1,5 +1,6 @@
 ﻿#pragma once
-#include "VIntPtr.h"
+#include "VLibuvInclude.h"
+#include "VCoreDefine.h"
 #include "VObject.h"
 #include <functional>
 
