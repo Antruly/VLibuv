@@ -5,6 +5,7 @@
 #include "VBuf.h"
 #include "VZlib.h"
 #include "VTcpClient.h"
+#include "VOpenSsl.h"
 
 class VHttpResponse {
  public:
@@ -20,11 +21,15 @@ class VHttpResponse {
 
   void initData();
 
+  void setSslPoint(VOpenSsl* ssl);
+  VOpenSsl* getSslPoint();
   // Get the associated TCP client object
   VTcpClient* getVTcpClient() const;
 
   // Get the HTTP parser object used for parsing HTTP requests
   VHttpParser* getVHttpParser() const;
+
+  VZlib* getVZlib() const;
 
   // Get the response status code
   int getStatusCode() const;
@@ -80,6 +85,10 @@ class VHttpResponse {
 
   void setServer(const std::string& server);
 
+  void setLocation(std::string location);
+
+  std::string getLocation() const;
+
   std::string getServer();
 
     size_t getContentLength() const;
@@ -113,6 +122,7 @@ class VHttpResponse {
   VHttpParser* http_parser_ = nullptr;  // HTTP parser object
   VZlib* zlib_ = nullptr;               // Zlib object for gzip compression
   VAsync* async_recv = nullptr;
+  VOpenSsl* openssl_ = nullptr;
 
   std::string error_message;
   std::string status_message;
@@ -122,7 +132,7 @@ class VHttpResponse {
   std::string header_cache_;
   std::string contentType_;  // Request content type
   std::string accept_ranges_;
- 
+  std::string location_;
 
 
 

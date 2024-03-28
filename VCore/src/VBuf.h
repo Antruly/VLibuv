@@ -4,7 +4,7 @@
 #include "VCoreDefine.h"
 class VBuf final : public VObject {
  public:
-  DEFINE_COPY_FUNC(VBuf);
+  VCORE_DEFINE_COPY_FUNC(VBuf);
   explicit VBuf();
   ~VBuf();
   explicit VBuf(const char* bf, size_t sz);

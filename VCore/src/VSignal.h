@@ -4,8 +4,8 @@
 
 class VSignal : public VHandle {
  public:
-  DEFINE_INHERIT_FUNC(VSignal);
-  DEFINE_COPY_FUNC_DELETE(VSignal);
+  VCORE_DEFINE_INHERIT_FUNC(VSignal);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VSignal);
 
   VSignal(VLoop* loop);
 

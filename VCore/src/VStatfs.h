@@ -11,7 +11,7 @@ class VStatfs :
  public:
   VStatfs();
   ~VStatfs();
-  DEFINE_COPY_FUNC(VStatfs);
+  VCORE_DEFINE_COPY_FUNC(VStatfs);
 
   int init();
 

@@ -11,7 +11,7 @@ class VUtsname :
  public:
   VUtsname();
   ~VUtsname();
-  DEFINE_COPY_FUNC(VUtsname);
+  VCORE_DEFINE_COPY_FUNC(VUtsname);
 
   int init();
 

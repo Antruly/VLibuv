@@ -7,8 +7,8 @@
 
 class VFs : public VReq {
  public:
-  DEFINE_INHERIT_FUNC(VFs);
-  DEFINE_COPY_FUNC_DELETE(VFs);
+  VCORE_DEFINE_INHERIT_FUNC(VFs);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VFs);
 
   int init();
 

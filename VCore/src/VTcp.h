@@ -7,8 +7,8 @@
 
 class VTcp : public VStream {
  public:
-  DEFINE_INHERIT_FUNC(VTcp);
-  DEFINE_COPY_FUNC_DELETE(VTcp);
+  VCORE_DEFINE_INHERIT_FUNC(VTcp);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VTcp);
   VTcp(VLoop* loop);
   VTcp(VLoop* loop, unsigned int flags);
 

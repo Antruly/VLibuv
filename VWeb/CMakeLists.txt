@@ -67,11 +67,9 @@ set(HTTP_PARSER_SOURCE_DIR "${HTTP_PARSER_DIR}")
 # 如果未提供路径，则使用默认路径
 if(NOT HTTP_PARSER_DIR)
     set(HTTP_PARSER_INCLUDE_DIR ${DEFAULT_HTTP_PARSER_INCLUDE_DIR})
-endif()
-
-if(NOT HTTP_PARSER_DIR)
     set(HTTP_PARSER_SOURCE_DIR ${DEFAULT_HTTP_PARSER_SOURCE_DIR})
 endif()
+
 
 # 设置默认的 websocket_parser 路径
 set(DEFAULT_WEBSOCKET_PARSER_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/websocket_parser")
@@ -82,11 +80,9 @@ set(WEBSOCKET_PARSER_SOURCE_DIR "${WEBSOCKET_PARSER_DIR}")
 # 如果未提供路径，则使用默认路径
 if(NOT WEBSOCKET_PARSER_DIR)
     set(WEBSOCKET_PARSER_INCLUDE_DIR ${DEFAULT_WEBSOCKET_PARSER_INCLUDE_DIR})
-endif()
-
-if(NOT WEBSOCKET_PARSER_DIR)
     set(WEBSOCKET_PARSER_SOURCE_DIR ${DEFAULT_WEBSOCKET_PARSER_SOURCE_DIR})
 endif()
+
 
 # 设置默认的 zlib 路径
 set(DEFAULT_ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/zlib")
@@ -98,11 +94,24 @@ set(ZLIB_SOURCE_DIR "${ZLIB_DIR}")
 # 如果未提供路径，则使用默认路径
 if(NOT ZLIB_DIR)
     set(ZLIB_INCLUDE_DIR ${DEFAULT_ZLIB_INCLUDE_DIR})
-endif()
-
-if(NOT ZLIB_DIR)
     set(ZLIB_SOURCE_DIR ${DEFAULT_ZLIB_SOURCE_DIR})
 endif()
+
+
+# 设置默认的 openssl 路径
+set(DEFAULT_OPENSSL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/openssl")
+set(DEFAULT_OPENSSL_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/openssl")
+set(OPENSSL_DIR "" CACHE PATH "Path to openssl directory")
+set(OPENSSL_INCLUDE_DIR "${OPENSSL_DIR}/include")
+set(OPENSSL_LIB_DIR "${OPENSSL_DIR}/lib")
+
+# 如果未提供路径，则使用默认路径
+if(NOT OPENSSL_DIR)
+    set(OPENSSL_INCLUDE_DIR ${DEFAULT_OPENSSL_INCLUDE_DIR})
+    set(OPENSSL_LIB_DIR ${DEFAULT_OPENSSL_LIB_DIR})
+endif()
+
+
 
 # VWeb
 set(VWEB_FILES
@@ -118,10 +127,13 @@ set(VWEB_FILES
     ${VWEB_SRC_DIR}/VHttpServer.h
     ${VWEB_SRC_DIR}/VWeb.cpp
     ${VWEB_SRC_DIR}/VWeb.h
+    ${VWEB_SRC_DIR}/VWebDefine.h
     ${VWEB_SRC_DIR}/VWebSocketParser.cpp
     ${VWEB_SRC_DIR}/VWebSocketParser.h
     ${VWEB_SRC_DIR}/VZlib.cpp
     ${VWEB_SRC_DIR}/VZlib.h
+    ${VWEB_SRC_DIR}/VOpenSsl.cpp
+    ${VWEB_SRC_DIR}/VOpenSsl.h
 )
 source_group(VWeb FILES ${VWEB_FILES})
 
@@ -169,6 +181,17 @@ file(GLOB INSTALL_INCLUDE_ZLIB_FILES
     "${ZLIB_INCLUDE_DIR}/*.h"
 )
 
+# install include openssl files
+file(GLOB INSTALL_INCLUDE_OPENSSL_FILES
+    "${OPENSSL_INCLUDE_DIR}/openssl/*.h"
+)
+
+file(GLOB INSTALL_LIB_OPENSSL_FILES
+    "${OPENSSL_LIB_DIR}/*.lib"
+    "${OPENSSL_LIB_DIR}/*.a"
+    "${OPENSSL_LIB_DIR}/*.pdb"
+)
+
 # # # # # # # # # # # # install# # # # # # # # # # # # 
 
 # 设置包含文件路径
@@ -181,6 +204,7 @@ include_directories(
     ${HTTP_PARSER_INCLUDE_DIR}
     ${WEBSOCKET_PARSER_INCLUDE_DIR}
     ${ZLIB_INCLUDE_DIR}
+    ${OPENSSL_INCLUDE_DIR}
 
 )
 if (MSVC)
@@ -256,4 +280,12 @@ install(FILES
         ${INSTALL_INCLUDE_ZLIB_FILES}
         # include/zlib
         DESTINATION include/zlib)
+install(FILES 
+        ${INSTALL_INCLUDE_OPENSSL_FILES}
+        # include/openssl/openssl
+        DESTINATION include/openssl/openssl)
+install(FILES 
+        ${INSTALL_LIB_OPENSSL_FILES}
+        # include/lib
+        DESTINATION lib)
 

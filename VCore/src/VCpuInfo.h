@@ -8,7 +8,7 @@ class VCpuInfo :
 public:
     VCpuInfo();
     ~VCpuInfo();
-    DEFINE_COPY_FUNC(VCpuInfo);
+    VCORE_DEFINE_COPY_FUNC(VCpuInfo);
 
     int init();
 

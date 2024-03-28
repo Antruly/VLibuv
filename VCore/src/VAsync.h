@@ -3,8 +3,8 @@
 
 class VAsync : public VHandle {
  public:
-  DEFINE_INHERIT_FUNC(VAsync);
-  DEFINE_COPY_FUNC_DELETE(VAsync);
+  VCORE_DEFINE_INHERIT_FUNC(VAsync);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VAsync);
 
   VAsync(VLoop* loop);
   int init();

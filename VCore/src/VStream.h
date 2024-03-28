@@ -4,8 +4,8 @@
 
 class VStream : public VHandle {
  public:
-  DEFINE_INHERIT_FUNC(VStream)
-  DEFINE_COPY_FUNC_DELETE(VStream);
+  VCORE_DEFINE_INHERIT_FUNC(VStream)
+  VCORE_DEFINE_COPY_FUNC_DELETE(VStream);
 
   int init();
 

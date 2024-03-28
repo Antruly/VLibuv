@@ -191,13 +191,14 @@ uv_handle_t* VHandle::getHandle() const {
 void VHandle::setHandle(void* hd) {
   this->freeHandle();
   handle = (uv_handle_t*)hd;
+  handle_union = *(HandleUnion*)&handle;
   this->setHandleData();
   return;
 }
 
 void VHandle::freeHandle() {
   if (handle != nullptr) {
-    if (uv_is_closing(handle) && !handle->flags) {
+    if (uv_is_closing(handle) && !handle->flags && uv_is_active(handle)) {
       uv_close(handle, nullptr);
     }
     VMemory::free(handle);

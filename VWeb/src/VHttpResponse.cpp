@@ -50,6 +50,7 @@ void VHttpResponse::initCallback() {
     http_parser_->setMessageBeginCallback([this](
                                               VHttpParser* http_parser) -> int {
       this->initData();
+      this->zlib_->initDecompressStream();
       return 0;  // Example return value, replace with your actual return value
     });
 
@@ -98,6 +99,8 @@ void VHttpResponse::initCallback() {
         }
       } else if (header_cache_ == "Content-Language") {
         content_language_ = header_value;
+      } else if (header_cache_ == "Location") {
+        location_ = header_value;
       } else if (header_cache_ == "Content-Length") {
         content_length_ = std::stoul(header_value);
       } else if (header_cache_ == "Transfer-Encoding") {
@@ -133,7 +136,14 @@ void VHttpResponse::initCallback() {
             "content_length_ = " + std::to_string(content_length_);
         printf("%s", error_message.c_str());
       } else {
-        body_.appandData(data, size);
+        if (use_gzip_ && size > 0) {
+          VBuf gzipData(data, size);
+          if (!zlib_->gzipDecompressChunked(gzipData, body_)) {
+            error_message = "gzipDecompress is error";
+          } 
+        } else {
+          body_.appandData(data, size); 
+        }
       }
      
 
@@ -146,15 +156,14 @@ void VHttpResponse::initCallback() {
       if (http_ssl) {
       } else {
       }
-        if (body_.size() > 1024 * 1024 * 10) {
+      if (body_.size() > max_body_cache_length_) {
       } else {
-        if (use_gzip_) {
+          if (use_gzip_ && body_.size() > 0) {
           VBuf gzipData;
-          if (!zlib_->gzipDecompress(&body_, gzipData)) {
-            error_message = "gzipDecompress is error";
-            return -1;
-          }
-          body_ = gzipData;
+            if (!zlib_->gzipDecompressChunked(gzipData, body_, true)) {
+            error_message = "gzipDecompress finish is error";
+          } 
+        
         } 
       }
 
@@ -165,6 +174,8 @@ void VHttpResponse::initCallback() {
       parser_finish = true;
       if (this->async_recv != nullptr)
         this->async_recv->send();
+
+      this->zlib_->closeDecompressStream();
       return 0;  // Example return value, replace with your actual return value
     });
 
@@ -190,6 +201,7 @@ void VHttpResponse::initData() {
   http_version_ = "";
   server_ = "";
   header_cache_ = "";
+  location_ = "";
   content_length_ = 0;
   status_ = 0;
 
@@ -205,12 +217,24 @@ void VHttpResponse::initData() {
   http_ssl = false;
 }
 
+void VHttpResponse::setSslPoint(VOpenSsl* ssl) {
+  openssl_ = ssl;
+}
+
+VOpenSsl* VHttpResponse::getSslPoint() {
+  return openssl_;
+}
+
 VTcpClient* VHttpResponse::getVTcpClient() const {
   return tcp_client_;
 }
 
 VHttpParser* VHttpResponse::getVHttpParser() const {
   return http_parser_;
+}
+
+VZlib* VHttpResponse::getVZlib() const {
+  return zlib_;
 }
 
 int VHttpResponse::getStatusCode() const {
@@ -322,6 +346,15 @@ void VHttpResponse::setUseChunked(bool useChunked) {
 void VHttpResponse::setServer(const std::string& server) {
   server_ = server;
   addHeader("Server", server_);
+}
+
+void VHttpResponse::setLocation(std::string location) {
+  location_ = location;
+  this->addHeader("Location", location_);
+}
+
+std::string VHttpResponse::getLocation() const {
+  return location_;
 }
 
 std::string VHttpResponse::getServer() {

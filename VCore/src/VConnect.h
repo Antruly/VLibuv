@@ -6,8 +6,8 @@
 
 class VConnect : public VReq {
  public:
-  DEFINE_INHERIT_FUNC(VConnect);
-  DEFINE_COPY_FUNC_DELETE(VConnect);
+  VCORE_DEFINE_INHERIT_FUNC(VConnect);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VConnect);
 
   int init();
   VStream* getConnectStream();

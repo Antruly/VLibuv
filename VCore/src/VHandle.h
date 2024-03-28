@@ -65,8 +65,8 @@ typedef uv_handle_type VHandleType;
 
 class VHandle : public VObject {
  public:
-  DEFINE_INHERIT_FUNC(VHandle);
-  DEFINE_COPY_FUNC(VHandle);
+  VCORE_DEFINE_INHERIT_FUNC(VHandle);
+  VCORE_DEFINE_COPY_FUNC(VHandle);
 
   int setData(void* pdata);
   void* getData();
@@ -141,6 +141,30 @@ class VHandle : public VObject {
   std::function<void(VHandle*, size_t, VBuf*)> handle_alloc_cb;
 
  private:
+  union HandleUnion {
+    uv_handle_t* handle;
+    uv_loop_t* loop;
+
+    uv_fs_event_t* fs_event;
+    uv_fs_poll_t* fs_poll;
+
+    uv_async_t* async;
+    uv_check_t* check;
+    uv_idle_t* idle;
+    uv_pipe_t* pipe;
+    uv_poll_t* poll;
+    uv_prepare_t* prepare;
+    uv_process_t* process;
+    uv_signal_t* signal;
+    uv_tty_t* tty;
+    uv_udp_t* udp;
+    
+    uv_stream_t* stream;
+    uv_tcp_t* tcp;
+    uv_timer_t* timer;
+  };
+ private:
   uv_handle_t* handle = nullptr;
+  HandleUnion handle_union;
   void* vdata = nullptr;
 };

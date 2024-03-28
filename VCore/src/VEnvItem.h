@@ -11,7 +11,7 @@ class VEnvItem :
  public:
   VEnvItem();
   ~VEnvItem();
-  DEFINE_COPY_FUNC(VEnvItem);
+  VCORE_DEFINE_COPY_FUNC(VEnvItem);
 
   int init();
 

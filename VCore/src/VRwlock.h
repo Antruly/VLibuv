@@ -5,8 +5,8 @@
 
 class VRwlock : public VObject {
  public:
-  DEFINE_INHERIT_FUNC(VRwlock);
-  DEFINE_COPY_FUNC_DELETE(VRwlock);
+  VCORE_DEFINE_INHERIT_FUNC(VRwlock);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VRwlock);
 
   int init();
   void rdlock();

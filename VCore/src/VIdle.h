@@ -5,8 +5,8 @@
 
 class VIdle : public VHandle {
  public:
-  DEFINE_INHERIT_FUNC(VIdle);
-  DEFINE_COPY_FUNC_DELETE(VIdle);
+  VCORE_DEFINE_INHERIT_FUNC(VIdle);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VIdle);
   VIdle(VLoop* loop);
 
   int init();

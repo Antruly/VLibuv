@@ -7,8 +7,8 @@
 
 class VUdp : public VHandle {
  public:
-  DEFINE_INHERIT_FUNC(VUdp);
-  DEFINE_COPY_FUNC_DELETE(VUdp);
+  VCORE_DEFINE_INHERIT_FUNC(VUdp);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VUdp);
 
   VUdp(VLoop* loop);
 #if UV_VERSION_MAJOR >= 1

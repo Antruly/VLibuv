@@ -8,7 +8,7 @@ class VDirent :
  public:
   VDirent();
   ~VDirent();
-  DEFINE_COPY_FUNC(VDirent);
+  VCORE_DEFINE_COPY_FUNC(VDirent);
 
   int init();
 

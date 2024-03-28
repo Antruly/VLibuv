@@ -4,8 +4,8 @@
 
 class VFsPoll : public VHandle {
  public:
-  DEFINE_INHERIT_FUNC(VFsPoll);
-  DEFINE_COPY_FUNC_DELETE(VFsPoll);
+  VCORE_DEFINE_INHERIT_FUNC(VFsPoll);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VFsPoll);
 
   VFsPoll(VLoop* loop);
 

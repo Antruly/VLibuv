@@ -7,8 +7,8 @@ class VShutdown :
     public VReq
 {
 public:
-    DEFINE_INHERIT_FUNC(VShutdown);
-    DEFINE_COPY_FUNC_DELETE(VShutdown);
+    VCORE_DEFINE_INHERIT_FUNC(VShutdown);
+    VCORE_DEFINE_COPY_FUNC_DELETE(VShutdown);
 
     int init();
     

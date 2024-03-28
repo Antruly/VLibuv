@@ -1,8 +1,9 @@
 ﻿#pragma once
 #include "VBuf.h"
 #include <string>
+#include <zlib.h>
+#include "VWebDefine.h"
 
-#define VLIB_MAX_BUFFER_CHACE_SIZE (2 * 1024 * 1024 * 1024)
 
 class VZlib {
  public:
@@ -12,8 +13,28 @@ class VZlib {
   bool gzipCompress(const VBuf* data, VBuf& compressedData);
   bool gzipDecompress(const VBuf* compressedData, VBuf& decompressedData);
 
+  void initCompressStream();
+  void initDecompressStream();
+  void closeCompressStream();
+  void closeDecompressStream();
+
+  bool gzipCompressChunked(const VBuf& data,
+                           VBuf& compressedData,
+                           bool isFinal = false,
+                           size_t cacheSize = 1024 * 1024 * 10);
+  bool gzipDecompressChunked(const VBuf& compressedData,
+                             VBuf& decompressedData,
+                             bool isFinal = false,
+                             size_t cacheSize = 1024 * 1024 * 10);
+
   std::string getLastError() const;
 
  protected:
   std::string error_;
+
+ private:
+  z_stream* zstrm_compress_ = nullptr;
+  z_stream* zstrm_decompress_ = nullptr;
+  VBuf tempCompressed_;
+  VBuf tempDecompressed_;
 };

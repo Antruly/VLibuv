@@ -5,8 +5,8 @@
 
 class VGetaddrinfo : public VReq {
  public:
-  DEFINE_INHERIT_FUNC(VGetaddrinfo);
-  DEFINE_COPY_FUNC_DELETE(VGetaddrinfo);
+  VCORE_DEFINE_INHERIT_FUNC(VGetaddrinfo);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VGetaddrinfo);
 
   int init();
 

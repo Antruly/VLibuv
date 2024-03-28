@@ -4,8 +4,8 @@
 
 class VFsEvent : public VHandle {
  public:
-  DEFINE_INHERIT_FUNC(VFsEvent);
-  DEFINE_COPY_FUNC_DELETE(VFsEvent);
+  VCORE_DEFINE_INHERIT_FUNC(VFsEvent);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VFsEvent);
   VFsEvent(VLoop* loop);
   int init();
 

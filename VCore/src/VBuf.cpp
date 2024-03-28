@@ -121,7 +121,7 @@ void VBuf::setZero() {
 
 void VBuf::resize(size_t sz) {
   if (sz == 0) {
-    VFREE(buf.base);
+    VCORE_VFREE(buf.base);
     buf.len = sz;
     return;
   } else if (buf.len == sz) {

@@ -5,8 +5,8 @@
 
 class VBarrier : public VObject {
  public:
-  DEFINE_INHERIT_FUNC(VBarrier);
-  DEFINE_COPY_FUNC_DELETE(VBarrier);
+  VCORE_DEFINE_INHERIT_FUNC(VBarrier);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VBarrier);
 
   int init(int ct);
   int wait();

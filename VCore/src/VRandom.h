@@ -6,8 +6,8 @@
 #if UV_VERSION_MINOR >= 33
 class VRandom : public VReq {
  public:
-  DEFINE_INHERIT_FUNC(VRandom);
-  DEFINE_COPY_FUNC_DELETE(VRandom);
+  VCORE_DEFINE_INHERIT_FUNC(VRandom);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VRandom);
 
   int init();
 

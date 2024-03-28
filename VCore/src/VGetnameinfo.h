@@ -5,8 +5,8 @@
 
 class VGetnameinfo : public VReq {
  public:
-  DEFINE_INHERIT_FUNC(VGetnameinfo);
-  DEFINE_COPY_FUNC_DELETE(VGetnameinfo);
+  VCORE_DEFINE_INHERIT_FUNC(VGetnameinfo);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VGetnameinfo);
 
   int init();
   

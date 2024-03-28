@@ -3,8 +3,8 @@
 
 class VTty : public VHandle {
  public:
-  DEFINE_INHERIT_FUNC(VTty);
-  DEFINE_COPY_FUNC(VTty);
+  VCORE_DEFINE_INHERIT_FUNC(VTty);
+  VCORE_DEFINE_COPY_FUNC(VTty);
 
   VTty(VLoop* loop, uv_file fd, int readable);
 

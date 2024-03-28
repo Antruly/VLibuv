@@ -11,7 +11,7 @@ class VMetrics :
  public:
   VMetrics();
   ~VMetrics();
-  DEFINE_COPY_FUNC(VMetrics);
+  VCORE_DEFINE_COPY_FUNC(VMetrics);
 
   int init();
 

@@ -3,35 +3,8 @@
 #include "VTcp.h"
 #include <map>
 #include <VAsync.h>
+#include "VNetWorkDefine.h"
 
-enum VTCP_WORKER_STATUS {
-  VTCP_WORKER_STATUS_NONE = 0x00,  // 无状态
-
-  // libuv提供的连接状态
-  VTCP_WORKER_STATUS_CONNECTING = 0x01,    // 连接中
-  VTCP_WORKER_STATUS_CONNECTED = 0x02,     // 已连接
-  VTCP_WORKER_STATUS_DISCONNECTED = 0x04,  // 已断开连接
-
-  VTCP_WORKER_STATUS_LISTENING = 0x08,  // 监听中
-  VTCP_WORKER_STATUS_CLOSED = 0x10,     // 已关闭
-
-  // 读写状态
-  VTCP_WORKER_STATUS_READING = 0x20,  // 可读取数据
-  VTCP_WORKER_STATUS_WRITING = 0x40,  // 可写入数据
-
-  // 数据处理状态
-  VTCP_WORKER_STATUS_PROCESSING = 0x80,  // 正在处理数据
-
-  // 断线重连状态
-  VTCP_WORKER_STATUS_RECONNECTING = 0x100,  // 重新连接中
-
-  // libuv提供的错误状态
-  VTCP_WORKER_STATUS_ERROR_NONE = 0x200,           // 无错误
-  VTCP_WORKER_STATUS_ERROR_UNKNOWN = 0x400,        // 未知错误
-  VTCP_WORKER_STATUS_ERROR_EADDRNOTAVAIL = 0x800,  // 地址不可用
-  VTCP_WORKER_STATUS_ERROR_ECONNRESET = 0x1000,    // 连接被重置
-
-};
 
 class VTcpClient : public VObject {
  public:

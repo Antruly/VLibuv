@@ -43,7 +43,7 @@ class VMemory : public VObject {
 #endif
 
     if (ptr == nullptr) {
-      printf("malloc error size: %lu\n", sz);
+      printf("malloc error size: %zu\n", sz);
       error_callback(&sz);
     }
     return ptr;
@@ -64,7 +64,7 @@ class VMemory : public VObject {
 #endif
 
     if (ptr == nullptr) {
-      printf("realloc error size: %lu\n", sz);
+      printf("realloc error size: %zu\n", sz);
       error_callback(&sz);
     }
     return ptr;

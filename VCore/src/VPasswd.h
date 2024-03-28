@@ -11,7 +11,7 @@ class VPasswd :
  public:
   VPasswd();
   ~VPasswd();
-  DEFINE_COPY_FUNC(VPasswd);
+  VCORE_DEFINE_COPY_FUNC(VPasswd);
 
   int init();
 

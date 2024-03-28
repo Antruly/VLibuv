@@ -2,6 +2,8 @@
 #include "VHttpRequest.h"
 #include "VHttpResponse.h"
 #include "VTcpClient.h"
+#include "VOpenSsl.h"
+#include "VWebDefine.h"
 
 class VHttpClient : public VObject{
  public:
@@ -11,8 +13,11 @@ class VHttpClient : public VObject{
   VHttpRequest* getVHttpRequest();
   VHttpResponse* getVHttpResponse();
   VTcpClient* getVTcpClient();
+  VOpenSsl* getVOpenSsl();
 
   void initCallback();
+
+  void initSsl(const SSL_METHOD* method = SSLv23_client_method());
 
   std::string getUrlFileName();
 
@@ -70,9 +75,10 @@ class VHttpClient : public VObject{
 
 
  private:
-  VTcpClient* tcp_client_;
-  VHttpRequest* request_;
-  VHttpResponse* response_;
+  VTcpClient* tcp_client_ = nullptr;
+  VHttpRequest* request_ = nullptr;
+  VHttpResponse* response_ = nullptr;
+  VOpenSsl* openssl_ = nullptr;
 
   std::string error_message;
 

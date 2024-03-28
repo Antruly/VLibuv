@@ -59,8 +59,8 @@ typedef uv_req_type VReqType;
 
 class VReq : public VObject {
  public:
-  DEFINE_INHERIT_FUNC(VReq);
-  DEFINE_COPY_FUNC(VReq);
+  VCORE_DEFINE_INHERIT_FUNC(VReq);
+  VCORE_DEFINE_COPY_FUNC(VReq);
 
   int setData(void* pdata);
   void* getData();

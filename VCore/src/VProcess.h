@@ -5,8 +5,8 @@
 
 class VProcess : public VHandle {
  public:
-  DEFINE_INHERIT_FUNC(VProcess);
-  DEFINE_COPY_FUNC_DELETE(VProcess);
+  VCORE_DEFINE_INHERIT_FUNC(VProcess);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VProcess);
   VProcess(VLoop* loop);
 
   int init();

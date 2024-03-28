@@ -3,6 +3,7 @@
 #include "VTcpClient.h"
 #include "VTimer.h"
 #include "VThreadPool.h"
+#include "VNetWorkDefine.h"
 #include <mutex>
 class VTcpServer : public VObject {
  public:

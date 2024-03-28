@@ -11,7 +11,7 @@ class VGroup :
  public:
   VGroup();
   ~VGroup();
-  DEFINE_COPY_FUNC(VGroup);
+  VCORE_DEFINE_COPY_FUNC(VGroup);
 
   int init();
 

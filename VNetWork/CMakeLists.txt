@@ -50,6 +50,7 @@ endif()
 
 # NetWork
 set(NETWORK_FILES
+    ${VNETWORK_SRC_DIR}/VNetWorkDefine.h
     ${VNETWORK_SRC_DIR}/VNetWork.h
     ${VNETWORK_SRC_DIR}/VNetWork.cpp
     ${VNETWORK_SRC_DIR}/VTcpServer.h

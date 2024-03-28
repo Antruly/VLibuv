@@ -40,6 +40,26 @@ VTcpClient::VTcpClient(VLoop* externalLoop)
 VTcpClient::~VTcpClient() {
   this->setStatus(VTCP_WORKER_STATUS_CLOSED, true);
 
+   if (own_loop && loop) {
+    loop->walk(
+        [this](VHandle* handle, void* data) {
+          if (!handle->isClosing() && handle->isActive()) {
+            handle->close();
+          }
+        },
+        nullptr);
+
+    if (!loop->isActive()) {
+      loop->run();
+    }
+
+    // 如果是自管理的VLoop，需要在这里释放资源
+    if (!this->loop->isClosing() && this->loop->isActive()) {
+      this->loop->close();
+    }
+    delete this->loop;
+  }
+
   if (this->idle != nullptr) {
     if (this->idle_run) {
       this->idleClose();
@@ -53,13 +73,7 @@ VTcpClient::~VTcpClient() {
     delete this->tcp;
   }
 
-  if (own_loop && loop) {
-    // 如果是自管理的VLoop，需要在这里释放资源
-    if (!this->loop->isClosing()) {
-      this->loop->close();
-    }
-    delete this->loop;
-  }
+ 
   if (alloc_buffers.size() > 0) {
     // 遍历并删除VBuf*指针
     for (auto it = alloc_buffers.begin(); it != alloc_buffers.end(); ++it) {

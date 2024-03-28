@@ -6,8 +6,8 @@
 #include "VDirent.h"
 class VDir : public VObject {
  public:
-  DEFINE_INHERIT_FUNC(VDir);
-  DEFINE_COPY_FUNC_DELETE(VDir);
+  VCORE_DEFINE_INHERIT_FUNC(VDir);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VDir);
 
   VDir(VDirent* dr);
   int init();

@@ -8,8 +8,8 @@
 
 class VPipe : public VStream {
  public:
-  DEFINE_INHERIT_FUNC(VPipe);
-  DEFINE_COPY_FUNC_DELETE(VPipe);
+  VCORE_DEFINE_INHERIT_FUNC(VPipe);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VPipe);
   VPipe(VLoop* loop, int pic);
 
   int init();

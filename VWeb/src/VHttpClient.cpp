@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "VHttpClient.h"
+#include <cassert>
 
 VHttpClient::VHttpClient()
     : tcp_client_(new VTcpClient()),
@@ -18,7 +19,14 @@ VHttpClient::~VHttpClient() {
     delete tcp_client_;
   }
   delete request_;
+  request_ = nullptr;
   delete response_;
+  response_ = nullptr;
+
+  if (openssl_ == nullptr) {
+    delete openssl_;
+    openssl_ = nullptr;
+  }
 }
 
 VHttpRequest* VHttpClient::getVHttpRequest() {
@@ -33,6 +41,10 @@ VTcpClient* VHttpClient::getVTcpClient() {
   return tcp_client_;
 }
 
+VOpenSsl* VHttpClient::getVOpenSsl() {
+  return openssl_;
+}
+
 void VHttpClient::initCallback() {
   if (tcp_client_ != nullptr) {
     tcp_client_->setConnectiondCb([this](int status) {
@@ -45,6 +57,28 @@ void VHttpClient::initCallback() {
 
     });
   }
+}
+
+void VHttpClient::initSsl(const SSL_METHOD* method) {
+
+    if (openssl_ == nullptr) {
+       openssl_ = new VOpenSsl(method);
+    }
+    else if (openssl_ != nullptr && openssl_->getSslMethod() != method) {
+      delete openssl_;
+      openssl_ = nullptr;
+      openssl_ = new VOpenSsl(method);
+    } else {
+      openssl_->initClient(tcp_client_);
+    }
+
+    if (request_ != nullptr) {
+      request_->setSslPoint(openssl_);
+    }
+
+    if (response_ != nullptr) {
+      response_->setSslPoint(openssl_);
+    }
 }
 
 std::string VHttpClient::getUrlFileName() {
@@ -318,6 +352,11 @@ bool VHttpClient::connect(const std::string& url) {
   ParsedURL parsedurl = request_->getParsedURL();
   std::string addrs;
   int port;
+  if (parsedurl.protocol =="https") {
+    this->initSsl();
+    assert(openssl_!= nullptr);
+  }
+
   tcp_client_->getPeerAddrs(addrs, port);
 
   if ((tcp_client_->getStatus() &

@@ -8,7 +8,7 @@ VHttpRequest::VHttpRequest()
       zlib_(new VZlib()),
       method_(METHOD_TYPE::OPTIONS),
       request_data_(),
-      max_body_cache_length_(1024*1024*100),
+      max_body_cache_length_(VWEB_HTTP_MAX_BODY_CACHE_LENGTH),
       body_() {
   this->initCallback();
   http_parser_->httpParserInit(http_parser_type::HTTP_REQUEST);
@@ -22,7 +22,7 @@ VHttpRequest::VHttpRequest(VTcpClient* vtcp_client)
       zlib_(new VZlib()),
       method_(METHOD_TYPE::OPTIONS),
       request_data_(),
-      max_body_cache_length_(1024 * 1024 * 100),
+      max_body_cache_length_(VWEB_HTTP_MAX_BODY_CACHE_LENGTH),
       body_() {
   this->initCallback();
   http_parser_->httpParserInit(http_parser_type::HTTP_REQUEST);
@@ -122,6 +122,8 @@ void VHttpRequest::initCallback() {
         }
       } else if (header_cache_ == "Accept-Language") {
         accept_language_ = header_value;
+      } else if (header_cache_ == "Location") {
+        location_ = header_value;
       } else if (header_cache_ == "Referer") {
         referer_ = header_value;
       } else if (header_cache_ == "Content-Length") {
@@ -205,6 +207,7 @@ void VHttpRequest::initData() {
   referer_ = "";
   user_agent_ = "";
   header_cache_ = "";
+  location_ = "";
 
   url_parser_.protocol = "";
   url_parser_.host = "";
@@ -226,6 +229,14 @@ void VHttpRequest::initData() {
   keep_alive_ = true;
   parser_finish = false;
   http_ssl = false;
+}
+
+void VHttpRequest::setSslPoint(VOpenSsl* ssl) {
+    openssl_ = ssl;
+}
+
+VOpenSsl* VHttpRequest::getSslPoint() {
+  return openssl_;
 }
 
 VTcpClient* VHttpRequest::getVTcpClient() const {
@@ -269,6 +280,9 @@ void VHttpRequest::setUrl(const std::string& url) {
   url_parser_ = http_parser_->parseUrl(url_);
   url_raw_ = url_parser_.path + (url_parser_.query.empty() ? "" : "?") + url_parser_.query;
   this->setHost(url_parser_.host);
+  if (url_parser_.protocol == "https") {
+    http_ssl = true;
+  }
 }
 
 std::string VHttpRequest::getRawUrl() const {
@@ -594,6 +608,10 @@ bool VHttpRequest::getUseChunked() const {
 std::string VHttpRequest::getUserAgent() const {
   return user_agent_;
 }
+void VHttpRequest::setLocation(std::string location) {
+  location_ = location;
+  this->addHeader("Location", location_);
+}
 void VHttpRequest::setMaxBodyCacheLength(const size_t& length) {
   max_body_cache_length_ = length;
 }
@@ -635,6 +653,10 @@ std::string
   }
 }
 
+std::string VHttpRequest::getLocation() const {
+  return location_;
+}
+
 void VHttpRequest::setRequestSendFinishCb(
     std::function<void(int)> request_send_finish_cb) {
   http_request_send_finish_cb = request_send_finish_cb;
@@ -647,7 +669,7 @@ void VHttpRequest::setRequestParserFinishCb(
 
 
  bool VHttpRequest::connect(const std::string& addrs, int port) {
-  if (addrs.empty() || port <= 0 || port > 65536) {
+  if (addrs.empty() || port <= 0 || port > VNETWORK_MAX_PORT_NUMBER) {
     error_message = "addrs or port is null";
     return false;
   }
@@ -665,11 +687,15 @@ void VHttpRequest::setRequestParserFinishCb(
     ip = addrs;
   }
 
-  if (tcp_client_ != nullptr) {
-    if (tcp_client_->connect(ip.c_str(), port) == 0)
-   {
-      return true;
-   }
+  if (tcp_client_ == nullptr) {
+    return false;
+  }
+  if (tcp_client_->connect(ip.c_str(), port) != 0) {
+    return false;
+  }
+
+  if (openssl_ != nullptr && url_parser_.protocol == "https") {
+      http_ssl = true;
   }
 
   error_message =

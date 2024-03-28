@@ -8,7 +8,7 @@ VTcp::VTcp() : VStream(this) {
 
 VTcp::~VTcp() {
   for (auto item = addrs.begin(); item != addrs.end(); item++) {
-    VDELETE(*item);
+    VCORE_VDELETE(*item);
     *item = nullptr;
   }
   addrs.clear();

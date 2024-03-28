@@ -5,8 +5,8 @@
 
 class VPrepare : public VHandle {
  public:
-  DEFINE_INHERIT_FUNC(VPrepare);
-  DEFINE_COPY_FUNC_DELETE(VPrepare);
+  VCORE_DEFINE_INHERIT_FUNC(VPrepare);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VPrepare);
   VPrepare(VLoop* loop);
 
   int init();

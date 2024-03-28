@@ -4,6 +4,8 @@
 #include "VZlib.h"
 #include "VThreadPool.h"
 #include "VGetaddrinfo.h"
+#include "VOpenSsl.h"
+#include "VWebDefine.h"
 #include <regex>
 
 class VHttpRequest : public VObject {
@@ -22,6 +24,9 @@ class VHttpRequest : public VObject {
   void initCallback();
 
   void initData();
+
+  void setSslPoint(VOpenSsl* ssl);
+  VOpenSsl* getSslPoint();
 
   // Get the associated TCP client object
   VTcpClient* getVTcpClient() const;
@@ -113,6 +118,10 @@ class VHttpRequest : public VObject {
 
   std::string getUserAgent() const;
 
+  void setLocation(std::string location);
+
+  std::string getLocation() const;
+
   // Parse request data
   void parseRequest(const VBuf* buf);
 
@@ -164,6 +173,7 @@ class VHttpRequest : public VObject {
   VHttpParser* http_parser_ = nullptr;  // HTTP parser object
   VZlib* zlib_ = nullptr;               // Zlib object for gzip compression
   VGetaddrinfo* getaddrinfo_ = nullptr;
+  VOpenSsl* openssl_ = nullptr;
 
   std::string error_message;
   std::string http_version_;            // HTTP version
@@ -176,6 +186,7 @@ class VHttpRequest : public VObject {
   std::string header_cache_;
   std::string contentType_;             // Request content type
   std::string accept_;
+  std::string location_;
 
   ParsedURL url_parser_;                // Parsed URL components
   

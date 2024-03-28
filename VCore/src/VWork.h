@@ -5,8 +5,8 @@
 
 class VWork : public VReq {
  public:
-  DEFINE_INHERIT_FUNC(VWork);
-  DEFINE_COPY_FUNC_DELETE(VWork);
+  VCORE_DEFINE_INHERIT_FUNC(VWork);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VWork);
 
   int init();
 

@@ -3,8 +3,8 @@
 
 class VCheck : public VHandle {
  public:
-  DEFINE_INHERIT_FUNC(VCheck);
-  DEFINE_COPY_FUNC_DELETE(VCheck);
+  VCORE_DEFINE_INHERIT_FUNC(VCheck);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VCheck);
 
   VCheck(VLoop* loop);
 

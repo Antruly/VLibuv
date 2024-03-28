@@ -1,12 +1,13 @@
 ﻿#include "VZlib.h"
 #include <zlib.h>
 
-VZlib::VZlib() {
-  // 初始化错误信息
-  error_ = "";
-}
+VZlib::VZlib()
+    : error_(), zstrm_compress_(nullptr), zstrm_decompress_(nullptr) {}
 
-VZlib::~VZlib() {}
+VZlib::~VZlib() {
+  closeCompressStream();
+  closeDecompressStream();
+}
 
 bool VZlib::gzipCompress(const VBuf* data, VBuf& compressedData) {
   z_stream zstrm;
@@ -41,7 +42,7 @@ RESTRAT:
 #ifdef _DEBUG
     printf(
         "compression succed, before compression size is %d, after compressione "
-        "size is %d\n",
+        "size is %zu\n",
         zstrm.total_in, compressedData.size() - zstrm.avail_out);
 #endif
     // 压缩结束
@@ -59,7 +60,7 @@ RESTRAT:
   } else if (ret == Z_BUF_ERROR) {
     error_ = "Gzip compression failed: zlib out buffer error";
     deflateEnd(&zstrm);
-    if (compressedData.size() < VLIB_MAX_BUFFER_CHACE_SIZE) {
+    if (compressedData.size() < VWEB_VLIB_MAX_BUFFER_CHACE_SIZE) {
       compressedData.resize(compressedData.size() * 2);
       goto RESTRAT;
     } else {
@@ -113,7 +114,7 @@ RESTRAT:
 #ifdef _DEBUG
     printf(
         "decompress succed, before decompress size is %d, after decompress "
-        "size is %d\n",
+        "size is %zu\n",
         zstrm.total_in, decompressedData.size() - zstrm.avail_out);
 #endif
     // 解压缩结束
@@ -134,7 +135,7 @@ RESTRAT:
     decompressedData.resize(decompressedData.size() * 2);
     goto RESTRAT;
 
-    if (decompressedData.size() < VLIB_MAX_BUFFER_CHACE_SIZE) {
+    if (decompressedData.size() < VWEB_VLIB_MAX_BUFFER_CHACE_SIZE) {
       decompressedData.resize(decompressedData.size() * 2);
       goto RESTRAT;
     } else {
@@ -155,6 +156,155 @@ ERROR_TO_END:
 #endif
   return false;
 }
+
+  void VZlib::initCompressStream() {
+  if (zstrm_compress_ != nullptr) {
+      closeCompressStream();
+  }
+  zstrm_compress_ = new z_stream();
+  memset(zstrm_compress_, 0, sizeof(z_stream));
+  if (deflateInit2(zstrm_compress_, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15 + 16,
+                   8, Z_DEFAULT_STRATEGY) != Z_OK) {
+    error_ = ("Failed to initialize compress stream.");
+  }
+}
+
+void VZlib::initDecompressStream() {
+  if (zstrm_decompress_ != nullptr) {
+    closeDecompressStream();
+  }
+  zstrm_decompress_ = new z_stream();
+  memset(zstrm_decompress_, 0, sizeof(z_stream));
+  if (inflateInit2(zstrm_decompress_, 15 + 16) != Z_OK) {
+    error_ = ("Failed to initialize decompress stream.");
+  }
+}
+
+void VZlib::closeCompressStream() {
+  if (zstrm_compress_) {
+    deflateEnd(zstrm_compress_);
+    delete zstrm_compress_;
+    zstrm_compress_ = nullptr;
+  }
+}
+
+void VZlib::closeDecompressStream() {
+  if (zstrm_decompress_) {
+    inflateEnd(zstrm_decompress_);
+    delete zstrm_decompress_;
+    zstrm_decompress_ = nullptr;
+  }
+}
+
+bool VZlib::gzipCompressChunked(const VBuf& data,
+                         VBuf& compressedData,
+                                bool isFinal,
+                                size_t cacheSize) {
+  if (!zstrm_compress_) {
+    error_ = "Compress stream not initialized.";
+    return false;
+  }
+
+  zstrm_compress_->next_in = reinterpret_cast<Bytef*>(data.getData());
+  zstrm_compress_->avail_in = data.size();
+
+
+  tempCompressed_.resize(cacheSize);  // 临时缓冲区大小
+  tempCompressed_.setZero();
+
+  do {
+    zstrm_compress_->next_out =
+        reinterpret_cast<Bytef*>(tempCompressed_.getData());
+    zstrm_compress_->avail_out = tempCompressed_.size();
+
+    int ret = deflate(zstrm_compress_, isFinal ? Z_FINISH : Z_NO_FLUSH);
+      if (ret == Z_STREAM_END || ret == Z_OK ||
+        (ret == Z_BUF_ERROR && zstrm_compress_->avail_out != 0)) {
+#ifdef _DEBUG
+      printf(
+          "compression succed, before compression size is %d, after "
+          "compressione "
+          "size is %zu\n",
+            zstrm_compress_->total_in,
+            tempCompressed_.size() - zstrm_compress_->avail_out);
+#endif
+      // 清空错误信息
+      error_ = "";
+    } else if (ret == Z_STREAM_ERROR) {
+      error_ = "Gzip compression failed: zlib error";
+      return false;
+    } else if (ret == Z_BUF_ERROR) {
+      error_ = "Gzip compression failed: zlib out buffer error";
+    } else {
+      error_ =
+          "Gzip compression failed: zlib error code " + std::to_string(ret);
+      return false;
+    }
+
+
+    size_t have = tempCompressed_.size() - zstrm_compress_->avail_out;
+    if (have > 0) {
+      compressedData.appandData(tempCompressed_.getConstData(), have);
+    }
+  } while (zstrm_compress_->avail_out == 0);
+
+  return true;
+}
+
+bool VZlib::gzipDecompressChunked(const VBuf& compressedData,
+                                  VBuf& decompressedData,
+                                  bool isFinal,
+                                  size_t cacheSize) {
+  if (!zstrm_decompress_) {
+    error_ = "Decompress stream not initialized.";
+    return false;
+  }
+
+  zstrm_decompress_->next_in =
+      reinterpret_cast<Bytef*>(compressedData.getData());
+  zstrm_decompress_->avail_in = compressedData.size();
+
+  tempDecompressed_.resize(cacheSize);  // 临时缓冲区大小
+  tempDecompressed_.setZero();
+
+
+  do {
+    zstrm_decompress_->next_out =
+        reinterpret_cast<Bytef*>(tempDecompressed_.getData());
+    zstrm_decompress_->avail_out = tempDecompressed_.size();
+    int ret = inflate(zstrm_decompress_, isFinal ? Z_FINISH : Z_NO_FLUSH);
+    if (ret == Z_STREAM_END || ret == Z_OK ||
+        (ret == Z_BUF_ERROR && zstrm_decompress_->avail_out != 0)) {
+#ifdef _DEBUG
+      printf(
+          "decompress succed, before decompress size is %d, after decompress "
+          "size is %zu\n",
+          zstrm_decompress_->total_in,
+          tempDecompressed_.size() - zstrm_decompress_->avail_out);
+#endif
+      // 清空错误信息
+      error_ = "";
+    } else if (ret == Z_STREAM_ERROR) {
+      error_ = "Gzip decompression failed: zlib error";
+      return false;
+    } else if (ret == Z_BUF_ERROR) {
+      error_ = "Gzip decompression failed: zlib out buffer error";
+      return false;
+    } else {
+      error_ =
+          "Gzip decompression failed: zlib error code " + std::to_string(ret);
+      return false;
+    }
+
+    size_t have = tempDecompressed_.size() - zstrm_decompress_->avail_out;
+    if (have > 0) {
+      decompressedData.appandData(tempDecompressed_.getConstData(), have);
+    }
+  } while (zstrm_decompress_->avail_out == 0);
+
+  return true;
+}
+
 
 std::string VZlib::getLastError() const {
   return error_;

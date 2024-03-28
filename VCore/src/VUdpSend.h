@@ -5,8 +5,8 @@
 
 class VUdpSend : public VReq {
  public:
-  DEFINE_INHERIT_FUNC(VUdpSend);
-  DEFINE_COPY_FUNC_DELETE(VUdpSend);
+  VCORE_DEFINE_INHERIT_FUNC(VUdpSend);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VUdpSend);
 
   int init();
 

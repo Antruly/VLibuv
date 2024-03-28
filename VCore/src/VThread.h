@@ -6,8 +6,8 @@
 
 class VThread : public VObject {
  public:
-  DEFINE_INHERIT_FUNC(VThread);
-  DEFINE_COPY_FUNC_DELETE(VThread);
+  VCORE_DEFINE_INHERIT_FUNC(VThread);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VThread);
 
   int start(std::function<void(void*)> start_cb, void* arg) {
     thread_start_cb = start_cb;

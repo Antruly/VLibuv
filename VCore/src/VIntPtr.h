@@ -5,7 +5,7 @@ class VBasePtr : public VObject {
  public:
   VBasePtr();
   ~VBasePtr();
-  DEFINE_COPY_FUNC(VBasePtr);
+  VCORE_DEFINE_COPY_FUNC(VBasePtr);
 
   VBasePtr(void*);
 

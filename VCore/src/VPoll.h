@@ -4,8 +4,8 @@
 
 class VPoll : public VHandle {
  public:
-  DEFINE_INHERIT_FUNC(VPoll);
-  DEFINE_COPY_FUNC_DELETE(VPoll);
+  VCORE_DEFINE_INHERIT_FUNC(VPoll);
+  VCORE_DEFINE_COPY_FUNC_DELETE(VPoll);
 
 #ifdef WIN32
 explicit VPoll(VLoop* loop, int fd);

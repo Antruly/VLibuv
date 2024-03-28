@@ -7,8 +7,8 @@
 
 class VInterfaceAddress : public VObject {
  public:
-  DEFINE_INHERIT_FUNC(VInterfaceAddress);
-  DEFINE_COPY_FUNC(VInterfaceAddress);
+  VCORE_DEFINE_INHERIT_FUNC(VInterfaceAddress);
+  VCORE_DEFINE_COPY_FUNC(VInterfaceAddress);
 
   int init();
 

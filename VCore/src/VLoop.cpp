@@ -7,6 +7,7 @@ VLoop::VLoop() : VHandle(this) {
 }
 VLoop::VLoop(VLoop *t_p) : VHandle(t_p) {}
 VLoop::~VLoop() {
+  if (!this->isClosing() && this->isActive())
   this->close();
 }
 int VLoop::run(uv_run_mode md) {

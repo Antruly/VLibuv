@@ -4,8 +4,12 @@ extern "C" {
 }
 #include <functional>
 #include "VCoreDefine.h"
+#include "VWebDefine.h"
 #include "VObject.h"
 #include <string>
+
+
+
 // URL解析结果结构体
 struct ParsedURL {
   std::string protocol;
@@ -14,21 +18,12 @@ struct ParsedURL {
   std::string path;
   std::string query;
 };
-enum METHOD_TYPE {
-  OPTIONS = 0,
-  GET = 1,
-  HEAD = 2,
-  POST = 3,
-  PUT = 4,
-  DELETE_METHOD = 5,
-  TRACE = 6,
-  CONNECT = 7
-};
+
 
 class VHttpParser : public VObject {
  public:
-  DEFINE_INHERIT_FUNC(VHttpParser);
-  DEFINE_COPY_FUNC(VHttpParser);
+  VCORE_DEFINE_INHERIT_FUNC(VHttpParser);
+  VCORE_DEFINE_COPY_FUNC(VHttpParser);
 
   /* Initialize http_parser members. */
   void httpParserInit(enum http_parser_type type);
@@ -138,26 +133,26 @@ class VHttpParser : public VObject {
   void setHttpParser(void* hd);
   void setHttpParserData();
 
-  static int VHttpParser::callback_message_begin(http_parser* m_parser);
-  static int VHttpParser::callback_url(http_parser* m_parser,
-                                        const char* pdata,
-                                        size_t size);
-  static int VHttpParser::callback_status(http_parser* m_parser,
-                                           const char* pdata,
-                                           size_t size);
-  static int VHttpParser::callback_header_field(http_parser* m_parser,
-                                                 const char* pdata,
-                                                 size_t size);
-  static int VHttpParser::callback_header_value(http_parser* m_parser,
-                                                 const char* pdata,
-                                                 size_t size);
-  static int VHttpParser::callback_headers_complete(http_parser* m_parser);
-  static int VHttpParser::callback_body(http_parser* m_parser,
-                                         const char* pdata,
-                                         size_t size);
-  static int VHttpParser::callback_message_complete(http_parser* m_parser);
-  static int VHttpParser::callback_chunk_header(http_parser* m_parser);
-  static int VHttpParser::callback_chunk_complete(http_parser* m_parser);
+  static int callback_message_begin(http_parser* m_parser);
+  static int callback_url(http_parser* m_parser,
+                           const char* pdata,
+                           size_t size);
+  static int callback_status(http_parser* m_parser,
+                              const char* pdata,
+                              size_t size);
+  static int callback_header_field(http_parser* m_parser,
+                                    const char* pdata,
+                                    size_t size);
+  static int callback_header_value(http_parser* m_parser,
+                                    const char* pdata,
+                                    size_t size);
+  static int callback_headers_complete(http_parser* m_parser);
+  static int callback_body(http_parser* m_parser,
+                            const char* pdata,
+                            size_t size);
+  static int callback_message_complete(http_parser* m_parser);
+  static int callback_chunk_header(http_parser* m_parser);
+  static int callback_chunk_complete(http_parser* m_parser);
 
  
 

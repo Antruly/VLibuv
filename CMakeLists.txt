@@ -7,6 +7,7 @@ set(VLIBUV_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 # 设置安装目录根路径
 # set(CMAKE_INSTALL_PREFIX install)
 
+set(VLIBUV_BUILD_TESTS ON CACHE BOOL "using VLibuv will build test")
 
 # VLibuv
 set(VLIBUV_FILES
@@ -23,3 +24,8 @@ install(FILES
         ${VLIBUV_FILES}
         # include
         DESTINATION include)
+
+
+if(VLIBUV_BUILD_TESTS)
+add_subdirectory(test)
+endif()
