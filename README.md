@@ -1,40 +1,60 @@
 # VLibuv
 
-## Project Overview
+## Overview
 
-VLibuv is a C++ wrapper based on libuv, designed to provide a convenient object-oriented programming interface and simplify the development of asynchronous, event-driven applications. By extending and encapsulating libuv's `uv_handle_t` and `uv_req_t` types, VLibuv makes them more compatible with C++'s object-oriented programming style.
+VLibuv is a C++ wrapper based on libuv, designed to simplify the development of asynchronous, event-driven applications. It provides a convenient object-oriented programming interface, making asynchronous programming more accessible for C++ developers.
 
 ## Key Features
 
-- **C++ Wrapper:** Simplifies asynchronous programming and event handling with a C++ wrapper for libuv's raw types.
-
+- **C++ Wrapper:** Simplifies asynchronous programming and event handling with an object-oriented interface.
 - **Extension of `uv_handle_t` and `uv_req_t`:** Facilitates management and operations through C++ inheritance.
-
 - **Extension of `uv_buf_t`:** Enhances flexibility in buffer operations with extended methods.
-
 - **Derived Types:** Introduces derived types, such as `VTcpServer`, for rapid establishment of a TCP service.
-
 - **Compatibility:** Maintains compatibility with all versions of libuv 1.0 series, incorporating new features and improvements promptly.
 
-## Building and Installing the Project with CMake
-Follow these steps to build and install the project using CMake:
+## Building and Installing
 
-```camke
-# Clone the libuv repository from https://github.com/libuv/libuv.
-git clone https://github.com/libuv/libuv
+### Prerequisites
 
-# In the root directory of VLibuv, create a build directory
-mkdir build && cd build
+- CMake
+- Git
+- [libuv](https://github.com/libuv/libuv)
+- [zlib](https://github.com/madler/zlib)
+- [http-parser](https://github.com/nodejs/http-parser)
+- [websocket-parser](https://github.com/php-ion/websocket-parser)
+- [OpenSSL](https://github.com/openssl/openssl)
 
-# Run CMake to configure the project
-cmake ..
+### Instructions
 
-# Build the project using your preferred build tool (make, Visual Studio, etc.)
-cmake --build .
+1. Clone the libuv repository:
 
-# Install the project
-cmake --install .
-```
+    ```bash
+    git clone https://github.com/libuv/libuv
+    ```
+
+2. Create a build directory in the root of VLibuv and navigate into it:
+
+    ```bash
+    mkdir build && cd build
+    ```
+
+3. Run CMake to configure the project:
+
+    ```bash
+    cmake ..
+    ```
+
+4. Build the project using your preferred build tool (make, Visual Studio, etc.):
+
+    ```bash
+    cmake --build .
+    ```
+
+5. Install the project:
+
+    ```bash
+    cmake --install .
+    ```
 
 ## Example Usage
 
@@ -59,6 +79,5 @@ int main() {
     vtimer.start(timerFunc, 1000, 0);
 
     // Enter the event loop and wait for events to occur
-    return vloop.exec();
+    return vloop.run();
 }
-```
