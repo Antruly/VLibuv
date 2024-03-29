@@ -9,8 +9,9 @@ bool connect(VTcpClient& client, const std::string& ip, int port) {
 
   if ((client.getStatus() & VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CONNECTED) ==
       0) {
-    return -1;
+    return false;
   }
+  return true;
 }
 
 void readData(VTcpClient& client, VBuf& buf, uint64_t maxTimeout = 30000) {

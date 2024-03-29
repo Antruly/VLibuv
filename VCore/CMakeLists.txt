@@ -35,7 +35,7 @@ message(STATUS "Project Binary Directory: ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
 #set(PDB_FILE "${VCORE_TARGET_LOCATION}.pdb")
 #message(STATUS "Executable Location: ${VCORE_TARGET_LOCATION}")
 
-set(ENABLE_VMEMORY_MEMORY_POOL ON CACHE BOOL "using VMemory memory pool")
+set(ENABLE_VMEMORY_MEMORY_POOL OFF CACHE BOOL "using VMemory memory pool")
 if(ENABLE_VMEMORY_MEMORY_POOL)
     add_definitions(-DVMEMORY_MEMORY_POOL)
 endif()

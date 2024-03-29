@@ -32,13 +32,13 @@ extern "C" {
   }
 
 #define STD_L_ZERO_ERROR_SHOW_INT(_ret, _remark)                  \
-  if (_ret > 0) {                                                 \
+  if (_ret < 0) {                                                 \
     fprintf(stderr, "%s error %s\n", _remark, uv_strerror(_ret)); \
     return _ret;                                                  \
   }
 
 #define STD_L_ZERO_ERROR_SHOW(_ret, _remark)                      \
-  if (_ret > 0) {                                                 \
+  if (_ret < 0) {                                                 \
     fprintf(stderr, "%s error %s\n", _remark, uv_strerror(_ret)); \
     return;                                                       \
   }

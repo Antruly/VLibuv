@@ -179,6 +179,7 @@ VLoop* VTcpClient::getVLoop() {
 }
 sockaddr_storage VTcpClient::getLocalAddrs(std::string& ip, int& port) {
   struct sockaddr_storage local_addr;
+  memset(&local_addr, 0, sizeof(local_addr));
   int local_addr_len = sizeof(local_addr);
   if (tcp == nullptr) {
     return local_addr;
@@ -205,6 +206,7 @@ sockaddr_storage VTcpClient::getLocalAddrs(std::string& ip, int& port) {
 }
 sockaddr_storage VTcpClient::getPeerAddrs(std::string& ip, int& port) {
   struct sockaddr_storage peer_addr;
+  memset(&peer_addr, 0, sizeof(peer_addr));
   int peer_addr_len = sizeof(peer_addr);
   if (tcp == nullptr) {
     return peer_addr;
