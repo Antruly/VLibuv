@@ -215,12 +215,19 @@ SET(BUILD_WIN32_x86_OPENSSL_LIBS
 
 # 创建可执行文件并添加源文件以及相应的头文件
 add_executable(test-VTcpClient test-VTcpClient.cpp)
+add_executable(test-VTcpServer test-VTcpServer.cpp)
 add_executable(test-VHttpClient test-VHttpClient.cpp)
 add_executable(test-VHttpServer test-VHttpServer.cpp)
 add_executable(test-VOpenSsl test-VOpenSsl.cpp)
 if (UNIX)
 # test-VTcpClient
 target_link_libraries(test-VTcpClient 
+    debug ${LIBUV_LIB_DIR} ${BUILD_UNIX_SYSTEM_LIBS} ${BUILD_UNIX_VLIBUV_DEBUG_LIBS} ${BUILD_UNIX_OPENSSL_LIBS}
+    optimized ${LIBUV_LIB_DIR} ${BUILD_UNIX_SYSTEM_LIBS} ${BUILD_UNIX_VLIBUV_RELEASE_LIBS} ${BUILD_UNIX_OPENSSL_LIBS}
+)
+
+# test-VTcpServer
+target_link_libraries(test-VTcpServer 
     debug ${LIBUV_LIB_DIR} ${BUILD_UNIX_SYSTEM_LIBS} ${BUILD_UNIX_VLIBUV_DEBUG_LIBS} ${BUILD_UNIX_OPENSSL_LIBS}
     optimized ${LIBUV_LIB_DIR} ${BUILD_UNIX_SYSTEM_LIBS} ${BUILD_UNIX_VLIBUV_RELEASE_LIBS} ${BUILD_UNIX_OPENSSL_LIBS}
 )
@@ -253,6 +260,13 @@ target_link_libraries(test-VTcpClient PRIVATE
     $<$<CONFIG:Release>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_RELEASE_LIBS} ${BUILD_WIN32_x64_OPENSSL_LIBS}>
 )
 
+# test-VTcpServer
+target_link_libraries(test-VTcpServer PRIVATE
+    $<$<CONFIG:Debug>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_DEBUG_LIBS} ${BUILD_WIN32_x64_OPENSSL_LIBS}>
+    $<$<CONFIG:Release>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_RELEASE_LIBS} ${BUILD_WIN32_x64_OPENSSL_LIBS}>
+)
+
+
  # test-VHttpClient
 target_link_libraries(test-VHttpClient PRIVATE
     $<$<CONFIG:Debug>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_DEBUG_LIBS} ${BUILD_WIN32_x64_OPENSSL_LIBS}>
@@ -275,6 +289,12 @@ elseif(CMAKE_GENERATOR_PLATFORM MATCHES "Win32")
 message(STATUS "Configuring for Win32")
 # test-VTcpClient
 target_link_libraries(test-VTcpClient PRIVATE
+    $<$<CONFIG:Debug>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_DEBUG_LIBS} ${BUILD_WIN32_x86_OPENSSL_LIBS}>
+    $<$<CONFIG:Release>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_RELEASE_LIBS} ${BUILD_WIN32_x86_OPENSSL_LIBS}>
+)
+
+# test-VTcpServer
+target_link_libraries(test-VTcpServer PRIVATE
     $<$<CONFIG:Debug>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_DEBUG_LIBS} ${BUILD_WIN32_x86_OPENSSL_LIBS}>
     $<$<CONFIG:Release>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_RELEASE_LIBS} ${BUILD_WIN32_x86_OPENSSL_LIBS}>
 )
