@@ -24,12 +24,38 @@ VLibuv is a C++ wrapper based on libuv, designed to simplify the development of 
 - [websocket-parser](https://github.com/php-ion/websocket-parser)
 - [OpenSSL](https://github.com/openssl/openssl)
 
+### Build OpenSSL
+1. Download and install perl
+- Windows/Linux/macOs[ActiveState Perl](https://www.activestate.com/products/perl/)
+- Windows[Strawberry Perl](http://strawberryperl.com/)
+
+2. Build
+Linux:
+    ```bash
+    ./Configure linux-x86_64 no-shared --prefix=/usr/local/openssl
+    make depend
+    make -j4
+    sudo make install
+    ```
+
+Windows:
+    ```bash
+    perl Configure VC-WIN64A no-shared --prefix=C:\openssl
+    set CL=/MP
+    nmake
+    nmake install
+    ```
+
 ### Instructions
 
-1. Clone the libuv repository:
+1. Clone Prerequisites repository:
 
     ```bash
-    git clone https://github.com/libuv/libuv
+    git clone https://github.com/libuv/libuv libuv && \
+    git clone https://github.com/madler/zlib zlib && \
+    git clone https://github.com/nodejs/http-parser http-parser && \
+    git clone https://github.com/php-ion/websocket-parser websocket-parser && \
+    git clone https://github.com/openssl/openssl openssl
     ```
 
 2. Create a build directory in the root of VLibuv and navigate into it:
@@ -41,7 +67,12 @@ VLibuv is a C++ wrapper based on libuv, designed to simplify the development of 
 3. Run CMake to configure the project:
 
     ```bash
-    cmake ..
+    cmake -DLIBUV_DIR=../libuv \
+      -DHTTP_PARSER_DIR=../http-parser \
+      -DWEBSOCKET_PARSER_DIR=../websocket-parser \
+      -DZLIB_DIR=../zlib \
+      -DOPENSSL_DIR=/usr/local/openssl\
+      ..
     ```
 
 4. Build the project using your preferred build tool (make, Visual Studio, etc.):
