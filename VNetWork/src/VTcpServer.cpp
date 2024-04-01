@@ -1,4 +1,5 @@
 ﻿#include "VTcpServer.h"
+#include <algorithm>
 
 VTcpServer::VTcpServer(int maxLoops)
     : VObject(),
