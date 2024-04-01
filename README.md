@@ -27,12 +27,12 @@ VLibuv is a C++ wrapper based on libuv, designed to simplify the development of 
 
 ### Build libuv
 
-cmake:
+####Cmake:
     ```bash
     sudo apt-get install camke
     sudo yum install camke
     ```
-
+build:
     ```bash
     mkdir build
     cd build
@@ -41,12 +41,12 @@ cmake:
     sudo cmake --install .
     ```
 
-autogen:
+####Autogen:
     ```bash
     sudo apt-get install autoconf automake libtool
     sudo yum install autoconf automake libtool
     ```
-
+build:
     ```bash
     ./autogen.sh
     ./configure --prefix=/usr/local/libuv CC=gcc CFLAGS=-static
@@ -56,12 +56,12 @@ autogen:
 
 ### Build OpenSSL
 
-1. Download and install perl
+####1. Download and install perl
 
 - Windows/Linux/macOs [ActiveState Perl](https://www.activestate.com/products/perl/)
 - Windows [Strawberry Perl](http://strawberryperl.com/)
 
-2. Build
+####2. Build
 
 Linux:
     ```bash
@@ -81,7 +81,7 @@ Windows:
 
 ### Instructions
 
-1. Clone Prerequisites repository:
+####1. Clone Prerequisites repository:
 
     ```bash
     git clone https://github.com/libuv/libuv libuv && \
@@ -91,13 +91,13 @@ Windows:
     git clone https://github.com/openssl/openssl openssl
     ```
 
-2. Create a build directory in the root of VLibuv and navigate into it:
+####2. Create a build directory in the root of VLibuv and navigate into it:
 
     ```bash
     mkdir build && cd build
     ```
 
-3. Run CMake to configure the project:
+####3. Run CMake to configure the project:
 
     ```bash
     cmake -DLIBUV_DIR=/usr/local/libuv \
@@ -108,13 +108,13 @@ Windows:
       ..
     ```
 
-4. Build the project using your preferred build tool (make, Visual Studio, etc.):
+####4. Build the project using your preferred build tool (make, Visual Studio, etc.):
 
     ```bash
     cmake --build .
     ```
 
-5. Install the project:
+####5. Install the project:
 
     ```bash
     cmake --install .
