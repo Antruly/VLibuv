@@ -113,6 +113,7 @@ linux:
       -DHTTP_PARSER_DIR=../http-parser \
       -DWEBSOCKET_PARSER_DIR=../websocket-parser \
       -DZLIB_DIR=../zlib \
+      -DVLIBUV_BUILD_TESTS=OFF \
       ..
 ```
 windows:
@@ -122,6 +123,7 @@ windows:
       -DHTTP_PARSER_DIR=../http-parser \
       -DWEBSOCKET_PARSER_DIR=../websocket-parser \
       -DZLIB_DIR=../zlib \
+      -DVLIBUV_BUILD_TESTS=OFF \
       ..
 ```
 #### 4. Build the project using your preferred build tool (make, Visual Studio, etc.):
