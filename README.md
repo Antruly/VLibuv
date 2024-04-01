@@ -9,15 +9,23 @@ VLibuv is a C++ wrapper based on libuv, designed to simplify the development of 
 - **C++ Wrapper:** Simplifies asynchronous programming and event handling with an object-oriented interface.
 - **Extension of `uv_handle_t` and `uv_req_t`:** Facilitates management and operations through C++ inheritance.
 - **Extension of `uv_buf_t`:** Enhances flexibility in buffer operations with extended methods.
-- **Derived Types:** Introduces derived types, such as `VTcpServer`, for rapid establishment of a TCP service.
 - **Compatibility:** Maintains compatibility with all versions of libuv 1.0 series, incorporating new features and improvements promptly.
+
+## New Features
+
+### VNetwork
+VNetwork is a new module that provides networking functionalities. It includes classes such as VTcpServer and VTcpClient for handling TCP connections.
+
+### VWeb
+VWeb is another new module focused on web-related functionalities. It includes classes for HTTP client and server implementations, such as VHttpClient, VHttpServer, VHttpRequest, VHttpResponse, and VHttpParser. Additionally, it provides support for WebSocket protocol through VWebSocketParser.
+
 
 ## Building and Installing
 
 ### Prerequisites
 
-- CMake
-- Git
+- [CMake](https://cmake.org/)
+- [Git](https://git-scm.com/)
 - [libuv](https://github.com/libuv/libuv)
 - [zlib](https://github.com/madler/zlib)
 - [http-parser](https://github.com/nodejs/http-parser)
@@ -25,96 +33,104 @@ VLibuv is a C++ wrapper based on libuv, designed to simplify the development of 
 - [OpenSSL](https://github.com/openssl/openssl)
 
 
-### Build libuv
+### Build libuv（only linux）
 
-####Cmake:
-    ```bash
-    sudo apt-get install camke
-    sudo yum install camke
-    ```
+#### Cmake:
+```bash
+    unbuntu: sudo apt-get install camke
+    centos: sudo yum install camke
+```
 build:
-    ```bash
+```bash
     mkdir build
     cd build
     cmake ..
     cmake --build .
     sudo cmake --install .
-    ```
+```
 
-####Autogen:
-    ```bash
-    sudo apt-get install autoconf automake libtool
-    sudo yum install autoconf automake libtool
-    ```
+#### Autogen:
+```bash
+    unbuntu: sudo apt-get install autoconf automake libtool
+    centos: sudo yum install autoconf automake libtool
+```
 build:
-    ```bash
+```bash
     ./autogen.sh
     ./configure --prefix=/usr/local/libuv CC=gcc CFLAGS=-static
     make -j4
     sudo make install
-    ```
+```
 
 ### Build OpenSSL
 
-####1. Download and install perl
+#### 1. Download and install perl
 
-- Windows/Linux/macOs [ActiveState Perl](https://www.activestate.com/products/perl/)
-- Windows [Strawberry Perl](http://strawberryperl.com/)
+- Windows/Linux/macOs: [ActiveState Perl](https://www.activestate.com/products/perl/)
+- Windows: [Strawberry Perl](http://strawberryperl.com/)
 
-####2. Build
+#### 2. Build
 
 Linux:
-    ```bash
+```bash
     ./Configure linux-x86_64 no-shared --prefix=/usr/local/openssl
     make depend
     make -j4
     sudo make install
-    ```
+```
 
 Windows:
-    ```bash
-    perl Configure VC-WIN64A no-shared --prefix=C:\openssl
+```bash
+    perl Configure VC-WIN64A no-shared --prefix=c:\openssl
     set CL=/MP
     nmake
     nmake install
-    ```
+```
 
 ### Instructions
 
-####1. Clone Prerequisites repository:
+#### 1. Clone Prerequisites repository:
 
-    ```bash
+```bash
     git clone https://github.com/libuv/libuv libuv && \
     git clone https://github.com/madler/zlib zlib && \
     git clone https://github.com/nodejs/http-parser http-parser && \
     git clone https://github.com/php-ion/websocket-parser websocket-parser && \
     git clone https://github.com/openssl/openssl openssl
-    ```
+```
 
-####2. Create a build directory in the root of VLibuv and navigate into it:
+#### 2. Create a build directory in the root of VLibuv and navigate into it:
 
     ```bash
     mkdir build && cd build
     ```
 
-####3. Run CMake to configure the project:
-
-    ```bash
+#### 3. Run CMake to configure the project:
+linux:
+```bash
     cmake -DLIBUV_DIR=/usr/local/libuv \
       -DOPENSSL_DIR=/usr/local/openssl\
       -DHTTP_PARSER_DIR=../http-parser \
       -DWEBSOCKET_PARSER_DIR=../websocket-parser \
       -DZLIB_DIR=../zlib \
       ..
-    ```
+```
+windows:
+```bash
+    cmake -DLIBUV_DIR=../libuv \
+      -DOPENSSL_DIR=c:/openssl \
+      -DHTTP_PARSER_DIR=../http-parser \
+      -DWEBSOCKET_PARSER_DIR=../websocket-parser \
+      -DZLIB_DIR=../zlib \
+      ..
+```
+#### 4. Build the project using your preferred build tool (make, Visual Studio, etc.):
 
-####4. Build the project using your preferred build tool (make, Visual Studio, etc.):
-
-    ```bash
+```bash
     cmake --build .
-    ```
+```
 
-####5. Install the project:
+#### 5. Install the project:
 
     ```bash
     cmake --install .
