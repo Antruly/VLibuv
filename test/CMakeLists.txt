@@ -140,12 +140,14 @@ SET(BUILD_UNIX_VLIBUV_DEBUG_LIBS
     libVCored.a
     libVNetWorkd.a
     libVWebd.a
+    libuv.a
 )
 
 SET(BUILD_UNIX_VLIBUV_RELEASE_LIBS 
     libVCored.a
     libVNetWorkd.a
     libVWebd.a
+    libuv.a
 )
 
 SET(BUILD_WIN32_VLIBUV_DEBUG_LIBS 
