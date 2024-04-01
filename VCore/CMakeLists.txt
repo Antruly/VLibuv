@@ -73,12 +73,8 @@ set(LIBUV_SOURCE_DIR "${LIBUV_DIR}/src")
 # 如果未提供路径，则使用默认路径
 if(NOT LIBUV_DIR)
     set(LIBUV_INCLUDE_DIR ${DEFAULT_LIBUV_INCLUDE_DIR})
-endif()
-
-if(NOT LIBUV_DIR)
     set(LIBUV_SOURCE_DIR ${DEFAULT_LIBUV_SOURCE_DIR})
 endif()
-
 
 # Core
 set(CORE_FILES
@@ -216,8 +212,9 @@ source_group(libuv/win FILES ${LIBUV_WIN_FILES})
 
 # libuv/unix
 file(GLOB LIBUV_UNIX_FILES
-    "${LIBUV_SOURCE_DIR}/unix/*.h"
-    "${LIBUV_SOURCE_DIR}/unix/*.c"
+#    "${LIBUV_SOURCE_DIR}/unix/*.h"
+#    "${LIBUV_SOURCE_DIR}/unix/*.c"
+    "${LIBUV_INCLUDE_DIR}/*.h"
 )
 source_group(libuv/unix FILES ${LIBUV_UNIX_FILES})
 

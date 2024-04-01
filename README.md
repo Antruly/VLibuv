@@ -24,12 +24,45 @@ VLibuv is a C++ wrapper based on libuv, designed to simplify the development of 
 - [websocket-parser](https://github.com/php-ion/websocket-parser)
 - [OpenSSL](https://github.com/openssl/openssl)
 
+
+### Build libuv
+
+cmake:
+    ```bash
+    sudo apt-get install camke
+    sudo yum install camke
+    ```
+
+    ```bash
+    mkdir build
+    cd build
+    cmake ..
+    cmake --build .
+    sudo cmake --install .
+    ```
+
+autogen:
+    ```bash
+    sudo apt-get install autoconf automake libtool
+    sudo yum install autoconf automake libtool
+    ```
+
+    ```bash
+    ./autogen.sh
+    ./configure --prefix=/usr/local/libuv CC=gcc CFLAGS=-static
+    make -j4
+    sudo make install
+    ```
+
 ### Build OpenSSL
+
 1. Download and install perl
-- Windows/Linux/macOs[ActiveState Perl](https://www.activestate.com/products/perl/)
-- Windows[Strawberry Perl](http://strawberryperl.com/)
+
+- Windows/Linux/macOs [ActiveState Perl](https://www.activestate.com/products/perl/)
+- Windows [Strawberry Perl](http://strawberryperl.com/)
 
 2. Build
+
 Linux:
     ```bash
     ./Configure linux-x86_64 no-shared --prefix=/usr/local/openssl
@@ -67,11 +100,11 @@ Windows:
 3. Run CMake to configure the project:
 
     ```bash
-    cmake -DLIBUV_DIR=../libuv \
+    cmake -DLIBUV_DIR=/usr/local/libuv \
+      -DOPENSSL_DIR=/usr/local/openssl\
       -DHTTP_PARSER_DIR=../http-parser \
       -DWEBSOCKET_PARSER_DIR=../websocket-parser \
       -DZLIB_DIR=../zlib \
-      -DOPENSSL_DIR=/usr/local/openssl\
       ..
     ```
 
