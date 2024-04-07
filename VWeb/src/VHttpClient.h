@@ -15,7 +15,7 @@ class VHttpClient : public VObject{
   VTcpClient* getVTcpClient();
   VOpenSsl* getVOpenSsl();
 
-  void initCallback();
+  void initCallback(bool isSsl = false);
 
   void initSsl(const SSL_METHOD* method = SSLv23_client_method());
 

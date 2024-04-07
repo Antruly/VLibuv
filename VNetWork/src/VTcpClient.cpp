@@ -10,7 +10,8 @@ VTcpClient::VTcpClient()
       buffer_cache(nullptr),
       idle_run(false),
       tcp_run(false),
-      own_loop(true) {
+      own_loop(true),
+      read_start(false) {
   this->loop = new VLoop();
   this->tcp = new VTcp(loop);
   this->idle = new VIdle(loop);
@@ -27,7 +28,8 @@ VTcpClient::VTcpClient(VLoop* externalLoop)
       loop(externalLoop),
       idle_run(false),
       tcp_run(false),
-      own_loop(false) {
+      own_loop(false),
+      read_start(false) {
   if (loop) {
     this->tcp = new VTcp(loop);
     this->idle = new VIdle(loop);
@@ -95,6 +97,7 @@ void VTcpClient::on_idle(VIdle* vidle) {
 }
 
 void VTcpClient::on_close(VHandle* client) {
+  this->read_start = false;
   this->tcp_run = false;
   if (tcp_close_cb)
     tcp_close_cb(this);
@@ -370,12 +373,12 @@ int VTcpClient::connect(const char* addripv4, int port) {
   return ret;
 }
 
-void VTcpClient::writeData(const VBuf& data) {
+int VTcpClient::writeData(const VBuf& data) {
   if ((this->getStatus() & VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CLOSED) ==
       VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CLOSED) {
     if (tcp_write_cb)
       tcp_write_cb(this, &data, -1);
-    return;
+    return -1;
   }
   this->setStatus(VTCP_WORKER_STATUS_PROCESSING);
 
@@ -383,17 +386,17 @@ void VTcpClient::writeData(const VBuf& data) {
   req->setBuf(nullptr);
   req->setSrcBuf(&data);
   req->setData(tcp);
-  tcp->write(req, &data, 1,
-             std::bind(&VTcpClient::echo_write, this, std::placeholders::_1,
-                       std::placeholders::_2));
+  return tcp->write(req, &data, 1,
+                    std::bind(&VTcpClient::echo_write, this,
+                              std::placeholders::_1, std::placeholders::_2));
 }
 
-void VTcpClient::writeNewData(const VBuf& data) {
+int VTcpClient::writeNewData(const VBuf& data) {
   if ((this->getStatus() & VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CLOSED) ==
       VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CLOSED) {
     if (tcp_write_cb)
       tcp_write_cb(this, &data, -1);
-    return;
+    return -1;
   }
   this->setStatus(VTCP_WORKER_STATUS_PROCESSING);
   VWrite* req = new VWrite();
@@ -401,7 +404,7 @@ void VTcpClient::writeNewData(const VBuf& data) {
   req->setBuf(bf);
   req->setSrcBuf(&data);
   req->setData(tcp);
-  tcp->write(req, bf, 1,
+  return tcp->write(req, bf, 1,
              std::bind(&VTcpClient::echo_write, this, std::placeholders::_1,
                        std::placeholders::_2));
 }
@@ -410,12 +413,16 @@ void VTcpClient::setConnectiondCb(std::function<void(int)> connectiond_cb) {
   this->tcp_client_connectiond_cb = connectiond_cb;
 }
 
-void VTcpClient::clientReadStart() {
-  tcp->readStart(
-      std::bind(&VTcpClient::alloc_buffer, this, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-      std::bind(&VTcpClient::echo_read, this, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3));
+int VTcpClient::clientReadStart() {
+    if (!read_start) {
+    read_start = true;
+    return tcp->readStart(
+        std::bind(&VTcpClient::alloc_buffer, this, std::placeholders::_1,
+                  std::placeholders::_2, std::placeholders::_3),
+        std::bind(&VTcpClient::echo_read, this, std::placeholders::_1,
+                  std::placeholders::_2, std::placeholders::_3));
+  }
+  
 }
 
 void VTcpClient::waitConnectFinish() {

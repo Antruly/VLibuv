@@ -9,10 +9,14 @@ int main() {
   pRequest->setHttpVersion(VWEB_HTTP_VERSION_1_1);
   pRequest->setKeepAlive(true);
   pRequest->setUseGzip(false);
-  pRequest->setUserAgent("Test Client version 1.0");
-  pRequest->addHeader("header1", "value1");
-  pRequest->addHeader("header2", "value2");
-  bool bRet = client.sendRequest("https://www.huorong.cn");
+  pRequest->setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36");
+  pRequest->addHeader("Upgrade-Insecure-Requests", "1");
+  pRequest->setAccept("text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
+  pRequest->addHeader("Accept-Language", "zh-CN,zh;q=0.9");
+
+  bool bRet = client.sendRequest("https://www.baidu.com");
+
+  
   if (!bRet) {
     return -1;
   }

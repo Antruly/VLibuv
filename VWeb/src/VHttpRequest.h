@@ -122,6 +122,9 @@ class VHttpRequest : public VObject {
 
   std::string getLocation() const;
 
+  void setHttpSsl(bool isSsl);
+  bool getHttpSsl() const;
+
   // Parse request data
   void parseRequest(const VBuf* buf);
 
@@ -161,6 +164,7 @@ class VHttpRequest : public VObject {
 
   std::string getIPFromVGetaddrinfo(const std::string& host);
 
+  bool writeData(const VBuf& sendBuf);
   
   
   protected:
@@ -201,6 +205,6 @@ class VHttpRequest : public VObject {
   bool use_chunked_ = false;
   bool keep_alive_ = true;  // Control whether to keep the connection alive
   bool parser_finish = false;
-  bool http_ssl = false;
-  bool own_tcp_client = false;
+  bool http_ssl_ = false;
+  bool own_tcp_client_ = false;
 };

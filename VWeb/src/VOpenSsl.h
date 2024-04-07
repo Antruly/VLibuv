@@ -148,7 +148,7 @@ class VOpenSsl : public VObject {
    * @brief 调用返回事件。
    * @param ret 返回值。
    */
-  void invokeRetEvent(int ret);
+  int invokeRetEvent(int ret);
 
   /**
    * @brief 从TCP客户端读取数据。

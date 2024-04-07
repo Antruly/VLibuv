@@ -94,6 +94,11 @@ class VHttpResponse {
     size_t getContentLength() const;
   void setContentLength(const size_t& length);
 
+  void setHttpSsl(bool isSsl);
+  bool getHttpSsl()const;
+
+  bool writeData(const VBuf& sendBuf);
+
     // Check if the request is secure
   bool isSecure() const;
 
@@ -147,6 +152,6 @@ class VHttpResponse {
   bool use_chunked_ = false;
   bool keep_alive_ = true;  // Control whether to keep the connection alive
   bool parser_finish = false;
-  bool http_ssl = false;
-  bool own_tcp_client = false;  // Response body
+  bool http_ssl_ = false;
+  bool own_tcp_client_ = false;  // Response body
 };

@@ -91,23 +91,23 @@ bool VOpenSsl::sslConnect() {
     return true;
   } else {
     int err = this->sslGetError(ret);
-    switch (err) {
-      case SSL_ERROR_WANT_READ:
-      case SSL_ERROR_WANT_WRITE:
-        this->invokeRetEvent(ret);
-        break;
-      default:
-        // Handle other errors
-        error_massage_ = "SSL connect error";
-        if (ssl_connectiond_cb_)
-          ssl_connectiond_cb_(-1);  // Call connection failure callback
-        return false;
-    }
-  }
 
-  do {
-    this->invokeRetEvent(ret);
-  } while (!this->sslIsInitFinished());
+     do {
+      switch (err) {
+        case SSL_ERROR_WANT_READ:
+        case SSL_ERROR_WANT_WRITE:
+          err = this->invokeRetEvent(ret);
+          break;
+        default:
+          // Handle other errors
+          error_massage_ = "SSL connect error";
+          if (ssl_connectiond_cb_)
+            ssl_connectiond_cb_(-1);  // Call connection failure callback
+          return false;
+      }
+    } while (!this->sslIsInitFinished());
+    
+  }
 
   if (ssl_connectiond_cb_)
     ssl_connectiond_cb_(0);
@@ -182,7 +182,7 @@ bool VOpenSsl::sslIsInitFinished() {
 bool VOpenSsl::sslPackData(const VBuf& srcData, VBuf& outData) {
   read_data_cache_.clear();
   write_data_cache_.clear();
-  int ret = SSL_write(ssl_, srcData.getConstData(), srcData.size());
+   int ret = SSL_write(ssl_, srcData.getConstData(), srcData.size());
   if (ret > 0) {
     outData.clear();
     this->getWriteBioData(outData);
@@ -191,7 +191,16 @@ bool VOpenSsl::sslPackData(const VBuf& srcData, VBuf& outData) {
     error_massage_ = "sslPackData is error";
     return false;
   } else {
-    this->invokeRetEvent(ret);
+    int err = sslGetError(ret);
+    switch (err) {
+      case SSL_ERROR_WANT_READ:
+      case SSL_ERROR_WANT_WRITE:
+        err = this->invokeRetEvent(ret);
+        break;
+      default:
+        error_massage_ = "sslPackData is unknow error";
+        return false;
+    }
     return true;
   }
   return false;
@@ -209,7 +218,16 @@ bool VOpenSsl::sslParserData(const VBuf& srcData, VBuf& outData) {
     error_massage_ = "sslPackData is error";
     return false;
   } else {
-    this->invokeRetEvent(ret);
+    int err = sslGetError(ret);
+    switch (err) {
+      case SSL_ERROR_WANT_READ:
+      case SSL_ERROR_WANT_WRITE:
+        err = this->invokeRetEvent(ret);
+        break;
+      default:
+        error_massage_ = "sslParserData is unknow error";
+        return false;
+    }
     return true;
   }
   return false;
@@ -228,11 +246,13 @@ void VOpenSsl::getWriteBioData(VBuf& data) {
   data.appand(dtBuf);
 
   if (tcp_client_ != nullptr) {
-    tcp_client_->writeData(dtBuf);
+    STD_NO_ZERO_ERROR_SHOW(tcp_client_->writeData(dtBuf), "VOpenSsl::getWriteBioData writeData");
 
     if (!tcp_client_->getVLoop()->isActive()) {
       tcp_client_->getVLoop()->run(uv_run_mode::UV_RUN_ONCE);
-      this->tcpClientReadData();
+      if (!this->sslIsInitFinished()) {
+        this->tcpClientReadData(5000);
+      }
     }
   } else if (tcp_server_ != nullptr) {
     // #server
@@ -275,7 +295,7 @@ int VOpenSsl::sslGetError(int ret) {
   return SSL_get_error(ssl_, ret);
 }
 
-void VOpenSsl::invokeRetEvent(int ret) {
+int VOpenSsl::invokeRetEvent(int ret) {
   int err = sslGetError(ret);
   if (err == SSL_ERROR_WANT_READ) {
     ssl_have_read_ = true;
@@ -285,15 +305,31 @@ void VOpenSsl::invokeRetEvent(int ret) {
     if (read_data_cache_.size() == 0) {
       ssl_have_read_ = false;
       ssl_have_write_ = true;
-      write_data_cache_.clear();
-      getWriteBioData(write_data_cache_);
+      
+      VBuf writeBuf;
+      getWriteBioData(writeBuf);
+      if (writeBuf.size() == 0) {
+        return -1;
+      }
     }
 
   } else if (err == SSL_ERROR_WANT_WRITE) {
     ssl_have_write_ = true;
     write_data_cache_.clear();
     getWriteBioData(write_data_cache_);
+
+    if (write_data_cache_.size() == 0) {
+      ssl_have_read_ = true;
+      ssl_have_write_ = false;
+      read_data_cache_.clear();
+      VBuf readBuf;
+      getReadSslData(readBuf);
+      if (readBuf.size() == 0) {
+        return -1;
+      }
+    }
   }
+  return err;
 }
 
 size_t VOpenSsl::tcpClientReadData(uint64_t maxTimeout) {

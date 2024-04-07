@@ -45,8 +45,19 @@ VOpenSsl* VHttpClient::getVOpenSsl() {
   return openssl_;
 }
 
-void VHttpClient::initCallback() {
-  if (tcp_client_ != nullptr) {
+void VHttpClient::initCallback(bool isSsl) {
+  if (isSsl) {
+    assert(openssl_ != nullptr);
+    openssl_->setSslConnectiondCb([this](int status) {
+      if (status < 0) {
+        error_message =
+            "openssl_ Connectiond error status:" + std::to_string(status);
+      }
+      if (this->http_client_connectiond_cb)
+        this->http_client_connectiond_cb(status);
+    });
+  }
+  else if (tcp_client_ != nullptr) {
     tcp_client_->setConnectiondCb([this](int status) {
       if (status < 0) {
         error_message =
@@ -68,9 +79,10 @@ void VHttpClient::initSsl(const SSL_METHOD* method) {
       delete openssl_;
       openssl_ = nullptr;
       openssl_ = new VOpenSsl(method);
-    } else {
-      openssl_->initClient(tcp_client_);
     }
+
+    openssl_->initClient(tcp_client_);
+    openssl_->initCallback();
 
     if (request_ != nullptr) {
       request_->setSslPoint(openssl_);
@@ -190,19 +202,15 @@ bool VHttpClient::sendRequest(const std::string& url) {
   }
   response_->initData();
   response_->initCallback();
-  response_->initRecvCallback();
 
   request_->initCallback();
-  request_->initSendCallback();
-
+ 
   if (!connect(url)) {
     return false;
   }
-  if (!tcp_client_->getVLoop()->isActive()) {
-    tcp_client_->run(uv_run_mode::UV_RUN_ONCE);
-  } else {
-    tcp_client_->waitConnectFinish();
-  }
+
+  request_->initSendCallback();
+  response_->initRecvCallback();
 
   if ((tcp_client_->getStatus() &
        VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CONNECTED) == 0) {
@@ -213,11 +221,7 @@ bool VHttpClient::sendRequest(const std::string& url) {
     return false;
   }
 
-  if (!tcp_client_->getVLoop()->isActive()) {
-    tcp_client_->run(uv_run_mode::UV_RUN_ONCE);
-  } else {
-    tcp_client_->waitWriteFinish();
-  }
+ 
 
   return true;
 }
@@ -354,7 +358,11 @@ bool VHttpClient::connect(const std::string& url) {
   int port;
   if (parsedurl.protocol =="https") {
     this->initSsl();
-    assert(openssl_!= nullptr);
+    this->initCallback(true);
+    this->request_->setHttpSsl(true);
+    this->response_->setHttpSsl(true);
+  } else {
+    this->initCallback(false);
   }
 
   tcp_client_->getPeerAddrs(addrs, port);
@@ -399,5 +407,20 @@ bool VHttpClient::connect(const std::string& url) {
     }
   }
 
-  return true;
+  if (!tcp_client_->getVLoop()->isActive()) {
+    tcp_client_->run(UV_RUN_ONCE);
+  }
+  else {
+    tcp_client_->waitConnectFinish();
+  }
+  if ((tcp_client_->getStatus() &
+      VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CONNECTED) > 0) {
+    if (parsedurl.protocol == "https") {
+      return this->openssl_->sslConnect();
+    }
+    return true;
+  }
+  return false;
+  
+
 }

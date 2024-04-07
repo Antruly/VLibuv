@@ -26,10 +26,10 @@ class VTcpClient : public VObject {
   void setConnectiondCb(std::function<void(int)> connectiond_cb);
 
   int connect(const char* addripv4, int port);
-  void writeData(const VBuf& data);
-  void writeNewData(const VBuf& data);
+  int writeData(const VBuf& data);
+  int writeNewData(const VBuf& data);
 
-  void clientReadStart();
+  int clientReadStart();
 
   void waitConnectFinish();
   void waitCloseFinish();
@@ -89,6 +89,7 @@ class VTcpClient : public VObject {
   bool idle_run = false;
   bool tcp_run = false;
   bool own_loop = true;
+  bool read_start = false;
 
  private:
   VTCP_WORKER_STATUS status = VTCP_WORKER_STATUS_NONE;

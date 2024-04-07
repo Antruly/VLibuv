@@ -1,10 +1,7 @@
 ﻿#pragma once
 #include "VLibuv.h"
-#include <cstdint>
-#include "VTcp.h"
 #include "VTcpServer.h"
 #include "VThread.h"
-#include "VTimer.h"
 #include "VWrite.h"
 
 VTcpServer tcpServer;
@@ -58,10 +55,6 @@ void newClient(VTcpClient* client) {
   client->clientReadStart();
   printf("new client connect !\n");
   client->run();
-}
-
-void timerFunc(VTimer* vtimer) {
-  vtimer->start(timerFunc, 1000, 0);
 }
 
 int main() {

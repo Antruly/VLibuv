@@ -1,8 +1,9 @@
 ﻿#include "VHttpRequest.h"
+#include <cassert>
 
 VHttpRequest::VHttpRequest()
     : tcp_client_(new VTcpClient()),
-      own_tcp_client(true),
+      own_tcp_client_(true),
       http_parser_(new VHttpParser()),
       getaddrinfo_(new VGetaddrinfo()),
       zlib_(new VZlib()),
@@ -16,7 +17,7 @@ VHttpRequest::VHttpRequest()
 
 VHttpRequest::VHttpRequest(VTcpClient* vtcp_client)
     : tcp_client_(vtcp_client),
-      own_tcp_client(false),
+      own_tcp_client_(false),
       http_parser_(new VHttpParser()),
       getaddrinfo_(new VGetaddrinfo()),
       zlib_(new VZlib()),
@@ -31,7 +32,7 @@ VHttpRequest::VHttpRequest(VTcpClient* vtcp_client)
 VHttpRequest::~VHttpRequest() {
   request_data_.clear();
   body_.clear();
-  if (own_tcp_client)
+  if (own_tcp_client_)
   {
     delete tcp_client_;
   }
@@ -40,7 +41,12 @@ VHttpRequest::~VHttpRequest() {
   delete zlib_;
 }
 void VHttpRequest::initRecvCallback() {
-  if (tcp_client_ != nullptr) {
+  if (http_ssl_) {
+    assert(openssl_ != nullptr);
+    openssl_->setSslReadCb(
+        [this](const VBuf* data) { this->parseRequest(data); });
+  }
+  else if (tcp_client_ != nullptr) {
     tcp_client_->setReadCb([this](VTcpClient* tcp_client, const VBuf* data) {
       this->parseRequest(data);
     });
@@ -48,7 +54,15 @@ void VHttpRequest::initRecvCallback() {
 }
 
 void VHttpRequest::initSendCallback() {
-  if (tcp_client_ != nullptr) {
+  if (http_ssl_) {
+    assert(openssl_ != nullptr);
+    openssl_->setSslWriteCb([this](const VBuf* data, int status) {
+      if (status < 0) {
+        error_message = "ssl Request Write error status:" + std::to_string(status);
+      }
+        });
+  }
+  else if (tcp_client_ != nullptr) {
     tcp_client_->setWriteCb([this](VTcpClient* tcp_client, const VBuf* data,
                                    int status) {
       if (status < 0) {
@@ -167,7 +181,7 @@ void VHttpRequest::initCallback() {
     // Message complete callback
     http_parser_->setMessageCompleteCallback([this](VHttpParser* http_parser)
                                                  -> int {
-      if (http_ssl) {
+      if (http_ssl_) {
         url_ = "https://" + host_ + url_raw_;
       } else {
         url_ = "http://" + host_ + url_raw_;
@@ -228,7 +242,7 @@ void VHttpRequest::initData() {
   use_chunked_ = false;
   keep_alive_ = true;
   parser_finish = false;
-  http_ssl = false;
+  http_ssl_ = false;
 }
 
 void VHttpRequest::setSslPoint(VOpenSsl* ssl) {
@@ -281,7 +295,10 @@ void VHttpRequest::setUrl(const std::string& url) {
   url_raw_ = url_parser_.path + (url_parser_.query.empty() ? "" : "?") + url_parser_.query;
   this->setHost(url_parser_.host);
   if (url_parser_.protocol == "https") {
-    http_ssl = true;
+    http_ssl_ = true;
+  }
+  else if (url_parser_.protocol == "http") {
+    http_ssl_ = false;
   }
 }
 
@@ -327,6 +344,7 @@ std::string VHttpRequest::getContentType() const {
 }
 
 void VHttpRequest::setAccept(const std::string& accept) {
+  addHeader("Accept", accept);
   accept_ = accept;
 }
 
@@ -391,19 +409,28 @@ void VHttpRequest::setContentLength(const size_t& length) {
 }
 
 bool VHttpRequest::sendRequest(bool isSendBody) {
-  if (tcp_client_ == nullptr || (tcp_client_->getStatus() &
+  if (tcp_client_ == nullptr ||
+      (tcp_client_->getStatus() &
        VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CONNECTED) !=
-      VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CONNECTED)
-    {
+          VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CONNECTED) {
     return false;
   }
-  
+
   if (http_parser_ == nullptr) {
     return false;
   }
 
   this->initSendCallback();
-  
+
+  if (http_ssl_) {
+    assert(openssl_ != nullptr);
+    tcp_client_->clientReadStart();
+    if (!openssl_->sslIsInitFinished() && !openssl_->sslConnect()) {
+      error_message = openssl_->getErrorMassage();
+      return false;
+    }
+  }
+
   if (isSendBody) {
     if (!this->sendRequestBegin(request_data_, false)) {
       return false;
@@ -434,7 +461,8 @@ bool VHttpRequest::sendRequestBegin(VBuf& sendBuf, bool isSend) {
 
    sendBuf.appandData(request.c_str(), request.size());
   if (isSend) {
-    tcp_client_->writeData(sendBuf);
+     return this->writeData(sendBuf);
+    //tcp_client_->writeData(sendBuf);
   }
   return true;
 }
@@ -492,7 +520,8 @@ bool VHttpRequest::sendRequestHeader(VBuf& sendBuf, bool isSend) {
 
   sendBuf.appandData(request.c_str(), request.size());
   if (isSend) {
-    tcp_client_->writeData(sendBuf);
+    return this->writeData(sendBuf);
+    //tcp_client_->writeData(sendBuf);
   }
   return true;
 }
@@ -514,7 +543,8 @@ bool VHttpRequest::sendRequestBody(VBuf& sendBuf, bool isSend) {
   }
 
    if (isSend) {
-    tcp_client_->writeData(sendBuf);
+    return  this->writeData(sendBuf);
+    //tcp_client_->writeData(sendBuf);
   }
   return true;
 }
@@ -523,7 +553,8 @@ bool VHttpRequest::sendRequestCRLF(VBuf& sendBuf, bool isSend) {
 
   std::string request = "\r\n";
   sendBuf.appandData(request.c_str(), request.size());
-  tcp_client_->writeData(sendBuf);
+  return this->writeData(sendBuf);
+  //tcp_client_->writeData(sendBuf);
   return true;
 }
 
@@ -657,6 +688,14 @@ std::string VHttpRequest::getLocation() const {
   return location_;
 }
 
+void VHttpRequest::setHttpSsl(bool isSsl) {
+  http_ssl_ = isSsl;
+}
+
+bool VHttpRequest::getHttpSsl() const {
+  return http_ssl_;
+}
+
 void VHttpRequest::setRequestSendFinishCb(
     std::function<void(int)> request_send_finish_cb) {
   http_request_send_finish_cb = request_send_finish_cb;
@@ -665,6 +704,22 @@ void VHttpRequest::setRequestSendFinishCb(
 void VHttpRequest::setRequestParserFinishCb(
     std::function<void(int)> request_parser_finish_cb) {
   http_request_parser_finish_cb = request_parser_finish_cb;
+}
+
+bool VHttpRequest::writeData(const VBuf& sendBuf) {
+  if (http_ssl_) {
+    assert(openssl_ != nullptr);
+    VBuf sslBuf;
+    return openssl_->sslPackData(sendBuf, sslBuf);
+  } else {
+    tcp_client_->writeData(sendBuf);
+    if (!tcp_client_->getVLoop()->isActive()) {
+      tcp_client_->run(uv_run_mode::UV_RUN_ONCE);
+    } else {
+      tcp_client_->waitWriteFinish();
+    }
+    return true;
+  }
 }
 
 
@@ -688,17 +743,21 @@ void VHttpRequest::setRequestParserFinishCb(
   }
 
   if (tcp_client_ == nullptr) {
+    error_message =
+        "tcp_client_ is null, addrs:" + addrs + ", port:" + std::to_string(port);
     return false;
   }
   if (tcp_client_->connect(ip.c_str(), port) != 0) {
+    error_message =
+        "connect is error addrs:" + addrs + ", port:" + std::to_string(port);
     return false;
   }
 
   if (openssl_ != nullptr && url_parser_.protocol == "https") {
-      http_ssl = true;
+      http_ssl_ = true;
+  } else if (url_parser_.protocol == "http") {
+    http_ssl_ = false;
   }
 
-  error_message =
-      "connect is error addrs:" + addrs + ", port:" + std::to_string(port);
-  return false;
+  return true;
  }
