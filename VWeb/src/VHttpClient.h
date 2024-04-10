@@ -1,37 +1,38 @@
 ﻿#pragma once
 #include "VHttpRequest.h"
 #include "VHttpResponse.h"
-#include "VTcpClient.h"
 #include "VOpenSsl.h"
+#include "VTcpClient.h"
 #include "VWebDefine.h"
 
-class VHttpClient : public VObject{
+class VHttpClient : public VObject {
  public:
   VHttpClient();
   VHttpClient(VTcpClient* tcp_client);
-  ~VHttpClient();
-  VHttpRequest* getVHttpRequest();
-  VHttpResponse* getVHttpResponse();
-  VTcpClient* getVTcpClient();
-  VOpenSsl* getVOpenSsl();
+  virtual ~VHttpClient();
+  VHttpRequest* getVHttpRequest()const;
+  VHttpResponse* getVHttpResponse() const;
+  VTcpClient* getVTcpClient() const;
+  VOpenSsl* getVOpenSsl() const;
 
-  void initCallback(bool isSsl = false);
+  virtual void initCallback(bool isSsl = false);
 
   void initSsl(const SSL_METHOD* method = SSLv23_client_method());
 
   std::string getUrlFileName();
 
   // 同步请求
- bool sendRequest(const METHOD_TYPE& method, const std::string& url,
-                      const std::map<std::string, std::string>& headers =
-                          std::map<std::string, std::string>(),
-                      const VBuf& body = VBuf(),
-                      const uint64_t& maxTimeout = 30000);
+  bool sendRequest(const METHOD_TYPE& method,
+                   const std::string& url,
+                   const std::map<std::string, std::string>& headers =
+                       std::map<std::string, std::string>(),
+                   const VBuf& body = VBuf(),
+                   const uint64_t& maxTimeout = 30000);
 
   // 发送请求（请求方法和报头,post和put 方法还需要调用sendBody）
   bool sendRequest(const std::string& url);
   // 发送body（仅post和put方法需要调用）
-  bool sendBody(const VBuf& body);
+  bool sendRequestBody(const VBuf& body);
   // 开始读取数据
   void readStart();
   // 等待响应,返回响应数据长度，通过
@@ -42,47 +43,53 @@ class VHttpClient : public VObject{
   void clearRecvResponseBody();
 
   // 异步请求
- void sendRequestAsync(const METHOD_TYPE& method,
-                       const std::string& url,
-                       const std::map<std::string, std::string>& headers =
-                           std::map<std::string, std::string>(),
-                       const VBuf& body = VBuf(),
-                       const uint64_t& maxTimeout = 30000);
- 
-  void setConnectiondCb(std::function<void(int)> connectiond_cb);
- void setRequestSendFinishCb(
-     std::function<void(int)> request_send_finish_cb);
+  void sendRequestAsync(const METHOD_TYPE& method,
+                        const std::string& url,
+                        const std::map<std::string, std::string>& headers =
+                            std::map<std::string, std::string>(),
+                        const VBuf& body = VBuf(),
+                        const uint64_t& maxTimeout = 30000);
+
+  void setConnectiondCb(std::function<void(VHttpClient*, int)> connectiond_cb);
+  void setCloseCb(std::function<void(VHttpClient*, int)> close_cb);
+  void setRequestSendFinishCb(
+      std::function<void(VHttpRequest*, int)> request_send_finish_cb);
   void setRequestParserFinishCb(
-      std::function<void(int)> request_parser_finish_cb);
- void setResponseSendFinishCb(
-     std::function<void(int)> response_send_finish_cb);
+      std::function<void(VHttpRequest*, int)> request_parser_finish_cb);
+  void setResponseSendFinishCb(
+      std::function<void(VHttpResponse*, int)> response_send_finish_cb);
   void setResponseParserFinishCb(
-      std::function<void(int)> response_parser_finish_cb);
+      std::function<void(VHttpResponse*, int)> response_parser_finish_cb);
 
-  protected:
-  bool connect(const std::string& url);
+  void setRequestParserHeadersFinishCb(
+      std::function<void(VHttpRequest*, std::map<std::string, std::string>*)>
+          request_parser_headers_finish_cb);
+  void setRequestRecvBodyCb(
+      std::function<bool(VHttpRequest*, const VBuf*)> request_recv_body_cb);
 
-  protected:
-  std::function<void(int)> http_client_connectiond_cb;
+  void setResponseParserHeadersFinishCb(
+      std::function<void(VHttpResponse*, std::map<std::string, std::string>*)>
+          response_parser_headers_finish_cb);
+  void setResponseRecvBodyCb(
+      std::function<bool(VHttpResponse*, const VBuf*)> response_recv_body_cb);
 
-  std::function<void(int)> http_client_request_send_finish_cb;
+  virtual int run(uv_run_mode md = UV_RUN_DEFAULT);
 
-  std::function<void(int)> http_client_request_parser_finish_cb;
+ protected:
+  virtual bool connect(const std::string& url);
 
-  std::function<void(int)> http_client_response_send_finish_cb;
-
-  std::function<void(int)> http_client_response_parser_finish_cb;
-
-
+ protected:
+  std::function<void(VHttpClient*, int)> http_client_connectiond_cb;
+  std::function<void(VHttpClient*, int)> http_client_close_cb;
+ protected:
+  std::string error_message;
  private:
   VTcpClient* tcp_client_ = nullptr;
   VHttpRequest* request_ = nullptr;
   VHttpResponse* response_ = nullptr;
   VOpenSsl* openssl_ = nullptr;
 
-  std::string error_message;
-
   VBuf cache_body_;
 
-  bool own_http_client_ = false;
+  bool own_tcp_client_ = false;
 };

@@ -219,6 +219,11 @@ add_executable(test-VTcpServer test-VTcpServer.cpp)
 add_executable(test-VHttpClient test-VHttpClient.cpp)
 add_executable(test-VHttpServer test-VHttpServer.cpp)
 add_executable(test-VOpenSsl test-VOpenSsl.cpp)
+add_executable(test-VHttpParser test-VHttpParser.cpp)
+add_executable(test-VWebSocketParser test-VWebSocketParser.cpp)
+add_executable(test-VWebSocketClient test-VWebSocketClient.cpp)
+
+
 if (UNIX)
 # test-VTcpClient
 target_link_libraries(test-VTcpClient 
@@ -246,6 +251,24 @@ target_link_libraries(test-VHttpServer
 
 # test-VOpenSsl
 target_link_libraries(test-VOpenSsl 
+    debug ${LIBUV_LIB_DIR} ${BUILD_UNIX_SYSTEM_LIBS} ${BUILD_UNIX_VLIBUV_DEBUG_LIBS} ${BUILD_UNIX_OPENSSL_LIBS}
+    optimized ${LIBUV_LIB_DIR} ${BUILD_UNIX_SYSTEM_LIBS} ${BUILD_UNIX_VLIBUV_RELEASE_LIBS} ${BUILD_UNIX_OPENSSL_LIBS}
+)
+
+# test-VHttpParser
+target_link_libraries(test-VHttpParser 
+    debug ${LIBUV_LIB_DIR} ${BUILD_UNIX_SYSTEM_LIBS} ${BUILD_UNIX_VLIBUV_DEBUG_LIBS} ${BUILD_UNIX_OPENSSL_LIBS}
+    optimized ${LIBUV_LIB_DIR} ${BUILD_UNIX_SYSTEM_LIBS} ${BUILD_UNIX_VLIBUV_RELEASE_LIBS} ${BUILD_UNIX_OPENSSL_LIBS}
+)
+
+# test-VWebSocketParser
+target_link_libraries(test-VWebSocketParser 
+    debug ${LIBUV_LIB_DIR} ${BUILD_UNIX_SYSTEM_LIBS} ${BUILD_UNIX_VLIBUV_DEBUG_LIBS} ${BUILD_UNIX_OPENSSL_LIBS}
+    optimized ${LIBUV_LIB_DIR} ${BUILD_UNIX_SYSTEM_LIBS} ${BUILD_UNIX_VLIBUV_RELEASE_LIBS} ${BUILD_UNIX_OPENSSL_LIBS}
+)
+
+# test-VWebSocketClient
+target_link_libraries(test-VWebSocketClient 
     debug ${LIBUV_LIB_DIR} ${BUILD_UNIX_SYSTEM_LIBS} ${BUILD_UNIX_VLIBUV_DEBUG_LIBS} ${BUILD_UNIX_OPENSSL_LIBS}
     optimized ${LIBUV_LIB_DIR} ${BUILD_UNIX_SYSTEM_LIBS} ${BUILD_UNIX_VLIBUV_RELEASE_LIBS} ${BUILD_UNIX_OPENSSL_LIBS}
 )
@@ -284,6 +307,25 @@ target_link_libraries(test-VOpenSsl PRIVATE
     $<$<CONFIG:Debug>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_DEBUG_LIBS} ${BUILD_WIN32_x64_OPENSSL_LIBS}>
     $<$<CONFIG:Release>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_RELEASE_LIBS} ${BUILD_WIN32_x64_OPENSSL_LIBS}>
 )
+
+# test-VHttpParser
+target_link_libraries(test-VHttpParser PRIVATE
+    $<$<CONFIG:Debug>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_DEBUG_LIBS} ${BUILD_WIN32_x64_OPENSSL_LIBS}>
+    $<$<CONFIG:Release>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_RELEASE_LIBS} ${BUILD_WIN32_x64_OPENSSL_LIBS}>
+)
+
+# test-VWebSocketParser
+target_link_libraries(test-VWebSocketParser PRIVATE
+    $<$<CONFIG:Debug>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_DEBUG_LIBS} ${BUILD_WIN32_x64_OPENSSL_LIBS}>
+    $<$<CONFIG:Release>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_RELEASE_LIBS} ${BUILD_WIN32_x64_OPENSSL_LIBS}>
+)
+
+# test-VWebSocketClient
+target_link_libraries(test-VWebSocketClient PRIVATE
+    $<$<CONFIG:Debug>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_DEBUG_LIBS} ${BUILD_WIN32_x64_OPENSSL_LIBS}>
+    $<$<CONFIG:Release>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_RELEASE_LIBS} ${BUILD_WIN32_x64_OPENSSL_LIBS}>
+)
+
 elseif(CMAKE_GENERATOR_PLATFORM MATCHES "Win32")
 # 针对32位平台的配置
 message(STATUS "Configuring for Win32")
@@ -313,6 +355,24 @@ target_link_libraries(test-VHttpServer PRIVATE
 
 # test-VOpenSsl
 target_link_libraries(test-VOpenSsl PRIVATE
+    $<$<CONFIG:Debug>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_DEBUG_LIBS} ${BUILD_WIN32_x86_OPENSSL_LIBS}>
+    $<$<CONFIG:Release>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_RELEASE_LIBS} ${BUILD_WIN32_x86_OPENSSL_LIBS}>
+)
+
+# test-VHttpParser
+target_link_libraries(test-VHttpParser PRIVATE
+    $<$<CONFIG:Debug>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_DEBUG_LIBS} ${BUILD_WIN32_x86_OPENSSL_LIBS}>
+    $<$<CONFIG:Release>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_RELEASE_LIBS} ${BUILD_WIN32_x86_OPENSSL_LIBS}>
+)
+
+# test-VWebSocketParser
+target_link_libraries(test-VWebSocketParser PRIVATE
+    $<$<CONFIG:Debug>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_DEBUG_LIBS} ${BUILD_WIN32_x86_OPENSSL_LIBS}>
+    $<$<CONFIG:Release>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_RELEASE_LIBS} ${BUILD_WIN32_x86_OPENSSL_LIBS}>
+)
+
+# test-VWebSocketClient
+target_link_libraries(test-VWebSocketClient PRIVATE
     $<$<CONFIG:Debug>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_DEBUG_LIBS} ${BUILD_WIN32_x86_OPENSSL_LIBS}>
     $<$<CONFIG:Release>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_RELEASE_LIBS} ${BUILD_WIN32_x86_OPENSSL_LIBS}>
 )

@@ -70,10 +70,10 @@ int main1() {
 
   bool isConnect = false;
   ssl.setSslConnectiondCb(
-      [&client, &isConnect](int status) { isConnect = true; });
+      [&client, &isConnect](VOpenSsl* vssl, int status) { isConnect = true; });
 
-  ssl.setSslWriteCb([&ssl, &client, &isConnect, &writeSslConnectData,
-                     &writSsleSendData](const VBuf* buf, int status) {
+  ssl.setSslWriteCb([&ssl, &client, &isConnect, &writeSslConnectData, &writSsleSendData](
+          VOpenSsl* vssl, const VBuf* buf, int status) {
     if (isConnect) {
       writSsleSendData.appand(*buf);
     } else {
@@ -97,7 +97,7 @@ int main1() {
   });
 
   ssl.setSslReadCb([&ssl, &client, &isConnect, &readSslConnectData,
-                    &readSslSendData](const VBuf* buf) {
+                    &readSslSendData](VOpenSsl* vssl, const VBuf* buf) {
     if (isConnect) {
       readSslSendData.appand(*buf);
     } else {
@@ -138,12 +138,13 @@ int main2() {
   VBuf writSsleSendData;
 
    bool isConnect = false;
-  ssl.setSslConnectiondCb([&client, &isConnect](int status) {
+  ssl.setSslConnectiondCb(
+      [&client, &isConnect](VOpenSsl* ssl, int status) {
      isConnect = true;
    });
 
-  ssl.setSslWriteCb([&ssl, &client, &isConnect, &writeSslConnectData,
-                     &writSsleSendData](const VBuf* buf, int status) {
+  ssl.setSslWriteCb([&ssl, &client, &isConnect, &writeSslConnectData, &writSsleSendData](
+          VOpenSsl* ssl, const VBuf* buf, int status) {
     if (isConnect) {
       writSsleSendData.appand(*buf);
     } else {
@@ -153,7 +154,7 @@ int main2() {
   });
 
   ssl.setSslReadCb([&ssl, &client, &isConnect, &readSslConnectData,
-                    &readSslSendData](const VBuf* buf) {
+                    &readSslSendData](VOpenSsl* ssl, const VBuf* buf) {
     if (isConnect) {
       readSslSendData.appand(*buf);
     } else {

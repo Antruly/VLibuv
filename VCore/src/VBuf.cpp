@@ -39,6 +39,16 @@ VBuf::VBuf(const char* bf, size_t sz) : buf() {
   }
 }
 
+VBuf::VBuf(const std::string& str) {
+  buf.base = nullptr;
+  buf.len = 0;
+
+  if (str.size() > 0) {
+    this->resize(str.size());
+    memcpy(buf.base, str.c_str(), str.size());
+  }
+}
+
 void* VBuf::operator new(size_t size) {
   return VMemory::malloc(size);
 }
@@ -152,7 +162,17 @@ void VBuf::setData(const char* bf, size_t sz, bool clean) {
 
 char* VBuf::getData() const { return buf.base; }
 
-const char* VBuf::getConstData() const { return buf.base; }
+const char* VBuf::getConstData() const {
+  return buf.base;
+}
+
+unsigned char* VBuf::getUData() const {
+  return (unsigned char*)buf.base;
+}
+
+const unsigned char* VBuf::getConstUData() const {
+  return (unsigned char*) buf.base;
+}
 
 size_t VBuf::size() const { return buf.len; }
 
@@ -164,6 +184,10 @@ void VBuf::clone(const VBuf& srcBuf) {
 
   this->resize(srcBuf.size());
   memcpy(buf.base, srcBuf.getData(), srcBuf.size());
+}
+
+std::string VBuf::toString()const {
+  return std::string(buf.base, buf.len);
 }
 
 void VBuf::cloneData(const char* bf, size_t sz){

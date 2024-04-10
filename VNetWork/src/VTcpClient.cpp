@@ -104,6 +104,8 @@ void VTcpClient::on_close(VHandle* client) {
 
    if (this->async_close != nullptr)
     this->async_close->send();
+
+  this->setStatus(VTCP_WORKER_STATUS_CLOSED, true);
 }
 
 void VTcpClient::echo_write(VWrite* req, int status) {
@@ -271,7 +273,7 @@ void VTcpClient::close() {
     this->tcp->close(
         std::bind(&VTcpClient::on_close, this, std::placeholders::_1));
   }
-  this->setStatus(VTCP_WORKER_STATUS_CLOSED, true);
+  this->setStatus(VTCP_WORKER_STATUS_CLOSING);
 }
 
 VTCP_WORKER_STATUS VTcpClient::getStatus() {
@@ -430,7 +432,7 @@ void VTcpClient::waitConnectFinish() {
     return;
   }
 
-  assert(this->async_connect != nullptr);
+  assert(this->async_connect == nullptr);
 
   VLoop vloop;
   this->async_connect = new VAsync();
@@ -460,8 +462,7 @@ void VTcpClient::waitCloseFinish() {
   if ((this->getStatus() & VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CLOSED) > 0) {
     return;
   }
-
-  assert(this->async_close != nullptr);
+  assert(this->async_close == nullptr);
 
   VLoop vloop;
   this->async_close = new VAsync();
@@ -496,7 +497,7 @@ void VTcpClient::waitWriteFinish() {
     return;
   }
 
-  assert(this->async_write != nullptr);
+  assert(this->async_write == nullptr);
 
   VLoop vloop;
   this->async_write = new VAsync();

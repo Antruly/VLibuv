@@ -2,12 +2,14 @@
 #include "VObject.h"
 #include "VLibuvInclude.h"
 #include "VCoreDefine.h"
+#include <string>
 class VBuf final : public VObject {
  public:
   VCORE_DEFINE_COPY_FUNC(VBuf);
   explicit VBuf();
   ~VBuf();
   explicit VBuf(const char* bf, size_t sz);
+  explicit VBuf(const std::string& str);
 
   void* operator new(size_t size);
 
@@ -43,10 +45,15 @@ class VBuf final : public VObject {
   char* getData()const;
   const char* getConstData() const;
 
+  unsigned char* getUData() const;
+  const unsigned char* getConstUData() const;
+
   size_t size() const;
 
   void clear();
   void clone(const VBuf& cloneBuf);
+
+  std::string toString() const;
 
   private:
 

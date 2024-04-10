@@ -29,7 +29,7 @@ void VHttpResponse::initRecvCallback() {
   if (http_ssl_) {
     assert(openssl_ != nullptr);
     openssl_->setSslReadCb(
-        [this](const VBuf* data) { this->parseResponse(data); });
+        [this](VOpenSsl* ssl, const VBuf* data) { this->parseResponse(data); });
   }
   else if (tcp_client_ != nullptr) {
     tcp_client_->setReadCb([this](VTcpClient* tcp_client, const VBuf* data) {
@@ -41,7 +41,8 @@ void VHttpResponse::initRecvCallback() {
 void VHttpResponse::initSendCallback() {
   if (http_ssl_) {
     assert(openssl_ != nullptr);
-    openssl_->setSslWriteCb([this](const VBuf* data, int status) {
+    openssl_->setSslWriteCb([this](VOpenSsl* ssl, const VBuf* data,
+                                   int status) {
       if (status < 0) {
         error_message =
             "ssl Response Write error status:" + std::to_string(status);
@@ -135,6 +136,8 @@ void VHttpResponse::initCallback() {
     // Headers complete callback
     http_parser_->setHeadersCompleteCallback([this](VHttpParser* http_parser)
                                                  -> int {
+      if (http_response_parser_headers_finish_cb)
+        http_response_parser_headers_finish_cb(this, &headers_);
       // Your headers_complete_cb logic here
       return 0;  // Example return value, replace with your actual return value
     });
@@ -159,6 +162,10 @@ void VHttpResponse::initCallback() {
         }
       }
      
+      if (http_response_recv_body_cb){
+       if(http_response_recv_body_cb(this, &body_))
+        body_.clear();
+      }
 
       return 0;  // Example return value, replace with your actual return value
     });
@@ -184,10 +191,12 @@ void VHttpResponse::initCallback() {
       http_version_ =
           "HTTP/" + std::to_string(http_parser_->getHttpParser()->http_major) +
           "." + std::to_string(http_parser_->getHttpParser()->http_minor);
-      parser_finish = true;
+
+      parser_mutex_.lock();
+      parser_finish_ = true;
       if (this->async_recv != nullptr)
         this->async_recv->send();
-
+      parser_mutex_.unlock();
       this->zlib_->closeDecompressStream();
       return 0;  // Example return value, replace with your actual return value
     });
@@ -226,7 +235,7 @@ void VHttpResponse::initData() {
 
   use_gzip_ = false;
   keep_alive_ = true;
-  parser_finish = false;
+  parser_finish_ = false;
   http_ssl_ = false;
 }
 
@@ -234,7 +243,7 @@ void VHttpResponse::setSslPoint(VOpenSsl* ssl) {
   openssl_ = ssl;
 }
 
-VOpenSsl* VHttpResponse::getSslPoint() {
+VOpenSsl* VHttpResponse::getSslPoint() const {
   return openssl_;
 }
 
@@ -472,7 +481,7 @@ bool VHttpResponse::sendResponse() {
 }
 
 bool VHttpResponse::isParser() {
-  return parser_finish;
+  return parser_finish_;
 }
 
 std::string VHttpResponse::getStatusMessage(int statusCode) {
@@ -570,8 +579,13 @@ void VHttpResponse::waitRecvFinish(const uint64_t& maxTimout) {
        VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CONNECTED) == 0) {
     return;
   }
+ parser_mutex_.lock();
+  if (this->isParser()) {
+    parser_mutex_.unlock();
+    return;
+  }
 
-  assert(this->async_recv != nullptr);
+  assert(this->async_recv == nullptr);
 
   VLoop vloop;
   this->async_recv = new VAsync();
@@ -595,17 +609,30 @@ void VHttpResponse::waitRecvFinish(const uint64_t& maxTimout) {
         vasync->close();
       },
       &vloop);
+  parser_mutex_.unlock();
   vloop.run();
+  
   this->async_recv = nullptr;
   delete vasync;
 
 }
 void VHttpResponse::setResponseSendFinishCb(
-    std::function<void(int)> response_send_finish_cb) {
+    std::function<void(VHttpResponse*, int)> response_send_finish_cb) {
   http_response_send_finish_cb = response_send_finish_cb;
 }
 
 void VHttpResponse::setResponseParserFinishCb(
-    std::function<void(int)> response_parser_finish_cb) {
+    std::function<void(VHttpResponse*, int)> response_parser_finish_cb) {
   http_response_parser_finish_cb = response_parser_finish_cb;
+}
+
+void VHttpResponse::setResponseParserHeadersFinishCb(
+    std::function<void(VHttpResponse*, std::map<std::string, std::string>*)>
+        response_parser_headers_finish_cb) {
+  http_response_parser_headers_finish_cb = response_parser_headers_finish_cb;
+}
+
+void VHttpResponse::setResponseRecvBodyCb(
+    std::function<bool(VHttpResponse*, const VBuf*)> response_recv_body_cb) {
+  http_response_recv_body_cb = response_recv_body_cb;
 }

@@ -22,7 +22,7 @@ class VHttpResponse {
   void initData();
 
   void setSslPoint(VOpenSsl* ssl);
-  VOpenSsl* getSslPoint();
+  VOpenSsl* getSslPoint() const;
   // Get the associated TCP client object
   VTcpClient* getVTcpClient() const;
 
@@ -115,13 +115,20 @@ class VHttpResponse {
   void waitRecvFinish(const uint64_t& maxTimout = 30000);
 
    void setResponseSendFinishCb(
-      std::function<void(int)> response_send_finish_cb);
+      std::function<void(VHttpResponse*, int)> response_send_finish_cb);
   void setResponseParserFinishCb(
-      std::function<void(int)> response_parser_finish_cb);
-
+       std::function<void(VHttpResponse*, int)> response_parser_finish_cb);
+   void setResponseParserHeadersFinishCb(
+      std::function<void(VHttpResponse*, std::map<std::string, std::string>*)>
+          response_parser_headers_finish_cb);
+  void setResponseRecvBodyCb(
+       std::function<bool(VHttpResponse*, const VBuf*)> response_recv_body_cb);
  protected:
-  std::function<void(int)> http_response_send_finish_cb;
-  std::function<void(int)> http_response_parser_finish_cb;
+  std::function<void(VHttpResponse*, int)> http_response_send_finish_cb;
+  std::function<void(VHttpResponse*, int)> http_response_parser_finish_cb;
+  std::function<void(VHttpResponse*, std::map<std::string, std::string>*)>
+      http_response_parser_headers_finish_cb;
+  std::function<bool(VHttpResponse*, const VBuf*)> http_response_recv_body_cb;
  private:
   VTcpClient* tcp_client_ = nullptr;    // Associated TCP client object
   VHttpParser* http_parser_ = nullptr;  // HTTP parser object
@@ -151,7 +158,8 @@ class VHttpResponse {
   bool use_gzip_ = false;   // Control whether to use gzip compression
   bool use_chunked_ = false;
   bool keep_alive_ = true;  // Control whether to keep the connection alive
-  bool parser_finish = false;
   bool http_ssl_ = false;
   bool own_tcp_client_ = false;  // Response body
+  std::atomic<bool> parser_finish_ = false;
+  std::mutex parser_mutex_;
 };

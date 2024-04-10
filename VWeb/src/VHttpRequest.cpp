@@ -44,7 +44,7 @@ void VHttpRequest::initRecvCallback() {
   if (http_ssl_) {
     assert(openssl_ != nullptr);
     openssl_->setSslReadCb(
-        [this](const VBuf* data) { this->parseRequest(data); });
+        [this](VOpenSsl* ssl, const VBuf* data) { this->parseRequest(data); });
   }
   else if (tcp_client_ != nullptr) {
     tcp_client_->setReadCb([this](VTcpClient* tcp_client, const VBuf* data) {
@@ -56,7 +56,8 @@ void VHttpRequest::initRecvCallback() {
 void VHttpRequest::initSendCallback() {
   if (http_ssl_) {
     assert(openssl_ != nullptr);
-    openssl_->setSslWriteCb([this](const VBuf* data, int status) {
+    openssl_->setSslWriteCb([this](VOpenSsl* ssl, const VBuf* data,
+                                   int status) {
       if (status < 0) {
         error_message = "ssl Request Write error status:" + std::to_string(status);
       }
@@ -158,6 +159,8 @@ void VHttpRequest::initCallback() {
     // Headers complete callback
     http_parser_->setHeadersCompleteCallback([this](VHttpParser* http_parser)
                                                  -> int {
+      if (http_request_parser_headers_finish_cb)
+        http_request_parser_headers_finish_cb(this, &headers_);
       // Your headers_complete_cb logic here
       return 0;  // Example return value, replace with your actual return value
     });
@@ -174,7 +177,10 @@ void VHttpRequest::initCallback() {
       } else {
         body_.appandData(data, size);
       }
-
+      if (http_request_recv_body_cb) {
+        if (http_request_recv_body_cb(this, &body_))
+          body_.clear();
+      }
       return 0;  // Example return value, replace with your actual return value
     });
 
@@ -191,7 +197,7 @@ void VHttpRequest::initCallback() {
           "." + std::to_string(http_parser_->getHttpParser()->http_minor);
       url_parser_ = http_parser_->parseUrl(url_);
       method_ = static_cast<METHOD_TYPE>(http_parser_->getHttpParser()->method);
-      parser_finish = true;
+      parser_finish_ = true;
       return 0;  // Example return value, replace with your actual return value
     });
 
@@ -241,7 +247,7 @@ void VHttpRequest::initData() {
   use_gzip_ = false;
   use_chunked_ = false;
   keep_alive_ = true;
-  parser_finish = false;
+  parser_finish_ = false;
   http_ssl_ = false;
 }
 
@@ -249,7 +255,7 @@ void VHttpRequest::setSslPoint(VOpenSsl* ssl) {
     openssl_ = ssl;
 }
 
-VOpenSsl* VHttpRequest::getSslPoint() {
+VOpenSsl* VHttpRequest::getSslPoint() const {
   return openssl_;
 }
 
@@ -293,11 +299,23 @@ void VHttpRequest::setUrl(const std::string& url) {
   url_ = url;
   url_parser_ = http_parser_->parseUrl(url_);
   url_raw_ = url_parser_.path + (url_parser_.query.empty() ? "" : "?") + url_parser_.query;
-  this->setHost(url_parser_.host);
+ 
+ 
   if (url_parser_.protocol == "https") {
+      if (url_parser_.port == 443) {
+      this->setHost(url_parser_.host);
+      } else {
+        this->setHost(url_parser_.host + ":" +
+                      std::to_string(url_parser_.port));
+      }
     http_ssl_ = true;
   }
   else if (url_parser_.protocol == "http") {
+    if (url_parser_.port == 80) {
+      this->setHost(url_parser_.host);
+    } else {
+      this->setHost(url_parser_.host + ":" + std::to_string(url_parser_.port));
+    }
     http_ssl_ = false;
   }
 }
@@ -574,7 +592,7 @@ bool VHttpRequest::sendRequestChunked(VBuf& sendBuf, bool isEnd) {
 }
 
 bool VHttpRequest::isParser() {
-  return parser_finish;
+  return parser_finish_;
 }
 
 void VHttpRequest::setUseGzip(bool useGzip) {
@@ -697,13 +715,24 @@ bool VHttpRequest::getHttpSsl() const {
 }
 
 void VHttpRequest::setRequestSendFinishCb(
-    std::function<void(int)> request_send_finish_cb) {
+    std::function<void(VHttpRequest*, int)> request_send_finish_cb) {
   http_request_send_finish_cb = request_send_finish_cb;
 }
 
 void VHttpRequest::setRequestParserFinishCb(
-    std::function<void(int)> request_parser_finish_cb) {
+    std::function<void(VHttpRequest*, int)> request_parser_finish_cb) {
   http_request_parser_finish_cb = request_parser_finish_cb;
+}
+
+void VHttpRequest::setRequestParserHeadersFinishCb(
+    std::function<void(VHttpRequest*, std::map<std::string, std::string>*)>
+        request_parser_headers_finish_cb) {
+  http_request_parser_headers_finish_cb = request_parser_headers_finish_cb;
+}
+
+void VHttpRequest::setRequestRecvBodyCb(
+    std::function<bool(VHttpRequest*, const VBuf*)> request_recv_body_cb) {
+  http_request_recv_body_cb = request_recv_body_cb;
 }
 
 bool VHttpRequest::writeData(const VBuf& sendBuf) {

@@ -87,7 +87,7 @@ bool VOpenSsl::sslConnect() {
   if (ret == 1) {
     // Connection established
     if (ssl_connectiond_cb_)
-      ssl_connectiond_cb_(0);  // Call connection success callback
+      ssl_connectiond_cb_(this, 0);  // Call connection success callback
     return true;
   } else {
     int err = this->sslGetError(ret);
@@ -102,7 +102,7 @@ bool VOpenSsl::sslConnect() {
           // Handle other errors
           error_massage_ = "SSL connect error";
           if (ssl_connectiond_cb_)
-            ssl_connectiond_cb_(-1);  // Call connection failure callback
+            ssl_connectiond_cb_(this, -1);  // Call connection failure callback
           return false;
       }
     } while (!this->sslIsInitFinished());
@@ -110,7 +110,7 @@ bool VOpenSsl::sslConnect() {
   }
 
   if (ssl_connectiond_cb_)
-    ssl_connectiond_cb_(0);
+    ssl_connectiond_cb_(this, 0);
 
   ssl_have_write_ = true;
   return true;
@@ -120,15 +120,18 @@ std::string VOpenSsl::getErrorMassage() {
   return error_massage_;
 }
 
-void VOpenSsl::setSslConnectiondCb(std::function<void(int)> connectiond_cb) {
+void VOpenSsl::setSslConnectiondCb(
+    std::function<void(VOpenSsl*, int)> connectiond_cb) {
   ssl_connectiond_cb_ = connectiond_cb;
 }
 
-void VOpenSsl::setSslWriteCb(std::function<void(const VBuf*, int)> write_cb) {
+void VOpenSsl::setSslWriteCb(
+    std::function<void(VOpenSsl*, const VBuf*, int)> write_cb) {
   ssl_write_cb_ = write_cb;
 }
 
-void VOpenSsl::setSslReadCb(std::function<void(const VBuf*)> read_cb) {
+void VOpenSsl::setSslReadCb(
+    std::function<void(VOpenSsl*, const VBuf*)> read_cb) {
   ssl_read_cb_ = read_cb;
 }
 
@@ -165,12 +168,12 @@ void VOpenSsl::initCallback() {
             error_massage_ = "ssl write error status:" + std::to_string(status);
           }
           if (this->ssl_write_cb_)
-            this->ssl_write_cb_(buf, status);
+            this->ssl_write_cb_(this, buf, status);
         });
 
-    tcp_client_->setCloseCb([this](VTcpClient* tcpClient) {
-      // Handle close event
-    });
+    //tcp_client_->setCloseCb([this](VTcpClient* tcpClient) {
+    //  // Handle close event
+    //});
   }
 }
 
@@ -258,12 +261,12 @@ void VOpenSsl::getWriteBioData(VBuf& data) {
     // #server
     if (dtBuf.size() > 0) {
       if (ssl_write_cb_)
-        ssl_write_cb_(&dtBuf, 0);
+        ssl_write_cb_(this, &dtBuf, 0);
     }
   } else {
     if (dtBuf.size() > 0) {
       if (ssl_write_cb_)
-        ssl_write_cb_(&dtBuf, 0);
+        ssl_write_cb_(this, &dtBuf, 0);
     }
   }
   dtBuf.clear();
@@ -284,7 +287,7 @@ void VOpenSsl::getReadSslData(VBuf& data) {
 
   if (dtBuf.size() > 0) {
     if (ssl_read_cb_)
-      ssl_read_cb_(&dtBuf);
+      ssl_read_cb_(this, &dtBuf);
   }
 
   dtBuf.clear();

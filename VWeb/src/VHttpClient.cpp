@@ -6,16 +6,16 @@ VHttpClient::VHttpClient()
     : tcp_client_(new VTcpClient()),
       request_(new VHttpRequest(tcp_client_)),
       response_(new VHttpResponse(tcp_client_)),
-      own_http_client_(true) {}
+      own_tcp_client_(true) {}
 
 VHttpClient::VHttpClient(VTcpClient* tcp_client)
     : tcp_client_(tcp_client),
       request_(new VHttpRequest(tcp_client)),
       response_(new VHttpResponse(tcp_client)),
-      own_http_client_(false) {}
+      own_tcp_client_(false) {}
 
 VHttpClient::~VHttpClient() {
-  if (own_http_client_ && tcp_client_ != nullptr) {
+  if (own_tcp_client_ && tcp_client_ != nullptr) {
     delete tcp_client_;
   }
   delete request_;
@@ -29,42 +29,50 @@ VHttpClient::~VHttpClient() {
   }
 }
 
-VHttpRequest* VHttpClient::getVHttpRequest() {
+VHttpRequest* VHttpClient::getVHttpRequest() const {
   return request_;
 }
 
-VHttpResponse* VHttpClient::getVHttpResponse() {
+VHttpResponse* VHttpClient::getVHttpResponse() const {
   return response_;
 }
 
-VTcpClient* VHttpClient::getVTcpClient() {
+VTcpClient* VHttpClient::getVTcpClient() const {
   return tcp_client_;
 }
 
-VOpenSsl* VHttpClient::getVOpenSsl() {
+VOpenSsl* VHttpClient::getVOpenSsl() const {
   return openssl_;
 }
 
 void VHttpClient::initCallback(bool isSsl) {
+
+    assert(tcp_client_ != nullptr);
+    this->getVTcpClient()->setCloseCb([this](VTcpClient* tcp) {
+    if (http_client_close_cb) {
+        http_client_close_cb(this, 0);
+    }
+  });
+
   if (isSsl) {
     assert(openssl_ != nullptr);
-    openssl_->setSslConnectiondCb([this](int status) {
+    openssl_->setSslConnectiondCb([this](VOpenSsl* ssl, int status) {
       if (status < 0) {
         error_message =
             "openssl_ Connectiond error status:" + std::to_string(status);
       }
       if (this->http_client_connectiond_cb)
-        this->http_client_connectiond_cb(status);
+        this->http_client_connectiond_cb(this, status);
     });
   }
-  else if (tcp_client_ != nullptr) {
+  else{
     tcp_client_->setConnectiondCb([this](int status) {
       if (status < 0) {
         error_message =
             "tcpClient Connectiond error status:" + std::to_string(status);
       }
       if (this->http_client_connectiond_cb)
-        this->http_client_connectiond_cb(status);
+        this->http_client_connectiond_cb(this, status);
 
     });
   }
@@ -226,7 +234,7 @@ bool VHttpClient::sendRequest(const std::string& url) {
   return true;
 }
 
-bool VHttpClient::sendBody(const VBuf& body) {
+bool VHttpClient::sendRequestBody(const VBuf& body) {
 
   cache_body_.clear();
   request_->setBody(body);
@@ -321,35 +329,62 @@ void VHttpClient::sendRequestAsync(
 }
 
 
-void VHttpClient::setConnectiondCb(std::function<void(int)> connectiond_cb) {
+void VHttpClient::setConnectiondCb(
+    std::function<void(VHttpClient*, int)> connectiond_cb) {
   http_client_connectiond_cb = connectiond_cb;
 }
 
+void VHttpClient::setCloseCb(std::function<void(VHttpClient*, int)> close_cb) {
+  http_client_close_cb = close_cb;
+}
+
 void VHttpClient::setRequestSendFinishCb(
-    std::function<void(int)> request_send_finish_cb) {
-  http_client_request_send_finish_cb = request_send_finish_cb;
+    std::function<void(VHttpRequest*, int)> request_send_finish_cb) {
   request_->setRequestSendFinishCb(request_send_finish_cb);
 }
 
 void VHttpClient::setRequestParserFinishCb(
-    std::function<void(int)> request_parser_finish_cb) {
-  http_client_request_parser_finish_cb = request_parser_finish_cb;
+    std::function<void(VHttpRequest*, int)> request_parser_finish_cb) {
   request_->setRequestParserFinishCb(request_parser_finish_cb);
 }
 
 void VHttpClient::setResponseSendFinishCb(
-    std::function<void(int)> response_send_finish_cb) {
-  http_client_response_send_finish_cb = response_send_finish_cb;
+    std::function<void(VHttpResponse*, int)> response_send_finish_cb) {
   response_->setResponseSendFinishCb(response_send_finish_cb);
 }
 
 void VHttpClient::setResponseParserFinishCb(
-    std::function<void(int)> response_parser_finish_cb) {
-  http_client_response_parser_finish_cb = response_parser_finish_cb;
+    std::function<void(VHttpResponse*, int)> response_parser_finish_cb) {
   response_->setResponseParserFinishCb(response_parser_finish_cb);
 }
 
+void VHttpClient::setRequestParserHeadersFinishCb(
+    std::function<void(VHttpRequest*, std::map<std::string, std::string>*)>
+        request_parser_headers_finish_cb) {
 
+    request_->setRequestParserHeadersFinishCb(request_parser_headers_finish_cb);
+}
+
+void VHttpClient::setRequestRecvBodyCb(
+    std::function<bool(VHttpRequest*, const VBuf*)> request_recv_body_cb) {
+  request_->setRequestRecvBodyCb(request_recv_body_cb);
+}
+
+void VHttpClient::setResponseParserHeadersFinishCb(
+    std::function<void(VHttpResponse*, std::map<std::string, std::string>*)>
+        response_parser_headers_finish_cb) {
+  response_->setResponseParserHeadersFinishCb(
+      response_parser_headers_finish_cb);
+}
+
+void VHttpClient::setResponseRecvBodyCb(
+    std::function<bool(VHttpResponse*, const VBuf*)> response_recv_body_cb) {
+  response_->setResponseRecvBodyCb(response_recv_body_cb);
+}
+
+int VHttpClient::run(uv_run_mode md) {
+  return tcp_client_->run(md);
+}
 
 bool VHttpClient::connect(const std::string& url) {
   request_->setUrl(url);
@@ -424,3 +459,5 @@ bool VHttpClient::connect(const std::string& url) {
   
 
 }
+
+

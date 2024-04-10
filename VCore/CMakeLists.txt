@@ -98,6 +98,8 @@ set(CORE_FILES
     ${VCORE_SRC_DIR}/VObject.cpp
     ${VCORE_SRC_DIR}/VString.h
     ${VCORE_SRC_DIR}/VString.cpp
+    ${VCORE_SRC_DIR}/VBase64.h
+    ${VCORE_SRC_DIR}/VBase64.cpp
 )
 source_group(Core FILES ${CORE_FILES})
 

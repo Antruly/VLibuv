@@ -117,6 +117,8 @@ endif()
 set(VWEB_FILES
     ${VWEB_SRC_DIR}/VHttpClient.cpp
     ${VWEB_SRC_DIR}/VHttpClient.h
+    ${VWEB_SRC_DIR}/VWebSocketClient.cpp
+    ${VWEB_SRC_DIR}/VWebSocketClient.h
     ${VWEB_SRC_DIR}/VHttpParser.cpp
     ${VWEB_SRC_DIR}/VHttpParser.h
     ${VWEB_SRC_DIR}/VHttpRequest.cpp

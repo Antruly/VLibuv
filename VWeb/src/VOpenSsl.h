@@ -122,19 +122,19 @@ class VOpenSsl : public VObject {
    * @brief 设置SSL连接回调函数。
    * @param connectiond_cb 连接回调函数。
    */
-  void setSslConnectiondCb(std::function<void(int)> connectiond_cb);
+  void setSslConnectiondCb(std::function<void(VOpenSsl*, int)> connectiond_cb);
 
   /**
    * @brief 设置SSL写入回调函数。
    * @param write_cb 写入回调函数。
    */
-  void setSslWriteCb(std::function<void(const VBuf*, int)> write_cb);
+  void setSslWriteCb(std::function<void(VOpenSsl*, const VBuf*, int)> write_cb);
 
   /**
    * @brief 设置SSL读取回调函数。
    * @param read_cb 读取回调函数。
    */
-  void setSslReadCb(std::function<void(const VBuf*)> read_cb);
+  void setSslReadCb(std::function<void(VOpenSsl*, const VBuf*)> read_cb);
 
  protected:
   /**
@@ -158,11 +158,14 @@ class VOpenSsl : public VObject {
   size_t tcpClientReadData(uint64_t maxTimeout = 30000);
 
  protected:
-  std::function<void(int)> ssl_connectiond_cb_; /**< SSL连接回调函数。 */
+  std::function<void(VOpenSsl*, int)>
+      ssl_connectiond_cb_; /**< SSL连接回调函数。 */
 
-  std::function<void(const VBuf*, int)> ssl_write_cb_; /**< SSL写入回调函数。 */
+  std::function<void(VOpenSsl*, const VBuf*, int)>
+      ssl_write_cb_; /**< SSL写入回调函数。 */
 
-  std::function<void(const VBuf*)> ssl_read_cb_; /**< SSL读取回调函数。 */
+  std::function<void(VOpenSsl*, const VBuf*)>
+      ssl_read_cb_; /**< SSL读取回调函数。 */
 
  private:
   const SSL_METHOD* ssl_method_ = nullptr;

@@ -26,7 +26,7 @@ class VHttpRequest : public VObject {
   void initData();
 
   void setSslPoint(VOpenSsl* ssl);
-  VOpenSsl* getSslPoint();
+  VOpenSsl* getSslPoint() const;
 
   // Get the associated TCP client object
   VTcpClient* getVTcpClient() const;
@@ -153,9 +153,16 @@ class VHttpRequest : public VObject {
 
   bool connect(const std::string& addrs, int port);
 
-  void setRequestSendFinishCb(std::function<void(int)> request_send_finish_cb);
+  void setRequestSendFinishCb(
+      std::function<void(VHttpRequest*, int)> request_send_finish_cb);
   void setRequestParserFinishCb(
-      std::function<void(int)> request_parser_finish_cb);
+      std::function<void(VHttpRequest*, int)> request_parser_finish_cb);
+
+  void setRequestParserHeadersFinishCb(
+      std::function<void(VHttpRequest*, std::map<std::string, std::string>*)>
+          request_parser_headers_finish_cb);
+  void setRequestRecvBodyCb(
+      std::function<bool(VHttpRequest*, const VBuf*)> request_recv_body_cb);
  protected:
   // Extract the host from the URL
   std::string getHostFromUrl(const std::string& url) const;
@@ -168,8 +175,11 @@ class VHttpRequest : public VObject {
   
   
   protected:
-  std::function<void(int)> http_request_send_finish_cb;
-  std::function<void(int)> http_request_parser_finish_cb;
+  std::function<void(VHttpRequest*, int)> http_request_send_finish_cb;
+   std::function<void(VHttpRequest*, int)> http_request_parser_finish_cb;
+  std::function<void(VHttpRequest*, std::map<std::string, std::string>*)>
+      http_request_parser_headers_finish_cb;
+   std::function<bool(VHttpRequest*, const VBuf*)> http_request_recv_body_cb;
  
 
  private:
@@ -204,7 +214,7 @@ class VHttpRequest : public VObject {
   bool use_gzip_ = false;   // Control whether to use gzip compression
   bool use_chunked_ = false;
   bool keep_alive_ = true;  // Control whether to keep the connection alive
-  bool parser_finish = false;
+  bool parser_finish_ = false;
   bool http_ssl_ = false;
   bool own_tcp_client_ = false;
 };
