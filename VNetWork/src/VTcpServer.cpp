@@ -1,7 +1,11 @@
 ﻿#include "VTcpServer.h"
 #include <algorithm>
 
-VTcpServer::VTcpServer(int maxLoops)
+VTcpServer::VTcpServer(size_t numThreads,
+                       size_t maxThreads,
+                       size_t minIdleThreads,
+                       size_t maxIdleThreads,
+                       size_t maxTaskQueueSize)
     : VObject(),
       tcpService_async(nullptr),
       threadpool(nullptr),
@@ -14,7 +18,8 @@ VTcpServer::VTcpServer(int maxLoops)
   this->idle = new VIdle(loop);
   this->timer = new VTimer(loop);
 
-  this->threadpool = new VThreadPool(maxLoops);
+  this->threadpool = new VThreadPool(
+      numThreads, maxThreads, minIdleThreads, maxIdleThreads, maxTaskQueueSize);
   this->tcpService_async = new VAsync();
   this->tcpService_async->init(
       std::bind(&VTcpServer::on_async_callback, this, std::placeholders::_1),

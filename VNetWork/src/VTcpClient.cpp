@@ -113,7 +113,7 @@ void VTcpClient::echo_write(VWrite* req, int status) {
   this->removStatus(VTCP_WORKER_STATUS_PROCESSING);
   if (status) {
 #ifdef _DEBUG
-    fprintf(stderr, "Write error %s\n", uv_strerror(status));
+    //fprintf(stderr, "Write error %s\n", uv_strerror(status));
 #endif
   }
   if (tcp_write_cb)
@@ -158,9 +158,9 @@ void VTcpClient::echo_read(VStream* client, ssize_t nread, const VBuf* buf) {
   } else if (nread < 0) {
 #ifdef _DEBUG
     if (nread != UV_EOF) {
-      fprintf(stderr, "Read error %sn", uv_err_name(nread));
+      //fprintf(stderr, "Read error %sn", uv_err_name(nread));
     } else {
-      fprintf(stderr, "client disconnectn");
+      //fprintf(stderr, "client disconnectn");
     }
 #endif  // endif
     client->close(
@@ -306,10 +306,10 @@ void VTcpClient::readData(VTcp* client, const VBuf& data) {
     VBuf newData;
     newData.clone(data);
     newData.resize(data.size() + 1);
-    printf("IP: %s, Port: %d reaData \n", peer_ip, ntohs(addrs.sin_port));
+    //printf("IP: %s, Port: %d reaData \n", peer_ip, ntohs(addrs.sin_port));
     newData.clear();
   } else {
-    fprintf(stderr, "Failed to get peer IP address\n");
+    //fprintf(stderr, "Failed to get peer IP address\n");
   }
 #endif
 #endif
@@ -332,13 +332,13 @@ void VTcpClient::on_connection(VConnect* req, int status) {
 
   uv_ip4_name(reinterpret_cast<sockaddr_in*>(&addr), ip, sizeof(ip));
   port = ntohs(reinterpret_cast<sockaddr_in*>(&addr)->sin_port);
-  fprintf(stderr, "connection ip:%s port:%d \n", ip, port);
+  //fprintf(stderr, "connection ip:%s port:%d \n", ip, port);
 #endif  // endif
 
   if (status < 0) {
     this->setStatus(VTCP_WORKER_STATUS_ERROR_UNKNOWN);
 #ifdef _DEBUG
-    fprintf(stderr, "on_connection error %s\n", uv_err_name(status));
+    //fprintf(stderr, "on_connection error %s\n", uv_err_name(status));
 #endif  // endif
   } else {
     this->setStatus(VTCP_WORKER_STATUS_CONNECTED);
@@ -533,10 +533,9 @@ void VTcpClient::connectiond(int status) {
   tcp->getpeername((sockaddr*)&addrs, &peer_ip_len);
   char peer_ip[INET_ADDRSTRLEN];
   if (inet_ntop(AF_INET, &(addrs.sin_addr), peer_ip, INET_ADDRSTRLEN)) {
-    printf("client connected from IP: %s, Port: %d\n", peer_ip,
-           ntohs(addrs.sin_port));
+    //printf("client connected from IP: %s, Port: %d\n", peer_ip,ntohs(addrs.sin_port));
   } else {
-    fprintf(stderr, "Failed to get peer IP address\n");
+    //fprintf(stderr, "Failed to get peer IP address\n");
   }
 #endif
 #endif

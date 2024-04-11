@@ -4,7 +4,7 @@
 #include "VThread.h"
 #include "VWrite.h"
 
-VTcpServer tcpServer;
+VTcpServer tcpServer(1,1024,50,512,1024);
 std::string getTestData =
     "HTTP/1.1 200 OK\r\nContent-Type: text/html; "
     "charset=utf-8\r\nContent-Length: 123\r\nConnection: "
@@ -36,7 +36,7 @@ void tcpClient_write(VTcpClient* client, const VBuf* data, int status) {
 
 void tcpClient_read(VTcpClient* client, const VBuf* data) {
   tcpServer_readIndex++;
-  printf("client data:%s\n", data->getData());
+  //printf("client data:%s\n", data->getData());
 
   VBuf* newdata = new VBuf(data->getData(), data->size());
   client->writeData(*newdata);
@@ -76,6 +76,15 @@ int main() {
            tcpServer_index, tcpServer_userMaxIndex, tcpServer_maxIndex);
     printf("new client  readIndex:%lld writeIndex:%lld\n\n",
            tcpServer_readIndex, tcpServer_writeIndex);
+
+   VThreadPool::Statistics info = tcpServer.getVThreadPool()->getStatistics();
+    printf("idleThreads:%zu\n", info.idleThreads.load());
+   printf("numThreads:%zu\n", info.numThreads.load());
+    printf("taskQueueSize:%zu\n", info.taskQueueSize.load());
+   printf("workingThreads:%zu\n", info.workingThreads.load());
+   printf("workedNumber:%zu\n", info.workedNumber.load());
+    
+
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
   td.join();

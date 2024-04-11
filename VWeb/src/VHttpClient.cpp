@@ -102,11 +102,11 @@ void VHttpClient::initSsl(const SSL_METHOD* method) {
 }
 
 std::string VHttpClient::getUrlFileName() {
-  int pos = request_->getUrl().find_last_of("/");
-  if (pos >= request_->getUrl().size()) {
+  int pos = request_->getParsedURL().path.find_last_of("/");
+  if (pos >= request_->getParsedURL().path.size()) {
     return std::string();
   }
-  std::string filename(request_->getUrl().substr(pos + 1));
+  std::string filename(request_->getParsedURL().path.substr(pos + 1));
   return filename;
 }
 

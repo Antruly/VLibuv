@@ -7,7 +7,11 @@
 #include <mutex>
 class VTcpServer : public VObject {
  public:
-  VTcpServer(int maxLoops = 100);
+  VTcpServer(size_t numThreads = 10,
+             size_t maxThreads = 1024,
+             size_t minIdleThreads = 5,
+             size_t maxIdleThreads = 100,
+             size_t maxTaskQueueSize = 1024);
   virtual ~VTcpServer();
 
  public:
