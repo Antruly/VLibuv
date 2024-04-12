@@ -1,6 +1,6 @@
-<a href="https://github.com/Antruly/VLibuv/README_zn-CN.md" class="github-button" data-color-scheme="no-preference: dark; light: dark; dark: dark;" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star ntkme/github-buttons on GitHub">中文简体</a>
+<a href="https://github.com/Antruly/VLibuv/blob/master/README_zn-CN.md" class="github-button" data-color-scheme="no-preference: dark; light: dark; dark: dark;" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star ntkme/github-buttons on GitHub">中文简体</a>
  
-<a href="https://github.com/Antruly/VLibuv/README.md" class="github-button" data-color-scheme="no-preference: dark; light: dark; dark: dark;" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star ntkme/github-buttons on GitHub">English</a>
+<a href="https://github.com/Antruly/VLibuv/blob/master/README.md" class="github-button" data-color-scheme="no-preference: dark; light: dark; dark: dark;" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star ntkme/github-buttons on GitHub">English</a>
 
 # VLibuv
 
