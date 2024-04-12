@@ -1,5 +1,6 @@
-<button onclick="window.location.href = 'README_zn-CN.md';">中文</button>
-<button onclick="window.location.href = 'README.md';">English</button>
+<a href="https://github.com/Antruly/VLibuv/blob/master/README_zn-CN.md" class="github-button" data-color-scheme="no-preference: dark; light: dark; dark: dark;" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star ntkme/github-buttons on GitHub">中文简体</a>
+ 
+<a href="https://github.com/Antruly/VLibuv/blob/master/README.md" class="github-button" data-color-scheme="no-preference: dark; light: dark; dark: dark;" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star ntkme/github-buttons on GitHub">English</a>
 
 # VLibuv
 
