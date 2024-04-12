@@ -6,7 +6,7 @@
 
 VLogger* VLogger::Log = new VLogger();
 
-VLogger::VLogger() : close_file(false) {
+VLogger::VLogger() : close_file(false), enable(false){
   char* buffer = new char[10240]();
   size_t size = 10240;
   std::string curpath;
@@ -38,6 +38,37 @@ VLogger::~VLogger() {
 
 }
 
+std::string VLogger::getCurrentDate()
+{
+    std::time_t time = std::time(nullptr);
+    std::tm* timeinfo = std::localtime(&time);
+    char buffer[80];
+    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d", timeinfo);
+    return std::string(buffer);
+}
+
+std::string VLogger::getCurrentTime()
+{
+    std::time_t time = std::time(nullptr);
+    std::tm* timeinfo = std::localtime(&time);
+    char buffer[80];
+    std::strftime(buffer, sizeof(buffer), "%H:%M:%S", timeinfo);
+    return std::string(buffer);
+}
+
+std::string VLogger::getCurrentDateTime()
+{
+    std::time_t time = std::time(nullptr);
+    std::tm* timeinfo = std::localtime(&time);
+    char buffer[80];
+    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeinfo);
+    return std::string(buffer);
+}
+
+void VLogger::setEnable(bool eb){
+    enable = eb;
+}
+
 void VLogger::setCloseFile(bool closefile) {
   close_file = closefile;
 }
@@ -65,6 +96,14 @@ std::string VLogger::getTime(const std::time_t& time) {
   char buffer[80];
   std::strftime(buffer, sizeof(buffer), "%H:%M:%S", timeinfo);
   return std::string(buffer);
+}
+
+std::string VLogger::getDateTime(const std::time_t& time)
+{
+    std::tm* timeinfo = std::localtime(&time);
+    char buffer[80];
+    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeinfo);
+    return std::string(buffer);
 }
 
 void VLogger::setLogFileDirectory(const std::string& directory) {
@@ -102,6 +141,9 @@ void VLogger::log(const std::string& filepath,
   logMessage =
       getDate(time_now) + " " + getTime(time_now) + " " + level + " " + message;
   std::cout << colour << logMessage.c_str() << VCORE_ANSI_COLOR_RESET << std::endl;
+
+  if (!enable)
+      return;
 
   if (!logfile.is_open()) {
     filename = getDate(time_now) + ".log";

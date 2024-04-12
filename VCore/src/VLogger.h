@@ -55,20 +55,34 @@ class VLogger : public VObject {
  public:
   static VLogger* Log;
 
+  // 获取当前日期
+  std::string getCurrentDate();
+
+  // 获取当前时间
+  std::string getCurrentTime();
+
+  // 获取当前日期时间
+  std::string getCurrentDateTime();
+
  private:
   std::time_t time_now;
   std::string logFileDirectory;
   bool close_file;
+  bool enable;
 
+  void setEnable(bool eb);
   void setCloseFile(bool closefile);
   // 获取完整的日志文件路径
   std::string getLogFilePath(const std::string& filename);
 
-  // 获取当前日期
+  // 获取日期
   std::string getDate(const std::time_t& time);
 
-  // 获取当前时间
+  // 获取时间
   std::string getTime(const std::time_t& time);
+
+  // 获取日期时间
+  std::string getDateTime(const std::time_t& time);
 
   VLOGGER_DEFINE_LOG_TYPE(Assert,
                           VLOGGER_LOG_ASSERT_NAME,
