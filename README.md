@@ -1,3 +1,6 @@
+<button onclick="window.location.href = 'README_zn-CN.md';">中文</button>
+<button onclick="window.location.href = 'README.md';">English</button>
+
 # VLibuv
 
 ## Overview
@@ -134,9 +137,9 @@ windows:
 
 #### 5. Install the project:
 
-    ```bash
+```bash
     cmake --install .
-    ```
+```
 
 ## Example Usage
 

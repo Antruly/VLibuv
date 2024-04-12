@@ -79,12 +79,12 @@ int main() {
            tcpServer_readIndex, tcpServer_writeIndex);
 
    VThreadPool::Statistics info = tcpServer.getVThreadPool()->getStatistics();
-    VLogger::Log->logAssert("idleThreads:%zu\n", info.idleThreads.load());
-   VLogger::Log->logError("numThreads:%zu\n", info.numThreads.load());
-    VLogger::Log->logWarn("taskQueueSize:%zu\n", info.taskQueueSize.load());
+    VLogger::Log->logInfo("idleThreads:%zu\n", info.idleThreads.load());
+   VLogger::Log->logInfo("numThreads:%zu\n", info.numThreads.load());
+    VLogger::Log->logInfo("taskQueueSize:%zu\n", info.taskQueueSize.load());
    VLogger::Log->logInfo("closedThreads:%zu\n", info.closedThreads.load());
-   VLogger::Log->logDebug("workingThreads:%zu\n", info.workingThreads.load());
-    VLogger::Log->logVerbose("workedNumber:%zu\n", info.workedNumber.load());
+   VLogger::Log->logInfo("workingThreads:%zu\n", info.workingThreads.load());
+    VLogger::Log->logInfo("workedNumber:%zu\n", info.workedNumber.load());
   
 
     

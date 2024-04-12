@@ -214,6 +214,8 @@ SET(BUILD_WIN32_x86_OPENSSL_LIBS
     endif ()
 
 # 创建可执行文件并添加源文件以及相应的头文件
+add_executable(test-VLogger test-VLogger.cpp)
+
 add_executable(test-VTcpClient test-VTcpClient.cpp)
 add_executable(test-VTcpServer test-VTcpServer.cpp)
 add_executable(test-VHttpClient test-VHttpClient.cpp)
@@ -225,6 +227,12 @@ add_executable(test-VWebSocketClient test-VWebSocketClient.cpp)
 
 
 if (UNIX)
+# test-VLogger
+target_link_libraries(test-VLogger 
+    debug ${LIBUV_LIB_DIR} ${BUILD_UNIX_SYSTEM_LIBS} ${BUILD_UNIX_VLIBUV_DEBUG_LIBS} ${BUILD_UNIX_OPENSSL_LIBS}
+    optimized ${LIBUV_LIB_DIR} ${BUILD_UNIX_SYSTEM_LIBS} ${BUILD_UNIX_VLIBUV_RELEASE_LIBS} ${BUILD_UNIX_OPENSSL_LIBS}
+)
+
 # test-VTcpClient
 target_link_libraries(test-VTcpClient 
     debug ${LIBUV_LIB_DIR} ${BUILD_UNIX_SYSTEM_LIBS} ${BUILD_UNIX_VLIBUV_DEBUG_LIBS} ${BUILD_UNIX_OPENSSL_LIBS}
@@ -277,6 +285,12 @@ elseif(WIN32)
 if(CMAKE_GENERATOR_PLATFORM MATCHES "x64")
   # 针对64位平台的配置
 message(STATUS "Configuring for x64")
+# test-VLogger
+target_link_libraries(test-VLogger PRIVATE
+    $<$<CONFIG:Debug>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_DEBUG_LIBS} ${BUILD_WIN32_x64_OPENSSL_LIBS}>
+    $<$<CONFIG:Release>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_RELEASE_LIBS} ${BUILD_WIN32_x64_OPENSSL_LIBS}>
+)
+
 # test-VTcpClient
 target_link_libraries(test-VTcpClient PRIVATE
     $<$<CONFIG:Debug>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_DEBUG_LIBS} ${BUILD_WIN32_x64_OPENSSL_LIBS}>
@@ -329,6 +343,12 @@ target_link_libraries(test-VWebSocketClient PRIVATE
 elseif(CMAKE_GENERATOR_PLATFORM MATCHES "Win32")
 # 针对32位平台的配置
 message(STATUS "Configuring for Win32")
+# test-VLogger
+target_link_libraries(test-VLogger PRIVATE
+    $<$<CONFIG:Debug>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_DEBUG_LIBS} ${BUILD_WIN32_x86_OPENSSL_LIBS}>
+    $<$<CONFIG:Release>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_RELEASE_LIBS} ${BUILD_WIN32_x86_OPENSSL_LIBS}>
+)
+
 # test-VTcpClient
 target_link_libraries(test-VTcpClient PRIVATE
     $<$<CONFIG:Debug>:${BUILD_WIN32_SYSTEM_LIBS} ${BUILD_WIN32_VLIBUV_DEBUG_LIBS} ${BUILD_WIN32_x86_OPENSSL_LIBS}>
