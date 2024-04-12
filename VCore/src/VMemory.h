@@ -3,6 +3,7 @@
 #include <functional>
 #include <string>
 #include "VObject.h"
+#include "VLogger.h"
 
 #ifdef NO_VMEMORY_MEMORY_POOL
 #undef VMEMORY_MEMORY_POOL
@@ -25,6 +26,7 @@
 #define VMEMORY_THREAD_LOCK(lockobj) std::lock_guard<std::mutex> lock(lockobj)
 #endif
 
+
 class VMemory : public VObject {
  public:
   static inline void* malloc(size_t sz) {
@@ -43,7 +45,7 @@ class VMemory : public VObject {
 #endif
 
     if (ptr == nullptr) {
-      printf("malloc error size: %zu\n", sz);
+      VLogger::Log->logError("malloc error size: %zu\n", sz);
       error_callback(&sz);
     }
     return ptr;
@@ -64,7 +66,7 @@ class VMemory : public VObject {
 #endif
 
     if (ptr == nullptr) {
-      printf("realloc error size: %zu\n", sz);
+      VLogger::Log->logError("realloc error size: %zu\n", sz);
       error_callback(&sz);
     }
     return ptr;

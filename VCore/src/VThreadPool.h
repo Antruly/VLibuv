@@ -90,7 +90,8 @@ class VThreadPool : public VObject {
   void enqueue(F&& f, Args&&... args) {
     std::unique_lock<std::mutex> locked(task_queue_push_lock_);
     if (statistics.taskQueueSize > statistics.maxTaskQueueSize) {
-      printf("taskQueueSize:%zu more than maxTaskQueueSize%zu \n",
+      VLogger::Log->logDebug(
+          "taskQueueSize:%zu more than maxTaskQueueSize%zu \n",
              statistics.taskQueueSize.load(),
              statistics.maxTaskQueueSize.load());
       std::chrono::milliseconds(10);

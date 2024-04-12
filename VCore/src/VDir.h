@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "VCoreDefine.h"
+#include "VLibuvInclude.h"
 #if UV_VERSION_MAJOR >= 1
 #if UV_VERSION_MINOR >= 28
 #include "VObject.h"

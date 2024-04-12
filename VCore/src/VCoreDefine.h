@@ -47,3 +47,13 @@
 #define VCORE_DEFINE_COPY_FUNC(type) \
   type(const type& obj);       \
   type& operator=(const type& obj);
+
+
+#define VCORE_ANSI_COLOR_RED "\x1B[31m"
+#define VCORE_ANSI_COLOR_GREEN "\x1B[32m"
+#define VCORE_ANSI_COLOR_YELLOW "\x1B[33m"
+#define VCORE_ANSI_COLOR_BLUE "\x1B[34m"
+#define VCORE_ANSI_COLOR_MAGENTA "\x1B[35m"
+#define VCORE_ANSI_COLOR_CYAN "\x1B[36m"
+#define VCORE_ANSI_COLOR_WHITE "\x1B[37m"
+#define VCORE_ANSI_COLOR_RESET "\x1B[0m"

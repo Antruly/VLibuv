@@ -203,18 +203,17 @@ void VTcpServer::on_new_connection(VStream* tcp, int status) {
 }
 
 int VTcpServer::listenIpv4(const char* addripv4, int port, int flags) {
-
 #ifdef _WIN32
   // 获取当前线程句柄
   HANDLE hThread = GetCurrentThread();
 
   // 设置线程优先级为高
   BOOL success = SetThreadPriority(hThread, THREAD_PRIORITY_ABOVE_NORMAL);
-  #ifdef _DEBUG
+#ifdef _DEBUG
   if (success) {
-    printf("Thread priority set to above normal.\n");
+    VLogger::Log->logInfo("Thread priority set to above normal.");
   } else {
-    printf("Failed to set thread priority.\n");
+    VLogger::Log->logError("Failed to set thread priority.");
     return 1;
   }
 #endif
@@ -226,16 +225,14 @@ int VTcpServer::listenIpv4(const char* addripv4, int port, int flags) {
 
   // 获取当前线程的调度策略和参数
   if (pthread_getschedparam(pthread_self(), &policy, &param) != 0) {
-    perror("pthread_getschedparam");
+    VLogger::Log->logError("pthread_getschedparam error");
   }
 
   if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &param) != 0) {
-    perror("pthread_setschedparam");
-  }  
+    VLogger::Log->logError("pthread_setschedparam error");
+  }
 
-#endif 
-
-
+#endif
 
   this->removStatus(static_cast<VTCP_WORKER_STATUS>(VTCP_WORKER_STATUS_CLOSED |
                                                     VTCP_WORKER_STATUS_NONE));
@@ -250,6 +247,7 @@ int VTcpServer::listenIpv4(const char* addripv4, int port, int flags) {
   STD_NO_ZERO_ERROR_SHOW_INT(ret, "listenIpv4");
   return ret;
 }
+
 
 void VTcpServer::closeClient(VTcpClient* tcpClient) {
   tcpClient->close();

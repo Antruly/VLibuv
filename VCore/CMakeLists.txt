@@ -100,6 +100,8 @@ set(CORE_FILES
     ${VCORE_SRC_DIR}/VString.cpp
     ${VCORE_SRC_DIR}/VBase64.h
     ${VCORE_SRC_DIR}/VBase64.cpp
+    ${VCORE_SRC_DIR}/VLogger.h
+    ${VCORE_SRC_DIR}/VLogger.cpp
 )
 source_group(Core FILES ${CORE_FILES})
 

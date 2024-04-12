@@ -1,5 +1,6 @@
 ﻿#include "VZlib.h"
 #include <zlib.h>
+#include <VLogger.h>
 
 VZlib::VZlib()
     : error_(), zstrm_compress_(nullptr), zstrm_decompress_(nullptr) {}
@@ -40,7 +41,7 @@ RESTRAT:
   if (ret == Z_STREAM_END || ret == Z_OK ||
       (ret == Z_BUF_ERROR && zstrm.avail_out != 0)) {
 #ifdef _DEBUG
-    printf(
+    VLogger::Log->logDebug(
         "compression succed, before compression size is %d, after compressione "
         "size is %zu\n",
         zstrm.total_in, compressedData.size() - zstrm.avail_out);
@@ -75,10 +76,7 @@ RESTRAT:
 
   return true;
 ERROR_TO_END:
-#ifdef _DEBUG
-  printf(error_.c_str());
-  printf("\n");
-#endif
+  VLogger::Log->logDebug(error_.c_str());
   return false;
 }
 
@@ -112,7 +110,7 @@ RESTRAT:
   if (ret == Z_STREAM_END || ret == Z_OK ||
       (ret == Z_BUF_ERROR && zstrm.avail_out != 0)) {
 #ifdef _DEBUG
-    printf(
+    VLogger::Log->logDebug(
         "decompress succed, before decompress size is %d, after decompress "
         "size is %zu\n",
         zstrm.total_in, decompressedData.size() - zstrm.avail_out);
@@ -150,10 +148,7 @@ RESTRAT:
 
   return true;
 ERROR_TO_END:
-#ifdef _DEBUG
-  printf(error_.c_str());
-  printf("\n");
-#endif
+  VLogger::Log->logDebug(error_.c_str());
   return false;
 }
 
@@ -221,7 +216,7 @@ bool VZlib::gzipCompressChunked(const VBuf& data,
       if (ret == Z_STREAM_END || ret == Z_OK ||
         (ret == Z_BUF_ERROR && zstrm_compress_->avail_out != 0)) {
 #ifdef _DEBUG
-      printf(
+        VLogger::Log->logDebug(
           "compression succed, before compression size is %d, after "
           "compressione "
           "size is %zu\n",
@@ -276,7 +271,7 @@ bool VZlib::gzipDecompressChunked(const VBuf& compressedData,
     if (ret == Z_STREAM_END || ret == Z_OK ||
         (ret == Z_BUF_ERROR && zstrm_decompress_->avail_out != 0)) {
 #ifdef _DEBUG
-      printf(
+      VLogger::Log->logDebug(
           "decompress succed, before decompress size is %d, after decompress "
           "size is %zu\n",
           zstrm_decompress_->total_in,

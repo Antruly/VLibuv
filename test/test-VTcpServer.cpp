@@ -3,6 +3,7 @@
 #include "VTcpServer.h"
 #include "VThread.h"
 #include "VWrite.h"
+#include "VLogger.h"
 
 VTcpServer tcpServer(1,1024,50,512,1024);
 std::string getTestData =
@@ -21,12 +22,12 @@ int64_t tcpServer_writeIndex = 0;
 int64_t tcpServer_userMaxIndex = 0;
 
 void tcpServer_close(VTcp* client) {
-  printf("server close !\n");
+  VLogger::Log->logInfo("server close !\n");
 }
 
 void tcpClient_close(VTcpClient* client) {
   tcpServer_index--;
-  printf("client close !\n");
+  VLogger::Log->logInfo("client close !\n");
 }
 
 void tcpClient_write(VTcpClient* client, const VBuf* data, int status) {
@@ -36,7 +37,7 @@ void tcpClient_write(VTcpClient* client, const VBuf* data, int status) {
 
 void tcpClient_read(VTcpClient* client, const VBuf* data) {
   tcpServer_readIndex++;
-  //printf("client data:%s\n", data->getData());
+  //VLogger::Log->logInfo("client data:%s\n", data->getData());
 
   VBuf* newdata = new VBuf(data->getData(), data->size());
   client->writeData(*newdata);
@@ -53,7 +54,7 @@ void newClient(VTcpClient* client) {
   client->setReadCb(tcpClient_read);
   client->setWriteCb(tcpClient_write);
   client->clientReadStart();
-  printf("new client connect !\n");
+  VLogger::Log->logInfo("new client connect !\n");
   client->run();
 }
 
@@ -64,7 +65,7 @@ int main() {
   VThread td;
   td.start(
       [&](void* data) {
-        printf("listenIpv4:%s port:8075\n\n", "0.0.0.0");
+        VLogger::Log->logInfo("listenIpv4:%s port:8075\n\n", "0.0.0.0");
         tcpServer.listenIpv4("0.0.0.0", 8075, 0);
         tcpServer.run();
       },
@@ -72,17 +73,21 @@ int main() {
 
   while (true) {
     
-    printf("new client  curruntClient:%lld userMaxIndex:%lld maxClient:%lld\n",
+    VLogger::Log->logInfo("new client  curruntClient:%lld userMaxIndex:%lld maxClient:%lld\n",
            tcpServer_index, tcpServer_userMaxIndex, tcpServer_maxIndex);
-    printf("new client  readIndex:%lld writeIndex:%lld\n\n",
+    VLogger::Log->logInfo("new client  readIndex:%lld writeIndex:%lld\n\n",
            tcpServer_readIndex, tcpServer_writeIndex);
 
    VThreadPool::Statistics info = tcpServer.getVThreadPool()->getStatistics();
-    printf("idleThreads:%zu\n", info.idleThreads.load());
-   printf("numThreads:%zu\n", info.numThreads.load());
-    printf("taskQueueSize:%zu\n", info.taskQueueSize.load());
-   printf("workingThreads:%zu\n", info.workingThreads.load());
-   printf("workedNumber:%zu\n", info.workedNumber.load());
+    VLogger::Log->logAssert("idleThreads:%zu\n", info.idleThreads.load());
+   VLogger::Log->logError("numThreads:%zu\n", info.numThreads.load());
+    VLogger::Log->logWarn("taskQueueSize:%zu\n", info.taskQueueSize.load());
+   VLogger::Log->logInfo("closedThreads:%zu\n", info.closedThreads.load());
+   VLogger::Log->logDebug("workingThreads:%zu\n", info.workingThreads.load());
+    VLogger::Log->logVerbose("workedNumber:%zu\n", info.workedNumber.load());
+  
+
+    
     
 
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));

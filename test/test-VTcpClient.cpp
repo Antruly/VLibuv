@@ -53,7 +53,7 @@ int main() {
       if (readCacheData.size() > 0) {
       VString strData(readCacheData.getConstData(), readCacheData.size());
         readCacheData.clear();
-        printf("%s", strData.c_str());
+      VLogger::Log->logDebug("%s", strData.c_str());
 
         if (strData == VString("exit")) {
           break;

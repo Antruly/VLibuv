@@ -125,7 +125,7 @@ class VHttpParser : public VObject {
    *   unsigned major = (version >> 16) & 255;
    *   unsigned minor = (version >> 8) & 255;
    *   unsigned patch = version & 255;
-   *   printf("http_parser v%u.%u.%u\n", major, minor, patch);
+   *   VLogger::Log->logDebug("http_parser v%u.%u.%u\n", major, minor, patch);
    */
   static unsigned long httpParserVersion(void);
 

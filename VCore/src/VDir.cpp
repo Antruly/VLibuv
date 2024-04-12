@@ -8,7 +8,7 @@ VDir::VDir() {
   init();
 }
 
-VDir::~VDir() { VFREE(dir); }
+VDir::~VDir() { VCORE_VFREE(dir); }
 
 VDir::VDir(VDirent* dr) {
   dir = (uv_dir_t*)VMemory::malloc(sizeof(uv_dir_t));
