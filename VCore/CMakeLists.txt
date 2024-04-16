@@ -92,7 +92,7 @@ set(CORE_FILES
     ${VCORE_SRC_DIR}/VMemory.cpp
     ${VCORE_SRC_DIR}/VMemoryPool.h
     ${VCORE_SRC_DIR}/VMemoryPool.cpp
-	${VCORE_SRC_DIR}/VMemoryCache.h
+    ${VCORE_SRC_DIR}/VMemoryCache.h
     ${VCORE_SRC_DIR}/VMemoryCache.cpp
     ${VCORE_SRC_DIR}/VThreadPool.h
     ${VCORE_SRC_DIR}/VThreadPool.cpp
@@ -104,6 +104,8 @@ set(CORE_FILES
     ${VCORE_SRC_DIR}/VBase64.cpp
     ${VCORE_SRC_DIR}/VLogger.h
     ${VCORE_SRC_DIR}/VLogger.cpp
+    ${VCORE_SRC_DIR}/VSha256.h
+    ${VCORE_SRC_DIR}/VSha256.cpp
 )
 source_group(Core FILES ${CORE_FILES})
 

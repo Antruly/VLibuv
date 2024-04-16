@@ -1,6 +1,7 @@
 #include "VThreadPool.h"
 #include <cassert>
 
+#if defined(_MSC_VER) && _MSC_VER > 1800
 VThreadPool::VThreadPool(size_t numThreads,
                          size_t maxThreads,
                          size_t minIdleThreads,
@@ -19,12 +20,18 @@ VThreadPool::VThreadPool(size_t numThreads,
 
         this->threadRotation(locked);
 
-        if (sigal_mamage.wait_for(locked, std::chrono::milliseconds(1000)) ==
-            std::cv_status::timeout) {
 
-            this->sendWorkingSingal();
-        } else {
-        }
+		if (sigal_mamage.wait_for(locked, std::chrono::milliseconds(1000)) ==
+			std::cv_status::timeout) {
+
+	  this->sendWorkingSingal();
+  }
+		else {
+		}
+
+        
+
+
       }
 
       std::unique_lock<std::mutex> locked(worker_lock_);
@@ -40,19 +47,56 @@ VThreadPool::VThreadPool(size_t numThreads,
 
   this->createThread(numThreads);
 }
+VThreadPool::~VThreadPool() {
+	stop = true;
+	this->sendALLWorkingSingal();
+	std::unique_lock<std::mutex> locked(worker_lock_);
+	for (auto& worker : workers) {
+		if (worker.second != nullptr)
+			worker.second->join();
+	}
+	workers.clear();
+
+	thread_manage.join();
+}
+#else
+VThreadPool::VThreadPool(size_t numThreads,
+	size_t maxThreads,
+	size_t minIdleThreads,
+	size_t maxIdleThreads,
+	size_t maxTaskQueueSize)
+	: VObject(), stop(false), statistics(), sigal_working(), sigal_mamage(){
+	statistics.maxThreads.store(maxThreads);
+	statistics.minIdleThreads.store(minIdleThreads);
+	statistics.maxIdleThreads.store(maxIdleThreads);
+	statistics.maxTaskQueueSize.store(maxTaskQueueSize);
+
+	sigal_working.init(std::bind(&VThreadPool::worker_callback, this, std::placeholders::_1), &sigal_working_loop);
+
+	sigal_mamage.init(std::bind(&VThreadPool::mamage_callback, this, std::placeholders::_1), &sigal_mamage_loop);
+
+	thread_manage = std::thread([this] {
+		sigal_mamage_loop.run();
+	});
+
+	this->createThread(numThreads);
+}
 
 VThreadPool::~VThreadPool() {
-  stop = true;
-  this->sendALLWorkingSingal();
-  std::unique_lock<std::mutex> locked(worker_lock_);
-  for (auto& worker : workers) {
-    if (worker.second != nullptr)
-      worker.second->join();
-  }
-  workers.clear();
+	stop = true;
+	sigal_working.close();
+	sigal_mamage.close();
+	std::unique_lock<std::mutex> locked(worker_lock_);
+	for (auto& worker : workers) {
+		if (worker.second != nullptr)
+			worker.second->join();
+	}
+	workers.clear();
 
-  thread_manage.join();
+	thread_manage.join();
 }
+#endif
+
 
 size_t VThreadPool::createThread(size_t num) {
   if (num == 0 || num > statistics.maxThreads) {
@@ -200,27 +244,83 @@ bool VThreadPool::isStopWorking() {
   return false;
 }
 
+#if defined(_MSC_VER) && _MSC_VER > 1800
 void VThreadPool::waitWorkingSignal(std::unique_lock<std::mutex>& qlock) {
-  /*if (statistics.taskQueueSize > 0) {
-    return;
-  }*/
-  statistics.workingThreads.fetch_sub(1);
-  statistics.idleThreads.fetch_add(1);
+	/*if (statistics.taskQueueSize > 0) {
+	return;
+	}*/
+	statistics.workingThreads.fetch_sub(1);
+	statistics.idleThreads.fetch_add(1);
 
-  if (sigal_working.wait_for(qlock, std::chrono::milliseconds(100)) ==
-      std::cv_status::timeout) {
-  } else {
-  }
+	if (sigal_working.wait_for(qlock, std::chrono::milliseconds(100)) ==
+		std::cv_status::timeout) {
+	}
+	else {
+	}
 
-  // sigal_working.wait(qlock, [] { return true; });
-  statistics.idleThreads.fetch_sub(1);
-  statistics.workingThreads.fetch_add(1);
+	// sigal_working.wait(qlock, [] { return true; });
+	statistics.idleThreads.fetch_sub(1);
+	statistics.workingThreads.fetch_add(1);
 }
 
 void VThreadPool::sendWorkingSingal() {
-  sigal_working.notify_one();
+	sigal_working.notify_one();
 }
 
 void VThreadPool::sendALLWorkingSingal() {
-  sigal_working.notify_all();
+	sigal_working.notify_all();
 }
+
+#else
+void VThreadPool::worker_callback(VAsync* signal){
+	send_working_stute.store(true);
+
+}
+void VThreadPool::mamage_callback(VAsync* signal){
+
+	if (!stop) {
+		{
+			std::unique_lock<std::mutex> locked(manage_lock_);
+
+			this->threadRotation(locked);
+
+		}
+
+		std::unique_lock<std::mutex> locked(worker_lock_);
+		if (wait_delete_workers.size() > 0) {
+			for (auto& worker : wait_delete_workers) {
+				worker->join();
+				delete worker;
+			}
+			wait_delete_workers.clear();
+		}
+	}
+}
+void VThreadPool::waitWorkingSignal(std::unique_lock<std::mutex>& qlock) {
+	/*if (statistics.taskQueueSize > 0) {
+	return;
+	}*/
+	statistics.workingThreads.fetch_sub(1);
+	statistics.idleThreads.fetch_add(1);
+
+	while (true){
+		{
+			std::unique_lock<std::mutex> locked(send_worker_lock_);
+			if (!send_working_stute){
+				send_working_stute.store(false);
+				break;
+			}
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
+
+	// sigal_working.wait(qlock, [] { return true; });
+	statistics.idleThreads.fetch_sub(1);
+	statistics.workingThreads.fetch_add(1);
+}
+
+void VThreadPool::sendWorkingSingal() {
+	sigal_working.send();
+}
+
+#endif
