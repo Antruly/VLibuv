@@ -211,9 +211,9 @@ int VTcpServer::listenIpv4(const char* addripv4, int port, int flags) {
   BOOL success = SetThreadPriority(hThread, THREAD_PRIORITY_ABOVE_NORMAL);
 #ifdef _DEBUG
   if (success) {
-    VLogger::Log->logInfo("Thread priority set to above normal.");
+    Log->logInfo("Thread priority set to above normal.");
   } else {
-    VLogger::Log->logError("Failed to set thread priority.");
+    Log->logError("Failed to set thread priority.");
     return 1;
   }
 #endif
@@ -225,11 +225,11 @@ int VTcpServer::listenIpv4(const char* addripv4, int port, int flags) {
 
   // 获取当前线程的调度策略和参数
   if (pthread_getschedparam(pthread_self(), &policy, &param) != 0) {
-    VLogger::Log->logError("pthread_getschedparam error");
+    Log->logError("pthread_getschedparam error");
   }
 
   if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &param) != 0) {
-    VLogger::Log->logError("pthread_setschedparam error");
+    Log->logError("pthread_setschedparam error");
   }
 
 #endif

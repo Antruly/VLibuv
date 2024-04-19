@@ -16,18 +16,18 @@ void testString() {
     std::string expected_hash =
         "75e7ac0202eb971025b66b1ef13b84d16e596735ec13e20d6f549022eb2bce51";
 
-    VLogger::Log->logInfo("Expected SHA-256 hash: %s", expected_hash.c_str());
-    VLogger::Log->logInfo("Calculated SHA-256 hash: %s",
+    Log->logInfo("Expected SHA-256 hash: %s", expected_hash.c_str());
+    Log->logInfo("Calculated SHA-256 hash: %s",
                           hash_string_result.c_str());
 
     // 比较预期的哈希值和计算得到的哈希值
     if (hash_string_result == expected_hash) {
-      VLogger::Log->logInfo("Hashes match.");
+      Log->logInfo("Hashes match.");
     } else {
-      VLogger::Log->logError("Hashes don't match.");
+      Log->logError("Hashes don't match.");
     }
   } else {
-    VLogger::Log->logError("Failed to calculate hash of string: %s",
+    Log->logError("Failed to calculate hash of string: %s",
                            message.c_str());
   }
 }
@@ -35,7 +35,7 @@ void testString() {
 void createTestFile(const std::string& filename, const std::string& data) {
   std::ofstream file(filename);
   if (!file) {
-    VLogger::Log->logError("Failed to create file: %s", filename.c_str());
+    Log->logError("Failed to create file: %s", filename.c_str());
     return;
   }
   file << data;
@@ -54,15 +54,15 @@ void testFile() {
   sha256.init();
 
   if (!hash_result.empty()) {
-    VLogger::Log->logInfo("File Expected SHA-256 hash: %s",
+    Log->logInfo("File Expected SHA-256 hash: %s",
                           expected_hash.c_str());
-    VLogger::Log->logInfo("File Calculated SHA-256 hash: %s",
+    Log->logInfo("File Calculated SHA-256 hash: %s",
                           hash_result.c_str());
 
     if (hash_result == expected_hash) {
-      VLogger::Log->logInfo("File Hashes match.");
+      Log->logInfo("File Hashes match.");
     } else {
-      VLogger::Log->logError("File Hashes don't match.");
+      Log->logError("File Hashes don't match.");
     }
   }
 }

@@ -150,7 +150,7 @@ void VHttpResponse::initCallback() {
             "response body size is to long, max_body_cache_length_ = " +
             std::to_string(max_body_cache_length_) +
             "content_length_ = " + std::to_string(content_length_);
-        VLogger::Log->logError("%s", error_message.c_str());
+        Log->logError("%s", error_message.c_str());
       } else {
         if (use_gzip_ && size > 0) {
           VBuf gzipData(data, size);

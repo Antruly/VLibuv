@@ -154,8 +154,8 @@ void VMemoryPool::dumpPoolData() {
 
   while (block != nullptr) {
     // Dump block data
-    VLogger::Log->logInfo("Block %zu:", block_counter);
-    VLogger::Log->logInfo(
+    Log->logInfo("Block %zu:", block_counter);
+    Log->logInfo(
         "\tUsed: %.2f%% (%zu/%zu)",
         (float)(block->offset) / (float)(block->blockSize) * 100, block->offset,
         block->blockSize);
@@ -166,19 +166,19 @@ void VMemoryPool::dumpPoolData() {
       continue;
     }
 
-    VLogger::Log->logInfo("\tUnits: ========================");
+    Log->logInfo("\tUnits: ========================");
     current_unit_offset = 0;
     unit_counter = 1;
     while (current_unit_offset < block->offset) {
       unit = reinterpret_cast<SMemoryUnitHeader*>(
           reinterpret_cast<char*>(block + 1) + current_unit_offset);
-      VLogger::Log->logInfo("\t\tUnit %zu: %zu", unit_counter,
+      Log->logInfo("\t\tUnit %zu: %zu", unit_counter,
                             unit->length + sizeof(SMemoryUnitHeader));
       current_unit_offset += sizeof(SMemoryUnitHeader) + unit->length;
       unit_counter++;
     }
 
-    VLogger::Log->logInfo("\t===============================");
+    Log->logInfo("\t===============================");
     block = block->next;
     block_counter++;
   }

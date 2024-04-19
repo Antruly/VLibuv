@@ -26,13 +26,13 @@ int main() {
   int statusCode = pResponse->getStatusCode();
   std::map<std::string, std::string> responseHeaders = pResponse->getHeaders();
 
-  VLogger::Log->logDebug("response Headers:%d\n", statusCode);
+  Log->logDebug("response Headers:%d\n", statusCode);
   for (auto header : responseHeaders) {
-    VLogger::Log->logDebug("%s: %s\n", header.first.c_str(),
+    Log->logDebug("%s: %s\n", header.first.c_str(),
                                 header.second.c_str());
   }
   
-  VLogger::Log->logDebug("response Status:%d\n", statusCode);
+  Log->logDebug("response Status:%d\n", statusCode);
   switch (statusCode) {
     case 200:{
 
@@ -41,7 +41,7 @@ int main() {
       break;
     case 301:
     case 302: {
-      VLogger::Log->logDebug("response Status:%d Location:%s\n",
+      Log->logDebug("response Status:%d Location:%s\n",
                                   statusCode, pResponse->getLocation().c_str());
       bRet = client.sendRequest(pResponse->getLocation());
       if (!bRet) {
@@ -62,7 +62,7 @@ int main() {
   }
  
 
-  VLogger::Log->logDebug("response body data:\n");
+  Log->logDebug("response body data:\n");
   while (client.waitRecvResponse() > 0) {
     VBuf recvBuf = client.getRecvResponseBody();
     index += recvBuf.size();
@@ -71,10 +71,10 @@ int main() {
 
   if (recvBody.size() > 0) {
     VString str(recvBody.getConstData(), recvBody.size());
-    VLogger::Log->logDebug("%s", str.c_str());
+    Log->logDebug("%s", str.c_str());
     recvBody.clear();
   }
-  VLogger::Log->logDebug("\nresponse body size:%zu\n", index);
+  Log->logDebug("\nresponse body size:%zu\n", index);
 
   client.getVTcpClient()->close();
   return 0;

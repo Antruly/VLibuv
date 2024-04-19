@@ -89,10 +89,10 @@ int main1() {
         VBuf writeBuf;
         ssl.sslParserData(readBuf, writeBuf);
       } else {
-        VLogger::Log->logDebugWarn("readData is null\n");
+        Log->logDebugWarn("readData is null\n");
       }
     } else {
-      VLogger::Log->logDebugWarn("writeData is null\n");
+      Log->logDebugWarn("writeData is null\n");
     }
   });
 

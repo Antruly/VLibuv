@@ -51,9 +51,15 @@
 #define VLOGGER_DEFINE_LOG_TYPE_DEBUG(Type) \
   inline void log##Type(const char* format, ...) {}
 
+#define Log VLogger::defaultVLogger()
+
 class VLogger : public VObject {
  public:
-  static VLogger* Log;
+  static VLogger* defaultVLogger() {
+    static VLogger log;
+    return &log;
+  }
+  
 
   // 获取当前日期
   std::string getCurrentDate();

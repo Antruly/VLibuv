@@ -32,6 +32,12 @@ void VLoop::callback_walk(uv_handle_t* handle, void* arg) {
 
 
 
+VLoop* VLoop::defaultVLoop() {
+  static VLoop default_loop;
+  default_loop.init();
+  return &default_loop;
+}
+
 int VLoop::init() { 
     int ret = uv_loop_init(VLOOP_HANDLE); 
     this->setHandleData();

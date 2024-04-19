@@ -10,7 +10,7 @@ void setCallback(VWebSocketClient& websocketClient) {
   websocketClient.setWebsocketConnectiondCb(
       [&](VWebSocketClient* websocketClient, int status) {
     if (status < 0) {
-          VLogger::Log->logDebugError("websocket connect error \n");
+          Log->logDebugError("websocket connect error \n");
       return;
     }
   });
@@ -18,14 +18,14 @@ void setCallback(VWebSocketClient& websocketClient) {
   websocketClient.setWebsocketRecvBodyCb(
       [&](VWebSocketClient* websocketClient, const VBuf* data) -> bool {
     
-      VLogger::Log->logDebug("%s\n", data->toString().c_str());
+      Log->logDebug("%s\n", data->toString().c_str());
       return true;
   });
 
   websocketClient.setWebsocketSendFinishCb(
       [&](VWebSocketClient* websocketClient, int status) {
     if (status < 0) {
-          VLogger::Log->logDebugError("websocket connect error \n");
+          Log->logDebugError("websocket connect error \n");
       return;
     }
   });
@@ -33,7 +33,7 @@ void setCallback(VWebSocketClient& websocketClient) {
    websocketClient.setWebsocketCloseCb(
       [&](VWebSocketClient* websocketClient, int status) {
     if (status < 0) {
-          VLogger::Log->logDebugError("websocket close error \n");
+          Log->logDebugError("websocket close error \n");
       return;
     }
     isClose = true;
@@ -41,14 +41,14 @@ void setCallback(VWebSocketClient& websocketClient) {
 
    websocketClient.setConnectiondCb([&](VHttpClient* httpClient, int status) {
      if (status < 0) {
-       VLogger::Log->logDebugError("tcp connect error \n");
+       Log->logDebugError("tcp connect error \n");
        return;
      }
    });
     websocketClient.setCloseCb(
        [&](VHttpClient* httpClient, int status) {
          if (status < 0) {
-       VLogger::Log->logDebugError("tcp close error \n");
+       Log->logDebugError("tcp close error \n");
            return;
          }
          isClose = true;
@@ -69,7 +69,7 @@ int main() {
   }
 
   uint64_t times = websocketClient.websocketPing();
-  VLogger::Log->logDebug("%s ping times %" PRIu64 " ms \n",
+  Log->logDebug("%s ping times %" PRIu64 " ms \n",
                          websocketUrl2.c_str(), times);
  
 

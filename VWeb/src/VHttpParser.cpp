@@ -236,7 +236,7 @@ ParsedURL VHttpParser::parseUrl(const std::string& url) {
   int parse_result =
       http_parser_parse_url(url.c_str(), url.length(), 0, &parsed_url);
   if (parse_result != 0) {
-    VLogger::Log->logError("Failed to parse URL:%s\n", url.c_str());
+    Log->logError("Failed to parse URL:%s\n", url.c_str());
     return result;  // 返回一个空的解析结果
   }
 

@@ -75,7 +75,7 @@ void VSha256::update(const std::string& data) {
 void VSha256::updateFileHash(const std::string& filename, const size_t readOnceSize) {
   std::ifstream file(filename, std::ios::binary);
   if (!file) {
-    VLogger::Log->logError("Failed to open file: %s", filename.c_str());
+    Log->logError("Failed to open file: %s", filename.c_str());
     return;
   }
 

@@ -173,7 +173,7 @@ void VHttpRequest::initCallback() {
             "request body size is to long, max_body_cache_length_ = " +
             std::to_string(max_body_cache_length_) +
                         "content_length_ = " + std::to_string(content_length_);
-        VLogger::Log->logError("%s", error_message.c_str());
+        Log->logError("%s", error_message.c_str());
       } else {
         body_.appandData(data, size);
       }

@@ -29,7 +29,7 @@ class VSha256 : public VObject {
   void digestToFile(const std::string& fileName) {
     std::ofstream file(fileName);
     if (!file) {
-      VLogger::Log->logError("Failed to create file: %s", fileName.c_str());
+      Log->logError("Failed to create file: %s", fileName.c_str());
       return;
     }
 

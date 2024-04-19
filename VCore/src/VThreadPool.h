@@ -91,7 +91,7 @@ class VThreadPool : public VObject {
   void enqueue(F&& f, Args&&... args) {
     std::unique_lock<std::mutex> locked(task_queue_push_lock_);
     if (statistics.taskQueueSize > statistics.maxTaskQueueSize) {
-      VLogger::Log->logDebug(
+      Log->logDebug(
           "taskQueueSize:%zu more than maxTaskQueueSize%zu \n",
              statistics.taskQueueSize.load(),
              statistics.maxTaskQueueSize.load());
@@ -141,11 +141,7 @@ class VThreadPool : public VObject {
   Statistics statistics;
   std::mutex worker_lock_;
   std::mutex manage_lock_;
-#if defined(_MSC_VER) && _MSC_VER > 1800
-  std::condition_variable sigal_working;
-  std::condition_variable sigal_mamage;
-#else
-
+#if defined(_MSC_VER) && _MSC_VER <= 1400
   std::mutex send_worker_lock_;
   std::atomic<bool> send_working_stute;
   void worker_callback(VAsync* signal);
@@ -154,6 +150,10 @@ class VThreadPool : public VObject {
   VLoop sigal_mamage_loop;
   VAsync sigal_working;
   VAsync sigal_mamage;
+#else
+  std::condition_variable sigal_working;
+  std::condition_variable sigal_mamage;
+  
 #endif
 
   std::thread thread_manage;

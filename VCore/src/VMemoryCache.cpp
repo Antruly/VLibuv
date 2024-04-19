@@ -269,12 +269,12 @@ void VMemoryCacheFrame::free() {
 
 void VMemoryCacheFrame::appandFrame(VMemoryCacheFrame* frame) {
   if (next_frame != nullptr) {
-    VLogger::Log->logWarn(
+    Log->logWarn(
         "AppandFrame VMemoryCacheFrame, this next_frame is not nullptr. You "
         "can call insertFrame");
   }
   if (frame->prev_frame != nullptr) {
-    VLogger::Log->logWarn(
+    Log->logWarn(
         "AppandFrame VMemoryCacheFrame, frame prev_frame is not nullptr. You "
         "can call insertFrame");
   }
@@ -468,12 +468,12 @@ std::vector<VMemoryCacheFrame*> VMemoryCacheBlock::removeUnIdle() {
 
 void VMemoryCacheBlock::appandBlock(VMemoryCacheBlock* block) {
   if (next_block != nullptr) {
-    VLogger::Log->logWarn(
+    Log->logWarn(
         "AppandBlock VMemoryCacheBlock, this next_block is not nullptr. You "
         "can call insertBlock");
   }
   if (block->prev_block != nullptr) {
-    VLogger::Log->logWarn(
+    Log->logWarn(
         "AppandBlock VMemoryCacheBlock, block prev_block is not nullptr. You "
         "can call insertBlock");
   }

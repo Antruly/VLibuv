@@ -4,6 +4,7 @@
 
 class VLoop : public VHandle {
  public:
+  static VLoop* defaultVLoop();
   VCORE_DEFINE_INHERIT_FUNC(VLoop);
   VCORE_DEFINE_COPY_FUNC_DELETE(VLoop);
 

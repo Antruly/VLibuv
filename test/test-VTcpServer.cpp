@@ -34,12 +34,12 @@ int64_t tcpServer_writeIndex = 0;
 int64_t tcpServer_userMaxIndex = 0;
 
 void tcpServer_close(VTcp* client) {
-  VLogger::Log->logInfo("server close !\n");
+  Log->logInfo("server close !\n");
 }
 
 void tcpClient_close(VTcpClient* client) {
   tcpServer_index--;
-  VLogger::Log->logInfo("client close !\n");
+  Log->logInfo("client close !\n");
 }
 
 void tcpClient_write(VTcpClient* client, const VBuf* data, int status) {
@@ -49,14 +49,14 @@ void tcpClient_write(VTcpClient* client, const VBuf* data, int status) {
 
 void tcpClient_read(VTcpClient* client, const VBuf* data) {
   tcpServer_readIndex++;
-  //VLogger::Log->logInfo("client data:%s\n", data->getData());
+  //Log->logInfo("client data:%s\n", data->getData());
   if (data->size() == 1) {
       //VBuf* newdata = new VBuf(data->getData(), data->size());
       VBuf* newdata = new VBuf(getTestData);
       client->writeData(*newdata);
   }
   else if (data->toString().find("GET ") != -1) {
-      //VBuf* newdata = new VBuf(getTestTime1 + VLogger::Log->getCurrentDateTime() + getTestTime2);
+      //VBuf* newdata = new VBuf(getTestTime1 + Log->getCurrentDateTime() + getTestTime2);
       VBuf* newdata = new VBuf(baiduRecv,10498);
       client->writeData(*newdata);
 
@@ -77,7 +77,7 @@ void newClient(VTcpClient* client) {
   client->setReadCb(tcpClient_read);
   client->setWriteCb(tcpClient_write);
   client->clientReadStart();
-  VLogger::Log->logInfo("new client connect !\n");
+  Log->logInfo("new client connect !\n");
   client->run();
 }
 
@@ -88,7 +88,7 @@ int main() {
   VThread td;
   td.start(
       [&](void* data) {
-        VLogger::Log->logInfo("listenIpv4:%s port:8075\n\n", "0.0.0.0");
+        Log->logInfo("listenIpv4:%s port:8075\n\n", "0.0.0.0");
         tcpServer.listenIpv4("0.0.0.0", 8075, 0);
         tcpServer.run();
       },
@@ -96,18 +96,18 @@ int main() {
 
   while (true) {
     
-    VLogger::Log->logInfo("new client  curruntClient:%lld userMaxIndex:%lld maxClient:%lld\n",
+    Log->logInfo("new client  curruntClient:%lld userMaxIndex:%lld maxClient:%lld\n",
            tcpServer_index, tcpServer_userMaxIndex, tcpServer_maxIndex);
-    VLogger::Log->logInfo("new client  readIndex:%lld writeIndex:%lld\n\n",
+    Log->logInfo("new client  readIndex:%lld writeIndex:%lld\n\n",
            tcpServer_readIndex, tcpServer_writeIndex);
 
    VThreadPool::Statistics info = tcpServer.getVThreadPool()->getStatistics();
-    VLogger::Log->logInfo("idleThreads:%zu\n", info.idleThreads.load());
-   VLogger::Log->logInfo("numThreads:%zu\n", info.numThreads.load());
-    VLogger::Log->logInfo("taskQueueSize:%zu\n", info.taskQueueSize.load());
-   VLogger::Log->logInfo("closedThreads:%zu\n", info.closedThreads.load());
-   VLogger::Log->logInfo("workingThreads:%zu\n", info.workingThreads.load());
-    VLogger::Log->logInfo("workedNumber:%zu\n", info.workedNumber.load());
+    Log->logInfo("idleThreads:%zu\n", info.idleThreads.load());
+   Log->logInfo("numThreads:%zu\n", info.numThreads.load());
+    Log->logInfo("taskQueueSize:%zu\n", info.taskQueueSize.load());
+   Log->logInfo("closedThreads:%zu\n", info.closedThreads.load());
+   Log->logInfo("workingThreads:%zu\n", info.workingThreads.load());
+    Log->logInfo("workedNumber:%zu\n", info.workedNumber.load());
   
 
     

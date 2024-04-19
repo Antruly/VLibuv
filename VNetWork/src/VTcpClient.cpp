@@ -112,7 +112,7 @@ void VTcpClient::echo_write(VWrite* req, int status) {
   this->tcp_run = true;
   this->removStatus(VTCP_WORKER_STATUS_PROCESSING);
   if (status) {
-    VLogger::Log->logDebug("Write error %s\n", uv_strerror(status));
+    Log->logDebug("Write error %s\n", uv_strerror(status));
   }
   if (tcp_write_cb)
     tcp_write_cb(this, req->getSrcBuf(), status);
@@ -156,9 +156,9 @@ void VTcpClient::echo_read(VStream* client, ssize_t nread, const VBuf* buf) {
   } else if (nread < 0) {
 
     if (nread != UV_EOF) {
-      VLogger::Log->logDebug("Read error %sn", uv_err_name(nread));
+      Log->logDebug("Read error %sn", uv_err_name(nread));
     } else {
-      VLogger::Log->logDebugError("client disconnectn");
+      Log->logDebugError("client disconnectn");
     }
 
     client->close(
@@ -304,10 +304,10 @@ void VTcpClient::readData(VTcp* client, const VBuf& data) {
     VBuf newData;
     newData.clone(data);
     newData.resize(data.size() + 1);
-    VLogger::Log->logDebug("IP: %s, Port: %d reaData \n", peer_ip, ntohs(addrs.sin_port));
+    Log->logDebug("IP: %s, Port: %d reaData \n", peer_ip, ntohs(addrs.sin_port));
     newData.clear();
   } else {
-    VLogger::Log->logDebugError("Failed to get peer IP address\n");
+    Log->logDebugError("Failed to get peer IP address\n");
   }
 #endif
 #endif
@@ -330,13 +330,13 @@ void VTcpClient::on_connection(VConnect* req, int status) {
 
   uv_ip4_name(reinterpret_cast<sockaddr_in*>(&addr), ip, sizeof(ip));
   port = ntohs(reinterpret_cast<sockaddr_in*>(&addr)->sin_port);
-  VLogger::Log->logDebug("connection ip:%s port:%d \n", ip, port);
+  Log->logDebug("connection ip:%s port:%d \n", ip, port);
 #endif  // endif
 
   if (status < 0) {
     this->setStatus(VTCP_WORKER_STATUS_ERROR_UNKNOWN);
 
-    VLogger::Log->logDebugError("on_connection error %s\n", uv_err_name(status));
+    Log->logDebugError("on_connection error %s\n", uv_err_name(status));
   } else {
     this->setStatus(VTCP_WORKER_STATUS_CONNECTED);
     tcp->readStart(
@@ -530,10 +530,10 @@ void VTcpClient::connectiond(int status) {
   tcp->getpeername((sockaddr*)&addrs, &peer_ip_len);
   char peer_ip[INET_ADDRSTRLEN];
   if (inet_ntop(AF_INET, &(addrs.sin_addr), peer_ip, INET_ADDRSTRLEN)) {
-    VLogger::Log->logDebug("Client connected from IP: %s, Port: %d", peer_ip,
+    Log->logDebug("Client connected from IP: %s, Port: %d", peer_ip,
                           ntohs(addrs.sin_port));
   } else {
-    VLogger::Log->logError("Failed to get peer IP address");
+    Log->logError("Failed to get peer IP address");
   }
 
 #endif

@@ -71,7 +71,7 @@ void VWebSocketClient::initWebsocketCallback(bool isSsl) {
           "VWebSocketClient body size is to long, max_body_cache_length_ = " +
           std::to_string(max_body_cache_length_) +
           "websocket_body_ size = " + std::to_string(websocket_body_.size());
-      VLogger::Log->logError("%s", error_message.c_str());
+      Log->logError("%s", error_message.c_str());
     } else {
       websocket_body_.appandData(data, len);
       if (websocket_client_recv_body_cb) {
@@ -253,12 +253,12 @@ bool VWebSocketClient::websocketConnect(const std::string& url) {
   std::map<std::string, std::string> responseHeaders =
       this->getVHttpResponse()->getHeaders();
 
-  // VLogger::Log->logDebug("response Headers:%d\n", statusCode);
+  // Log->logDebug("response Headers:%d\n", statusCode);
   /*for (auto header : responseHeaders) {
-    VLogger::Log->logDebug("%s: %s\n", header.first.c_str(), header.second.c_str());
+    Log->logDebug("%s: %s\n", header.first.c_str(), header.second.c_str());
   }*/
 
-  // VLogger::Log->logDebug("response Status:%d\n", statusCode);
+  // Log->logDebug("response Status:%d\n", statusCode);
   while (true) {
     switch (statusCode) {
       case 101: {
@@ -274,7 +274,7 @@ bool VWebSocketClient::websocketConnect(const std::string& url) {
       case 303:
       case 307:
       case 308: {
-        // VLogger::Log->logDebug("response Status:%d Location:%s\n",
+        // Log->logDebug("response Status:%d Location:%s\n",
         // statusCode,this->getVHttpResponse()->getLocation().c_str());
         int bRet = this->sendRequest(this->getVHttpResponse()->getLocation());
         if (!bRet) {

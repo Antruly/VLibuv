@@ -4,8 +4,6 @@
 #include <fcntl.h>
 #include <fstream>
 
-VLogger* VLogger::Log = new VLogger();
-
 VLogger::VLogger() : close_file(false), enable(false){
   char* buffer = new char[10240]();
   size_t size = 10240;

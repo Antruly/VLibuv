@@ -102,9 +102,9 @@ int main() {
     double timeWithPool = withPool();
     double timeWithCachePool = withCachePool(caceh);
 
-    VLogger::Log->logInfo("系统原生耗时：%lf ms", timeWithoutCache);
-    VLogger::Log->logInfo("使用内存池耗时：%lf ms", timeWithPool);
-    VLogger::Log->logInfo("使用缓存加内存池耗时：%lf ms", timeWithCachePool);
+    Log->logInfo("系统原生耗时：%lf ms", timeWithoutCache);
+    Log->logInfo("使用内存池耗时：%lf ms", timeWithPool);
+    Log->logInfo("使用缓存加内存池耗时：%lf ms", timeWithCachePool);
 
     VMemoryCacheBlock* block =
         caceh.getHeaderCacheBlock(std::this_thread::get_id());
