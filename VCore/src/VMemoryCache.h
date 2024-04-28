@@ -10,9 +10,9 @@
 #include "VObject.h"
 #include <queue>
 class VMemoryCache;
-class VMemoryCacheBlock;
-class VMemoryCacheFrame;
-class VMemoryCacheUnit;
+struct VMemoryCacheBlock;
+struct VMemoryCacheFrame;
+struct VMemoryCacheUnit;
 
 struct VMemoryCacheUnit {
   enum class VMEMORY_CACHE_FLAGS {

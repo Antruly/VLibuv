@@ -1,7 +1,7 @@
 #include "VThreadPool.h"
 #include <cassert>
 
-#if defined(_MSC_VER) && _MSC_VER <= 1400
+#if defined(_MSC_VER) && _MSC_VER <= 1800
 VThreadPool::VThreadPool(size_t numThreads,
                          size_t maxThreads,
                          size_t minIdleThreads,
@@ -240,7 +240,7 @@ bool VThreadPool::isStopWorking() {
   return false;
 }
 
-#if defined(_MSC_VER) && _MSC_VER <= 1400
+#if defined(_MSC_VER) && _MSC_VER <= 1800
 void VThreadPool::worker_callback(VAsync* signal) {
   send_working_stute.store(true);
 }

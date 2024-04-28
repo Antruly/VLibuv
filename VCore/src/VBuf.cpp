@@ -195,12 +195,12 @@ void VBuf::cloneData(const char* bf, size_t sz){
 	memcpy(buf.base, bf, sz);	
 }
 
-void VBuf::appand(const VBuf& srcBuf) {
+void VBuf::append(const VBuf& srcBuf) {
   this->resize(buf.len + srcBuf.buf.len);
   memcpy(buf.base + buf.len - srcBuf.buf.len, srcBuf.buf.base, srcBuf.buf.len);
 }
 
-void VBuf::appandData(const char* bf, size_t sz) {
+void VBuf::appendData(const char* bf, size_t sz) {
 
     this->resize(buf.len + sz);
   memcpy(buf.base + buf.len - sz, bf, sz);
@@ -208,7 +208,7 @@ void VBuf::appandData(const char* bf, size_t sz) {
 
 void VBuf::insertData(uint64_t point, const char* bf, size_t sz) {
   if (point >= buf.len) {
-    this->appandData(bf, sz);
+    this->appendData(bf, sz);
   } else {
     this->resize(buf.len + sz);
     memmove(buf.base + point + sz, buf.base + point, buf.len - point - sz);

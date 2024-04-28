@@ -73,7 +73,7 @@ void VWebSocketClient::initWebsocketCallback(bool isSsl) {
           "websocket_body_ size = " + std::to_string(websocket_body_.size());
       Log->logError("%s", error_message.c_str());
     } else {
-      websocket_body_.appandData(data, len);
+      websocket_body_.appendData(data, len);
       if (websocket_client_recv_body_cb) {
         if (websocket_client_recv_body_cb(this, &websocket_body_)) {
           websocket_body_.clear();
@@ -495,8 +495,8 @@ VBuf VWebSocketClient::getRecvWebsocketBody(size_t count) {
     recvBuf.clear();
   } else if (count < recvBuf.size()) {
     VBuf newBuf;
-    retBuf.appandData(recvBuf.getConstData(), count);
-    newBuf.appandData(recvBuf.getConstData() + count, recvBuf.size() - count);
+    retBuf.appendData(recvBuf.getConstData(), count);
+    newBuf.appendData(recvBuf.getConstData() + count, recvBuf.size() - count);
     recvBuf = newBuf;
   } else {
     retBuf = recvBuf;

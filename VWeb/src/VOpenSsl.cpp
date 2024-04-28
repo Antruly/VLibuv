@@ -243,10 +243,10 @@ void VOpenSsl::getWriteBioData(VBuf& data) {
     readIndex =
         BIO_read(write_bio_, cache_write_buf_, VWEB_VOPENSSL_MAX_CACHE_BUFFER_SIZE);
     if (readIndex > 0) {
-      dtBuf.appandData(cache_write_buf_, readIndex);
+      dtBuf.appendData(cache_write_buf_, readIndex);
     }
   } while (readIndex > 0);
-  data.appand(dtBuf);
+  data.append(dtBuf);
 
   if (tcp_client_ != nullptr) {
     STD_NO_ZERO_ERROR_SHOW(tcp_client_->writeData(dtBuf), "VOpenSsl::getWriteBioData writeData");
@@ -279,11 +279,11 @@ void VOpenSsl::getReadSslData(VBuf& data) {
   do {
     readIndex = SSL_read(ssl_, cache_read_buf_, VWEB_VOPENSSL_MAX_CACHE_BUFFER_SIZE);
     if (readIndex > 0) {
-      dtBuf.appandData(cache_read_buf_, readIndex);
+      dtBuf.appendData(cache_read_buf_, readIndex);
     }
   } while (readIndex > 0);
 
-  data.appand(dtBuf);
+  data.append(dtBuf);
 
   if (dtBuf.size() > 0) {
     if (ssl_read_cb_)

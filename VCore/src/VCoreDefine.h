@@ -62,3 +62,5 @@
 #define VCORE_ANSI_COLOR_CYAN "\x1B[36m"
 #define VCORE_ANSI_COLOR_WHITE "\x1B[37m"
 #define VCORE_ANSI_COLOR_RESET "\x1B[0m"
+
+#define VCORE_MS_SLEEP(mtime) std::this_thread::sleep_for(std::chrono::milliseconds(mtime))

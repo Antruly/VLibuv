@@ -239,7 +239,7 @@ bool VZlib::gzipCompressChunked(const VBuf& data,
 
     size_t have = tempCompressed_.size() - zstrm_compress_->avail_out;
     if (have > 0) {
-      compressedData.appandData(tempCompressed_.getConstData(), have);
+      compressedData.appendData(tempCompressed_.getConstData(), have);
     }
   } while (zstrm_compress_->avail_out == 0);
 
@@ -293,7 +293,7 @@ bool VZlib::gzipDecompressChunked(const VBuf& compressedData,
 
     size_t have = tempDecompressed_.size() - zstrm_decompress_->avail_out;
     if (have > 0) {
-      decompressedData.appandData(tempDecompressed_.getConstData(), have);
+      decompressedData.appendData(tempDecompressed_.getConstData(), have);
     }
   } while (zstrm_decompress_->avail_out == 0);
 

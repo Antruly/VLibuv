@@ -15,7 +15,7 @@ void writeCallback(VTcpClient* client, const VBuf* data, int status) {
   STD_L_ZERO_ERROR_SHOW(status, "writeCallback is error");
 }
 void readCallback(VTcpClient* client, const VBuf* data) {
-  readCacheData.appand(*data);
+  readCacheData.append(*data);
 }
 void connectiondCallback(int status) {
   STD_L_ZERO_ERROR_SHOW(status, "connectiondCallback is error");

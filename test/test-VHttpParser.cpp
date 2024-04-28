@@ -34,7 +34,7 @@ void setCallback(VHttpParser& httpParser) {
   httpParser.setBodyCallback(
       [&](VHttpParser* http_parser, const char* data, size_t size) -> int {
         VBuf body;
-        body.appandData(data, size);
+        body.appendData(data, size);
         return 0;
       });
 

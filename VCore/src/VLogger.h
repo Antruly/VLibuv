@@ -25,28 +25,29 @@
 #define VLOGGER_LOG_DEBUG_COLOR VCORE_ANSI_COLOR_CYAN
 #define VLOGGER_LOG_VERBOSE_COLOR VCORE_ANSI_COLOR_WHITE
 
-#define VLOGGER_DEFINE_LOG_TYPE(Type, Name, Colour)                        \
- private:                                                                  \
-  std::ofstream logfile_##Type;                                            \
-                                                                           \
- public:                                                                   \
-  void log##Type(const char* format, ...) {                                \
-    va_list args;                                                          \
-    va_start(args, format);                                                \
-    int size = vsnprintf(nullptr, 0, format, args);                        \
-    if (size < 0) {                                                        \
-      va_end(args);                                                        \
-      return;                                                              \
-    }                                                                      \
-    char* buffer = new char[size + 1];                                     \
-    vsnprintf(buffer, size + 1, format, args);                             \
-    std::string filename;                                                  \
-    std::string logMessage;                                                \
-    log(logFileDirectory + std::string("/") + #Type, logfile_##Type, Name, \
-        buffer, Colour, filename, logMessage);                             \
-    delete[] buffer;                                                       \
-    va_end(args);                                                          \
-  }
+#define VLOGGER_DEFINE_LOG_TYPE(Type, Name, Colour)                         \
+private:                                                                    \
+    std::ofstream logfile_##Type;                                          \
+                                                                            \
+public:                                                                     \
+    void log##Type(const char* format, ...) {                              \
+        va_list args;                                                      \
+        va_start(args, format);                                            \
+        int size = _vscprintf(format, args);                               \
+        if (size < 0) {                                                    \
+            va_end(args);                                                  \
+            return;                                                        \
+        }                                                                   \
+        char* buffer = new char[size + 1];                                 \
+        vsnprintf_s(buffer, size + 1, _TRUNCATE, format, args);            \
+        std::string filename;                                              \
+        std::string logMessage;                                            \
+        log(logFileDirectory + std::string("/") + #Type, logfile_##Type, Name, \
+            buffer, Colour, filename, logMessage);                         \
+        delete[] buffer;                                                   \
+        va_end(args);                                                      \
+    }
+
 
 #define VLOGGER_DEFINE_LOG_TYPE_DEBUG(Type) \
   inline void log##Type(const char* format, ...) {}
@@ -70,13 +71,15 @@ class VLogger : public VObject {
   // 获取当前日期时间
   std::string getCurrentDateTime();
 
+  void setEnable(bool eb);
+
  private:
   std::time_t time_now;
   std::string logFileDirectory;
   bool close_file;
   bool enable;
 
-  void setEnable(bool eb);
+ 
   void setCloseFile(bool closefile);
   // 获取完整的日志文件路径
   std::string getLogFilePath(const std::string& filename);

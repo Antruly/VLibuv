@@ -5,6 +5,33 @@
 #include "VTcpClient.h"
 #include "VWebDefine.h"
 
+struct VHttpPart {
+  std::string key;
+  std::string value;
+  std::string content_type;
+};
+
+class VHttpMultiPart {
+public:
+  VHttpMultiPart();
+  ~VHttpMultiPart();
+
+  void init();
+
+  void append(const VHttpPart &dataPart);
+  void appendFinally(const VHttpPart &dataPart);
+
+  const VBuf &getConstData()const;
+
+  const std::string getMuitiPartString() const;
+
+  std::string generateBoundary();
+
+private:
+  std::string multi_boundary = "";
+  VBuf data;
+};
+
 class VHttpClient : public VObject {
  public:
   VHttpClient();
@@ -30,7 +57,7 @@ class VHttpClient : public VObject {
                    const uint64_t& maxTimeout = 30000);
 
   // 发送请求（请求方法和报头,post和put 方法还需要调用sendBody）
-  bool sendRequest(const std::string& url);
+  bool sendRequest(const std::string& url, const VBuf& body = VBuf());
   // 发送body（仅post和put方法需要调用）
   bool sendRequestBody(const VBuf& body);
   // 开始读取数据

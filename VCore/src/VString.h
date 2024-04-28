@@ -71,6 +71,10 @@ class VString :public VObject {
 
   std::string ReplaceAll(const std::string& search, const std::string& replace);
 
+  std::string urlEncode(const std::string& value);
+
+  std::string urlDecode(const std::string& value);
+
 // Convert ASCII to UTF-8
   std::string ASCIIToUTF8() const;
 

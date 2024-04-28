@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "VHttpClient.h"
 #include <cassert>
+#include <random>
 
 VHttpClient::VHttpClient()
     : tcp_client_(new VTcpClient()),
@@ -204,7 +205,7 @@ bool VHttpClient::sendRequest(
   return true;
 }
 
-bool VHttpClient::sendRequest(const std::string& url) {
+bool VHttpClient::sendRequest(const std::string& url, const VBuf& body) {
   if (tcp_client_ == nullptr || request_ == nullptr || response_ == nullptr) {
     return false;
   }
@@ -225,9 +226,19 @@ bool VHttpClient::sendRequest(const std::string& url) {
     return false;
   }
 
-  if (!request_->sendRequest(false)) {
-    return false;
+  if (body.size() > 0)
+  {
+	  request_->setBody(body);
+	  if (!request_->sendRequest(true)) {
+		  return false;
+	  }
   }
+  else{
+	  if (!request_->sendRequest(false)) {
+		  return false;
+	  }
+  }
+  
 
  
 
@@ -302,8 +313,8 @@ VBuf VHttpClient::getRecvResponseBody(size_t count) {
     recvBuf.clear();
   } else if (count < recvBuf.size()) {
     VBuf newBuf;
-    retBuf.appandData(recvBuf.getConstData(), count);
-    newBuf.appandData(recvBuf.getConstData() + count, recvBuf.size() - count);
+    retBuf.appendData(recvBuf.getConstData(), count);
+    newBuf.appendData(recvBuf.getConstData() + count, recvBuf.size() - count);
     recvBuf = newBuf;
   } else {
     retBuf = recvBuf;
@@ -443,7 +454,12 @@ bool VHttpClient::connect(const std::string& url) {
   }
 
   if (!tcp_client_->getVLoop()->isActive()) {
-    tcp_client_->run(UV_RUN_ONCE);
+	  while ((tcp_client_->getStatus() &
+		  VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CONNECTING) > 0){
+		  tcp_client_->run(UV_RUN_NOWAIT);
+		  VCORE_MS_SLEEP(1);
+	  }
+	 
   }
   else {
     tcp_client_->waitConnectFinish();
@@ -458,6 +474,65 @@ bool VHttpClient::connect(const std::string& url) {
   return false;
   
 
+}
+
+void VHttpMultiPart::append(const VHttpPart &dataPart) {
+  
+    data.appendData(getMuitiPartString().c_str(), getMuitiPartString().size());
+  data.appendData("\r\n", 2);
+    std::string key = std::string("Content-Disposition: form-data; name=\"") +
+                      dataPart.key + std::string("\"\r\n");
+  data.appendData(key.c_str(), key.size());
+
+  if (!dataPart.content_type.empty()) {
+    std::string type = std::string("Content-Type: ") + dataPart.content_type +
+                       std::string("\r\n");
+    data.appendData(type.c_str(), type.size());
+  }
+  data.appendData("\r\n", 2);
+  data.appendData(dataPart.value.c_str(), dataPart.value.size());
+  data.appendData("\r\n", 2);
+
+  
+}
+
+void VHttpMultiPart::appendFinally(const VHttpPart &dataPart) {
+  append(dataPart);
+  data.appendData(getMuitiPartString().c_str(), getMuitiPartString().size());
+  data.appendData("--", 2);
+}
+
+const VBuf &VHttpMultiPart::getConstData() const { return data; }
+
+VHttpMultiPart::VHttpMultiPart() { init(); }
+
+VHttpMultiPart::~VHttpMultiPart() {}
+
+void VHttpMultiPart::init() {
+  multi_boundary = "---------" + generateBoundary();
+  data.clear();
+}
+
+const std::string VHttpMultiPart::getMuitiPartString() const {
+
+  return multi_boundary;
+}
+
+std::string VHttpMultiPart::generateBoundary() {
+  // 生成一个足够长的随机字符串作为 boundary
+  static const std::string charset =
+      "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const int length = 32; // 设置 boundary 的长度
+  std::string boundary;
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dis(0, charset.length() - 1);
+
+  for (int i = 0; i < length; ++i) {
+    boundary += charset[dis(gen)];
+  }
+
+  return boundary;
 }
 
 

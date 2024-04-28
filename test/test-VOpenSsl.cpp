@@ -17,7 +17,7 @@ bool connect(VTcpClient& client, const std::string& ip, int port) {
 void readData(VTcpClient& client, VBuf& buf, uint64_t maxTimeout = 30000) {
   VBuf readBuf;
   client.setReadCb(
-      [&readBuf](VTcpClient* tcp, const VBuf* buf) { readBuf.appand(*buf); });
+      [&readBuf](VTcpClient* tcp, const VBuf* buf) { readBuf.append(*buf); });
   client.clientReadStart();
 
   size_t readIndex = 0;
@@ -75,9 +75,9 @@ int main1() {
   ssl.setSslWriteCb([&ssl, &client, &isConnect, &writeSslConnectData, &writSsleSendData](
           VOpenSsl* vssl, const VBuf* buf, int status) {
     if (isConnect) {
-      writSsleSendData.appand(*buf);
+      writSsleSendData.append(*buf);
     } else {
-      writeSslConnectData.appand(*buf);
+      writeSslConnectData.append(*buf);
     }
 
     if (buf->size() > 0) {
@@ -99,9 +99,9 @@ int main1() {
   ssl.setSslReadCb([&ssl, &client, &isConnect, &readSslConnectData,
                     &readSslSendData](VOpenSsl* vssl, const VBuf* buf) {
     if (isConnect) {
-      readSslSendData.appand(*buf);
+      readSslSendData.append(*buf);
     } else {
-      readSslConnectData.appand(*buf);
+      readSslConnectData.append(*buf);
     }
   });
 
@@ -146,9 +146,9 @@ int main2() {
   ssl.setSslWriteCb([&ssl, &client, &isConnect, &writeSslConnectData, &writSsleSendData](
           VOpenSsl* ssl, const VBuf* buf, int status) {
     if (isConnect) {
-      writSsleSendData.appand(*buf);
+      writSsleSendData.append(*buf);
     } else {
-      writeSslConnectData.appand(*buf);
+      writeSslConnectData.append(*buf);
     }
 
   });
@@ -156,9 +156,9 @@ int main2() {
   ssl.setSslReadCb([&ssl, &client, &isConnect, &readSslConnectData,
                     &readSslSendData](VOpenSsl* ssl, const VBuf* buf) {
     if (isConnect) {
-      readSslSendData.appand(*buf);
+      readSslSendData.append(*buf);
     } else {
-      readSslConnectData.appand(*buf);
+      readSslConnectData.append(*buf);
     }
   });
 

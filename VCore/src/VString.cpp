@@ -4,6 +4,9 @@
 #include <cstring> // For std::memset
 #include <memory> // For std::unique_ptr
 #include "VString.h"
+#include <iomanip>
+#include <cctype>
+#include <assert.h>
 
 #ifdef _WIN32
 const char* GBK_LOCALE_NAME = ".936";  // GBK在Windows下的locale name
@@ -152,6 +155,65 @@ std::string VString::ReplaceAll(const std::string& search,
   return result;
 }
 
+unsigned char ToHex(unsigned char x)
+{
+	return  x > 9 ? x + 55 : x + 48;
+}
+
+unsigned char FromHex(unsigned char x)
+{
+	unsigned char y;
+	if (x >= 'A' && x <= 'Z') y = x - 'A' + 10;
+	else if (x >= 'a' && x <= 'z') y = x - 'a' + 10;
+	else if (x >= '0' && x <= '9') y = x - '0';
+	else assert(0);
+	return y;
+}
+
+std::string VString::urlEncode(const std::string& str)
+{
+	std::string strTemp = "";
+	size_t length = str.length();
+	for (size_t i = 0; i < length; i++)
+	{
+		if (isalnum((unsigned char)str[i]) ||
+			(str[i] == '-') ||
+			(str[i] == '_') ||
+			(str[i] == '.') ||
+			(str[i] == '~'))
+			strTemp += str[i];
+		else if (str[i] == ' ')
+			strTemp += "+";
+		else
+		{
+			strTemp += '%';
+			strTemp += ToHex((unsigned char)str[i] >> 4);
+			strTemp += ToHex((unsigned char)str[i] % 16);
+		}
+	}
+	return strTemp;
+}
+
+std::string VString::urlDecode(const std::string& str)
+{
+	std::string strTemp = "";
+	size_t length = str.length();
+	for (size_t i = 0; i < length; i++)
+	{
+		if (str[i] == '+') strTemp += ' ';
+		else if (str[i] == '%')
+		{
+			assert(i + 2 < length);
+			unsigned char high = FromHex((unsigned char)str[++i]);
+			unsigned char low = FromHex((unsigned char)str[++i]);
+			strTemp += high * 16 + low;
+		}
+		else strTemp += str[i];
+	}
+	return strTemp;
+}
+
+
 // Convert ASCII to UTF-8
 
 std::string VString::ASCIIToUTF8() const {
@@ -195,50 +257,39 @@ std::wstring UTF8ToUnicode(const std::string& str) {
   return convert.from_bytes(str);
 }
 
+// 将 Unicode 编码的字符串转换为 ANSI 编码的字符串
 std::string UnicodeToANSI(const std::wstring& wstr) {
-  std::string ret;
-  std::mbstate_t state;
-  std::memset(&state, 0, sizeof(state));  // Initialize the state
-  const wchar_t* src = wstr.data();
-  size_t len = std::wcsrtombs(nullptr, &src, 0, &state);
-  if (static_cast<size_t>(-1) != len) {
-    std::unique_ptr<char[]> buff(new char[len + 1]);
-    len = std::wcsrtombs(buff.get(), &src, len, &state);
-    if (static_cast<size_t>(-1) != len) {
-      ret.assign(buff.get(), len);
-    }
-  }
-  return ret;
+	// 使用系统默认的 ANSI 代码页进行转换
+	std::wstring_convert<std::codecvt<wchar_t, char, std::mbstate_t>> converter;
+	return converter.to_bytes(wstr);
 }
 
+
+// 将 ANSI 编码的字符串转换为 Unicode 编码的字符串
 std::wstring ANSIToUnicode(const std::string& str) {
-  std::wstring ret;
-  std::mbstate_t state;
-  std::memset(&state, 0, sizeof(state));  // Initialize the state
-  const char* src = str.data();
-  size_t len = std::mbsrtowcs(nullptr, &src, 0, &state);
-  if (static_cast<size_t>(-1) != len) {
-    std::unique_ptr<wchar_t[]> buff(new wchar_t[len + 1]);
-    len = std::mbsrtowcs(buff.get(), &src, len, &state);
-    if (static_cast<size_t>(-1) != len) {
-      ret.assign(buff.get(), len);
-    }
-  }
-  return ret;
+	// 使用系统默认的 ANSI 代码页进行转换
+	std::wstring_convert<std::codecvt<wchar_t, char, std::mbstate_t>> converter;
+	return converter.from_bytes(str);
 }
 
+// 将 UTF-8 编码的字符串转换为 ANSI 编码的字符串
 std::string UTF8ToANSI(const std::string& str) {
-  return UnicodeToANSI(UTF8ToUnicode(str));
+	return UnicodeToANSI(UTF8ToUnicode(str));
 }
 
+// 将 ANSI 编码的字符串转换为 UTF-8 编码的字符串
 std::string ANSIToUTF8(const std::string& str) {
-  return UnicodeToUTF8(ANSIToUnicode(str));
+	return UnicodeToUTF8(ANSIToUnicode(str));
 }
 
 std::string GBKToUTF8(const std::string& gbkData) {
-  std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> convert;
-  std::wstring wString = ANSIToUnicode(gbkData);  // string => wstring
-  return convert.to_bytes(wString);               // wstring => utf-8
+	// 使用系统默认的 ANSI 代码页进行转换
+	std::wstring_convert<std::codecvt<wchar_t, char, std::mbstate_t>> converter;
+	std::wstring wstr = converter.from_bytes(gbkData);
+
+	// 将 wchar_t 字符串转换为 UTF-8 编码的 std::string
+	std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> utf8Converter;
+	return utf8Converter.to_bytes(wstr);
 }
 
 std::string ReplaceAll(const std::string& str,

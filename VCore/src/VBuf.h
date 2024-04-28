@@ -37,8 +37,8 @@ class VBuf final : public VObject {
   void resize(size_t sz);
   void setData(const char* bf, size_t sz, bool clean = true);
   void cloneData(const char* bf, size_t sz);
-  void appand(const VBuf& srcBuf);
-  void appandData(const char* bf, size_t sz);
+  void append(const VBuf& srcBuf);
+  void appendData(const char* bf, size_t sz);
 
   void insertData(uint64_t point, const char* bf, size_t sz);
   void rewriteData(uint64_t point, const char* bf, size_t sz);

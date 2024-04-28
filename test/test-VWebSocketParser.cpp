@@ -7,7 +7,7 @@ void setCallback(VWebSocketParser& webSocketParser) {
   webSocketParser.setFrameHeaderCallback(
       [&](VWebSocketParser* http_parser) -> int { 
           VBuf mask;
-        mask.appandData(http_parser->getWebSocketParser()->mask, 4);
+        mask.appendData(http_parser->getWebSocketParser()->mask, 4);
 
           return 0; 
       });
@@ -21,7 +21,7 @@ void setCallback(VWebSocketParser& webSocketParser) {
               body.getData(), data, size);
         }
         else {
-          body.appandData(data, size);
+          body.appendData(data, size);
         }
         
         return 0;

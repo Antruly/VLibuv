@@ -158,7 +158,7 @@ void VHttpResponse::initCallback() {
             error_message = "gzipDecompress is error";
           } 
         } else {
-          body_.appandData(data, size); 
+          body_.appendData(data, size); 
         }
       }
      
@@ -470,8 +470,8 @@ bool VHttpResponse::sendResponse() {
   } else {
     // Original body
     response_data_.clear();
-    response_data_.appandData(response.c_str(), response.size());
-    response_data_.appandData(body_.getConstData(), body_.size());
+    response_data_.appendData(response.c_str(), response.size());
+    response_data_.appendData(body_.getConstData(), body_.size());
   }
   this->initSendCallback();
   // Send the HTTP request

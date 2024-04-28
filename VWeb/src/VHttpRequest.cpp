@@ -175,7 +175,7 @@ void VHttpRequest::initCallback() {
                         "content_length_ = " + std::to_string(content_length_);
         Log->logError("%s", error_message.c_str());
       } else {
-        body_.appandData(data, size);
+        body_.appendData(data, size);
       }
       if (http_request_recv_body_cb) {
         if (http_request_recv_body_cb(this, &body_))
@@ -477,7 +477,7 @@ bool VHttpRequest::sendRequestBegin(VBuf& sendBuf, bool isSend) {
                         (url_parser_.query.empty() ? "" : "?") +
                         url_parser_.query + " HTTP/1.1\r\n";
 
-   sendBuf.appandData(request.c_str(), request.size());
+   sendBuf.appendData(request.c_str(), request.size());
   if (isSend) {
      return this->writeData(sendBuf);
     //tcp_client_->writeData(sendBuf);
@@ -536,7 +536,7 @@ bool VHttpRequest::sendRequestHeader(VBuf& sendBuf, bool isSend) {
 
   request += "\r\n";
 
-  sendBuf.appandData(request.c_str(), request.size());
+  sendBuf.appendData(request.c_str(), request.size());
   if (isSend) {
     return this->writeData(sendBuf);
     //tcp_client_->writeData(sendBuf);
@@ -553,11 +553,11 @@ bool VHttpRequest::sendRequestBody(VBuf& sendBuf, bool isSend) {
     // Gzip compress the body
     VBuf gzip_compressed_data;
     this->zlib_->gzipCompress(&body_, gzip_compressed_data);
-    sendBuf.appandData(gzip_compressed_data.getConstData(),
+    sendBuf.appendData(gzip_compressed_data.getConstData(),
                        gzip_compressed_data.size());
   } else {
     // Original body
-    sendBuf.appandData(body_.getConstData(), body_.size());
+    sendBuf.appendData(body_.getConstData(), body_.size());
   }
 
    if (isSend) {
@@ -570,7 +570,7 @@ bool VHttpRequest::sendRequestBody(VBuf& sendBuf, bool isSend) {
 bool VHttpRequest::sendRequestCRLF(VBuf& sendBuf, bool isSend) {
 
   std::string request = "\r\n";
-  sendBuf.appandData(request.c_str(), request.size());
+  sendBuf.appendData(request.c_str(), request.size());
   return this->writeData(sendBuf);
   //tcp_client_->writeData(sendBuf);
   return true;
@@ -581,8 +581,8 @@ bool VHttpRequest::sendRequestCRLF(VBuf& sendBuf, bool isSend) {
 bool VHttpRequest::sendRequestChunked(VBuf& sendBuf, bool isEnd) {
 
   std::string request = std::to_string(sendBuf.size()) + "\r\n";
-  sendBuf.appandData(request.c_str(), request.size());
-  sendBuf.appandData("\r\n", 2);
+  sendBuf.appendData(request.c_str(), request.size());
+  sendBuf.appendData("\r\n", 2);
   tcp_client_->writeNewData(sendBuf);
   if (isEnd) {
     const static VBuf endBuf("0\r\n\r\n",5);

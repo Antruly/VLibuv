@@ -6,3 +6,6 @@
 #include "VDir.h"
 #include "VIntPtr.h"
 #include "VString.h"
+#include "VMemoryCache.h"
+#include "VSha256.h"
+#include "VLogger.h"

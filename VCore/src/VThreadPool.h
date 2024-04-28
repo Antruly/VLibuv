@@ -10,6 +10,7 @@
 #include "VObject.h"
 #include "VAsync.h"
 
+
 #define VTHREADPOOL_MAX_SIZE 1024
 #define VTHREADPOOL_MAX_IDLE_SIZE 100
 #define VTHREADPOOL_MIN_IDLE_SIZE 5
@@ -141,7 +142,7 @@ class VThreadPool : public VObject {
   Statistics statistics;
   std::mutex worker_lock_;
   std::mutex manage_lock_;
-#if defined(_MSC_VER) && _MSC_VER <= 1400
+#if defined(_MSC_VER) && _MSC_VER <= 1800
   std::mutex send_worker_lock_;
   std::atomic<bool> send_working_stute;
   void worker_callback(VAsync* signal);
