@@ -106,6 +106,7 @@ void VTcpClient::on_close(VHandle* client) {
     this->async_close->send();
 
   this->setStatus(VTCP_WORKER_STATUS_CLOSED, true);
+  this->loop->stop();
 }
 
 void VTcpClient::echo_write(VWrite* req, int status) {
@@ -158,7 +159,7 @@ void VTcpClient::echo_read(VStream* client, ssize_t nread, const VBuf* buf) {
     if (nread != UV_EOF) {
       Log->logDebug("Read error %sn", uv_err_name(nread));
     } else {
-      Log->logDebugError("client disconnectn");
+      Log->logDebugWarn("client disconnectn");
     }
 
     client->close(
@@ -271,7 +272,11 @@ void VTcpClient::close() {
     this->tcp->close(
         std::bind(&VTcpClient::on_close, this, std::placeholders::_1));
   }
+  if (loop->isActive())
   this->setStatus(VTCP_WORKER_STATUS_CLOSING);
+  else {
+    this->setStatus(VTCP_WORKER_STATUS_CLOSED);
+  }
 }
 
 VTCP_WORKER_STATUS VTcpClient::getStatus() {

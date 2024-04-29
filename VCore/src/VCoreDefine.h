@@ -4,6 +4,42 @@
 #endif
 
 
+// Visual C++ 6.0
+#define _MSC_VER_VS6 1200// _MSC_VER = 1200
+
+// Visual C++ .NET 2002 (7.0)
+#define _MSC_VER_VS2002 1300// _MSC_VER = 1300
+
+// Visual C++ .NET 2003 (7.1)
+#define _MSC_VER_VS2003 1310// _MSC_VER = 1310
+
+// Visual C++ 2005 (8.0)
+#define _MSC_VER_VS2005 1400// _MSC_VER = 1400
+
+// Visual C++ 2008 (9.0)
+#define _MSC_VER_VS2008 1500// _MSC_VER = 1500
+
+// Visual C++ 2010 (10.0)
+#define _MSC_VER_VS2010 1600// _MSC_VER = 1600
+
+// Visual C++ 2012 (11.0)
+#define _MSC_VER_VS2012 1700// _MSC_VER = 1700
+
+// Visual C++ 2013 (12.0)
+#define _MSC_VER_VS2013 1800// _MSC_VER = 1800
+
+// Visual C++ 2015 (14.0)
+#define _MSC_VER_VS2015 1900// _MSC_VER = 1900
+
+// Visual C++ 2017 (15.0)
+#define _MSC_VER_VS2017 1910// _MSC_VER = 1910
+
+// Visual C++ 2019 (16.0)
+#define _MSC_VER_VS2019 1920// _MSC_VER = 1920
+
+// Visual C++ 2022 (17.0)
+#define _MSC_VER_VS2022 1939// _MSC_VER = 1939
+
 #define VCORE_VFREE(_data)      \
   if (_data != nullptr) { \
     VMemory::free(_data); \

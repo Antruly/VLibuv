@@ -17,6 +17,8 @@ VHttpClient::VHttpClient(VTcpClient* tcp_client)
 
 VHttpClient::~VHttpClient() {
   if (own_tcp_client_ && tcp_client_ != nullptr) {
+    tcp_client_->close();
+    tcp_client_->waitCloseFinish();
     delete tcp_client_;
   }
   delete request_;
@@ -394,7 +396,15 @@ void VHttpClient::setResponseRecvBodyCb(
 }
 
 int VHttpClient::run(uv_run_mode md) {
-  return tcp_client_->run(md);
+  return tcp_client_->run(md); }
+
+void VHttpClient::close() {
+  if (tcp_client_ != nullptr) {
+    tcp_client_->close();
+    
+    tcp_client_->waitCloseFinish();
+  }
+
 }
 
 bool VHttpClient::connect(const std::string& url) {

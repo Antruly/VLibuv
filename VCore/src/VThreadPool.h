@@ -9,13 +9,20 @@
 #include <vector>
 #include "VObject.h"
 #include "VAsync.h"
+#include "VMutex.h"
 
+#if defined(_MSC_VER) && _MSC_VER > _MSC_VER_VS2012
+#include <condition_variable>
+#endif
 
 #define VTHREADPOOL_MAX_SIZE 1024
 #define VTHREADPOOL_MAX_IDLE_SIZE 100
 #define VTHREADPOOL_MIN_IDLE_SIZE 5
 #define VTHREADPOOL_MAX_TASK_QUEUE_SIZE 100
 #define VTHREADPOOL_DEFAULT_SIZE 10
+
+
+
 
 class VThreadPool : public VObject {
  private:
@@ -129,6 +136,7 @@ class VThreadPool : public VObject {
   void sendWorkingSingal();
   void sendALLWorkingSingal();
 
+
  private:
  
   void push(TaskType task);
@@ -142,7 +150,7 @@ class VThreadPool : public VObject {
   Statistics statistics;
   std::mutex worker_lock_;
   std::mutex manage_lock_;
-#if defined(_MSC_VER) && _MSC_VER <= 1800
+#if defined(_MSC_VER) && _MSC_VER <= _MSC_VER_VS2012
   std::mutex send_worker_lock_;
   std::atomic<bool> send_working_stute;
   void worker_callback(VAsync* signal);

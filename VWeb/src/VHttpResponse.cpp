@@ -337,13 +337,13 @@ void VHttpResponse::setUseGzip(bool useGzip) {
     } else {
       headers_["Accept-Encoding"] =
           static_cast<VString>(headers_["Accept-Encoding"])
-              .ReplaceAll(",gzip", "");
+              .replaceAll(",gzip", "");
       headers_["Accept-Encoding"] =
           static_cast<VString>(headers_["Accept-Encoding"])
-              .ReplaceAll("gzip,", "");
+              .replaceAll("gzip,", "");
       headers_["Accept-Encoding"] =
           static_cast<VString>(headers_["Accept-Encoding"])
-              .ReplaceAll("gzip", "");
+              .replaceAll("gzip", "");
     }
   }
  

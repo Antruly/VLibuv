@@ -102,6 +102,8 @@ class VHttpClient : public VObject {
 
   virtual int run(uv_run_mode md = UV_RUN_DEFAULT);
 
+  void close();
+
  protected:
   virtual bool connect(const std::string& url);
 

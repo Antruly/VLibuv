@@ -236,15 +236,26 @@ int VTcpServer::listenIpv4(const char* addripv4, int port, int flags) {
 
   this->removStatus(static_cast<VTCP_WORKER_STATUS>(VTCP_WORKER_STATUS_CLOSED |
                                                     VTCP_WORKER_STATUS_NONE));
-  this->setStatus(VTCP_WORKER_STATUS_LISTENING);
+  this->setStatus(VTCP_WORKER_STATUS_STARTING);
   int ret;
   ret = this->getVTcp()->bindIpv4(addripv4, port, flags);
+  if (ret != 0)
+  {
+	  this->setStatus(VTCP_WORKER_STATUS_ERROR_UNKNOWN);
+  }
   STD_NO_ZERO_ERROR_SHOW_INT(ret, "bindIpv4");
+  
   ret = this->getVTcp()->listen(
       std::bind(&VTcpServer::on_new_connection, this, std::placeholders::_1,
                 std::placeholders::_2),
       128);
+  if (ret != 0)
+  {
+	  this->setStatus(VTCP_WORKER_STATUS_ERROR_UNKNOWN);
+  }
   STD_NO_ZERO_ERROR_SHOW_INT(ret, "listenIpv4");
+
+  this->setStatus(VTCP_WORKER_STATUS_LISTENING);
   return ret;
 }
 

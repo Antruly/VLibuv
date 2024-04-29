@@ -106,6 +106,8 @@ set(CORE_FILES
     ${VCORE_SRC_DIR}/VLogger.cpp
     ${VCORE_SRC_DIR}/VSha256.h
     ${VCORE_SRC_DIR}/VSha256.cpp
+    ${VCORE_SRC_DIR}/VMutex.h
+    ${VCORE_SRC_DIR}/VMutex.cpp
 )
 source_group(Core FILES ${CORE_FILES})
 

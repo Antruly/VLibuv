@@ -102,12 +102,12 @@ int main() {
            tcpServer_readIndex, tcpServer_writeIndex);
 
    VThreadPool::Statistics info = tcpServer.getVThreadPool()->getStatistics();
-    Log->logInfo("idleThreads:%zu\n", info.idleThreads.load());
-   Log->logInfo("numThreads:%zu\n", info.numThreads.load());
-    Log->logInfo("taskQueueSize:%zu\n", info.taskQueueSize.load());
-   Log->logInfo("closedThreads:%zu\n", info.closedThreads.load());
-   Log->logInfo("workingThreads:%zu\n", info.workingThreads.load());
-    Log->logInfo("workedNumber:%zu\n", info.workedNumber.load());
+    Log->logInfo("idleThreads:%ld\n", info.idleThreads.load());
+   Log->logInfo("numThreads:%ld\n", info.numThreads.load());
+    Log->logInfo("taskQueueSize:%ld\n", info.taskQueueSize.load());
+   Log->logInfo("closedThreads:%ld\n", info.closedThreads.load());
+   Log->logInfo("workingThreads:%ld\n", info.workingThreads.load());
+    Log->logInfo("workedNumber:%ld\n", info.workedNumber.load());
   
 
     
