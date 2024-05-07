@@ -7,7 +7,7 @@ VGroup::VGroup() {
   this->init();
 }
 
-VGroup::~VGroup() {}
+VGroup::~VGroup() { VCORE_VFREE(this->group); }
 
 VGroup::VGroup(const VGroup& obj) {
   if (this->group != nullptr) {
@@ -33,5 +33,9 @@ int VGroup::init() {
   memset(this->group, 0, sizeof(uv_group_t));
   return 0;
 }
+int VGroup::getOsGroup(uv_uid_t gid) {
+  return uv_os_get_group(this->group, gid);
+}
+void VGroup::freeGroup() { uv_os_free_group(this->group); }
 #endif
 #endif

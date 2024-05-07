@@ -14,6 +14,11 @@ class VEnvItem :
   VCORE_DEFINE_COPY_FUNC(VEnvItem);
 
   int init();
+ int osEnviron(int *count);
+ void freeEnviron(int count);
+ int getenv(const char *name, char *buffer, size_t *size);
+ int setenv(const char *name, const char *value);
+ int uvUnsetenv(const char *name);
 
  private:
   uv_env_item_t* env_item = nullptr;

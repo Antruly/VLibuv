@@ -15,6 +15,12 @@ class VUtsname :
 
   int init();
 
+  int gethostname(char *buffer, size_t *size);
+
+  int uname();
+
+  uv_utsname_t *getUtsname() const;
+
  private:
   uv_utsname_t* utsname = nullptr;
 };

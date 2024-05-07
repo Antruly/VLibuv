@@ -15,6 +15,8 @@ class VStatfs :
 
   int init();
 
+  uv_statfs_t *getStatfs() const;
+
  private:
   uv_statfs_t* statfs = nullptr;
 };

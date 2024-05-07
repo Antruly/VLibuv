@@ -7,7 +7,7 @@ VEnvItem::VEnvItem() {
   this->init();
 }
 
-VEnvItem::~VEnvItem() {}
+VEnvItem::~VEnvItem() { VCORE_VFREE(this->env_item); }
 
 VEnvItem::VEnvItem(const VEnvItem& obj) {
   if (this->env_item != nullptr) {
@@ -33,5 +33,18 @@ int VEnvItem::init() {
   memset(this->env_item, 0, sizeof(uv_env_item_t));
   return 0;
 }
+int VEnvItem::osEnviron(int *count) {
+  return uv_os_environ(&this->env_item, count);
+}
+void VEnvItem::freeEnviron(int count) {
+  uv_os_free_environ(this->env_item, count);
+}
+int VEnvItem::getenv(const char *name, char *buffer, size_t *size) {
+  return uv_os_getenv(name, buffer, size);
+}
+int VEnvItem::setenv(const char *name, const char *value) {
+  return uv_os_setenv(name, value);
+}
+int VEnvItem::uvUnsetenv(const char *name) { return uv_os_unsetenv(name); }
 #endif
 #endif

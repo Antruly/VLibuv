@@ -8,7 +8,7 @@ VMetrics::VMetrics() {
   this->init();
 }
 
-VMetrics::~VMetrics() {}
+VMetrics::~VMetrics() { VCORE_VFREE(this->metrics); }
 
 VMetrics::VMetrics(const VMetrics& obj) {
   if (this->metrics != nullptr) {
@@ -34,6 +34,16 @@ int VMetrics::init() {
   memset(this->metrics, 0, sizeof(uv_metrics_t));
   return 0;
 }
+
+int VMetrics::info(VLoop *loop) {
+  return uv_metrics_info(OBJ_VLOOP_HANDLE(*loop), this->metrics);
+}
+
+uint64_t VMetrics::idleTime(VLoop *loop) {
+  return uv_metrics_idle_time(OBJ_VLOOP_HANDLE(*loop));
+}
+
+uv_metrics_t *VMetrics::getMetrics() const { return this->metrics; }
 
 #endif  // UV_VERSION_MINOR >= 45
 #endif  // UV_VERSION_MAJOR >= 1

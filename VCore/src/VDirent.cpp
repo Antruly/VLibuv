@@ -5,7 +5,7 @@ VDirent::VDirent() {
   this->init();
 }
 
-VDirent::~VDirent() {}
+VDirent::~VDirent() { VCORE_VFREE(this->dirent); }
 
 VDirent::VDirent(const VDirent& obj) {
   if (this->dirent != nullptr) {

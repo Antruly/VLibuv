@@ -7,7 +7,7 @@ VStatfs::VStatfs() {
   this->init();
 }
 
-VStatfs::~VStatfs() {}
+VStatfs::~VStatfs() { VCORE_VFREE(this->statfs); }
 
 VStatfs::VStatfs(const VStatfs& obj) {
   if (this->statfs != nullptr) {
@@ -33,5 +33,10 @@ int VStatfs::init() {
   memset(this->statfs, 0, sizeof(uv_statfs_t));
   return 0;
 }
+
+uv_statfs_t * VStatfs::getStatfs()const{
+	return statfs;
+}
+
 #endif
 #endif

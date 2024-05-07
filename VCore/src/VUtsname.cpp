@@ -8,7 +8,7 @@ VUtsname::VUtsname() {
   this->init();
 }
 
-VUtsname::~VUtsname() {}
+VUtsname::~VUtsname() { VCORE_VFREE(this->utsname); }
 
 VUtsname::VUtsname(const VUtsname& obj) {
   if (this->utsname != nullptr) {
@@ -34,5 +34,10 @@ int VUtsname::init() {
   memset(this->utsname, 0, sizeof(uv_utsname_t));
   return 0;
 }
+int VUtsname::gethostname(char *buffer, size_t *size) {
+  return uv_os_gethostname(buffer, size);
+}
+int VUtsname::uname() { return uv_os_uname(utsname); }
+uv_utsname_t *VUtsname::getUtsname() const { return utsname; }
 #endif
 #endif

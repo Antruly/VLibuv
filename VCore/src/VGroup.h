@@ -14,6 +14,8 @@ class VGroup :
   VCORE_DEFINE_COPY_FUNC(VGroup);
 
   int init();
+  int getOsGroup(uv_uid_t gid);
+  void freeGroup();
 
  private:
   uv_group_t* group = nullptr;

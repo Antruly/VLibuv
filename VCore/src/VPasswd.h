@@ -15,6 +15,11 @@ class VPasswd :
 
   int init();
 
+  int getOsPasswd();
+  int getOsPasswd(uv_uid_t uid);
+  void freePasswd();
+
+  uv_passwd_t *getPasswd() const;
  private:
   uv_passwd_t* passwd = nullptr;
 };

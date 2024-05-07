@@ -1,9 +1,6 @@
 ﻿#include "VInterfaceAddress.h"
 #include "VMemory.h"
 
-
-std::vector<VInterfaceAddress> VInterfaceAddress::addrs;
-
 VInterfaceAddress::VInterfaceAddress(const VInterfaceAddress& addrs) {
   interface_address =
       (uv_interface_address_t*)VMemory::malloc(sizeof(uv_interface_address_t));
@@ -13,18 +10,19 @@ VInterfaceAddress::VInterfaceAddress(const VInterfaceAddress& addrs) {
 
 VInterfaceAddress& VInterfaceAddress::operator=(
     const VInterfaceAddress& addrs) {
-  memcpy(interface_address, addrs.interface_address,
+  memcpy(this->interface_address, addrs.interface_address,
          sizeof(uv_interface_address_t));
   return *this;
 }
 
-std::vector<VInterfaceAddress> VInterfaceAddress::getAllInterfaceAddresses() {
+std::vector<VInterfaceAddress>& VInterfaceAddress::getAllInterfaceAddresses() {
+  static std::vector<VInterfaceAddress> addrs;
   addrs.clear();
   uv_interface_address_t* paddrs;
   int count = 0;
   uv_interface_addresses(&paddrs, &count);
 
-  for (int i = 0; i < count; i++) {
+  for (int i = 0; i < count; ++i) {
     VInterfaceAddress vaddrs;
     if (vaddrs.interface_address == nullptr) {
       vaddrs.interface_address = (uv_interface_address_t*)VMemory::malloc(
@@ -41,32 +39,30 @@ std::vector<VInterfaceAddress> VInterfaceAddress::getAllInterfaceAddresses() {
   return addrs;
 }
 
-void* VInterfaceAddress::getInterfaceAddress() const {
-  return interface_address;
+uv_interface_address_t *VInterfaceAddress::getInterfaceAddress() const {
+  return this->interface_address;
 }
 
 VInterfaceAddress::VInterfaceAddress() {
-  interface_address =
+  this->interface_address =
       (uv_interface_address_t*)VMemory::malloc(sizeof(uv_interface_address_t));
 }
 
 VInterfaceAddress::~VInterfaceAddress() {
-  if (interface_address != nullptr) {
-    free(interface_address);
-    interface_address = nullptr;
-  }
+  VCORE_VFREE(this->interface_address);
 }
 
 int VInterfaceAddress::init() {
-  memset(interface_address, 0, sizeof(uv_interface_address_t));
+  memset(this->interface_address, 0, sizeof(uv_interface_address_t));
   return 0;
 }
 
 std::string VInterfaceAddress::getIpv4Addrs() {
   char buffer[512] = {0};
 
-  if (interface_address->address.address4.sin_family == AF_INET) {
-    uv_ip4_name(&interface_address->address.address4, buffer, sizeof(buffer));
+  if (this->interface_address->address.address4.sin_family == AF_INET) {
+    uv_ip4_name(&this->interface_address->address.address4, buffer,
+                sizeof(buffer));
   }
 
   std::string strRet(buffer);
@@ -76,8 +72,9 @@ std::string VInterfaceAddress::getIpv4Addrs() {
 std::string VInterfaceAddress::getIpv6Addrs() {
   char buffer[512] = {0};
 
-  if (interface_address->address.address4.sin_family == AF_INET6) {
-    uv_ip6_name(&interface_address->address.address6, buffer, sizeof(buffer));
+  if (this->interface_address->address.address4.sin_family == AF_INET6) {
+    uv_ip6_name(&this->interface_address->address.address6, buffer,
+                sizeof(buffer));
   }
 
   std::string strRet(buffer);

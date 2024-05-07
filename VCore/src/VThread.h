@@ -9,16 +9,18 @@ class VThread : public VObject {
   VCORE_DEFINE_INHERIT_FUNC(VThread);
   VCORE_DEFINE_COPY_FUNC_DELETE(VThread);
 
-  int start(std::function<void(void*)> start_cb, void* arg) {
-    thread_start_cb = start_cb;
-    this->vdata = arg;
-    return uv_thread_create(thread, callback_start, this);
-  }
+  int start(std::function<void(void*)> start_cb, void* arg);
 
   int init();
   int join();
-
+  int equal(const VThread* t);
+  int equal(const uv_thread_t* t);
+ 
   uv_thread_t* getThread() const;
+
+  static int equal(const VThread* t1, const VThread* t2);
+  static int equal(const uv_thread_t* t1, const uv_thread_t* t2);
+  static uv_thread_t self();
 
  protected:
   std::function<void(void*)> thread_start_cb;

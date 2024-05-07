@@ -7,7 +7,7 @@ VPasswd::VPasswd() {
   this->init();
 }
 
-VPasswd::~VPasswd() {}
+VPasswd::~VPasswd() { VCORE_VFREE(this->passwd); }
 
 VPasswd::VPasswd(const VPasswd& obj) {
   if (this->passwd != nullptr) {
@@ -33,5 +33,9 @@ int VPasswd::init() {
   memset(this->passwd, 0, sizeof(uv_passwd_t));
   return 0;
 }
+int VPasswd::getOsPasswd() { return uv_os_get_passwd(passwd); }
+int VPasswd::getOsPasswd(uv_uid_t uid) { return uv_os_get_passwd2(passwd, uid); }
+void VPasswd::freePasswd() { uv_os_free_passwd(passwd); }
+uv_passwd_t *VPasswd::getPasswd() const { return this->passwd; }
 #endif
 #endif

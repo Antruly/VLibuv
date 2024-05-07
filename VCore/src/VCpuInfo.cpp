@@ -6,7 +6,7 @@ VCpuInfo::VCpuInfo() {
   this->init();
 }
 
-VCpuInfo::~VCpuInfo() {}
+VCpuInfo::~VCpuInfo() { VCORE_VFREE(this->cpu_info); }
 
 VCpuInfo::VCpuInfo(const VCpuInfo& obj) {
   if (this->cpu_info != nullptr) {

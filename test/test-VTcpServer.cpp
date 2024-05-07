@@ -78,6 +78,10 @@ void newClient(VTcpClient* client) {
   client->setWriteCb(tcpClient_write);
   client->clientReadStart();
   Log->logInfo("new client connect !\n");
+  VBuf* newdata = new VBuf("");
+  VBuf* newdata2 = new VBuf("");
+  client->writeData(*newdata);
+  client->writeData(*newdata2);
   client->run();
 }
 
