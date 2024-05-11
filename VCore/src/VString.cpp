@@ -14,6 +14,9 @@ const char *GBK_LOCALE_NAME = ".936"; // GBK在Windows下的locale name
 const char *GBK_LOCALE_NAME =
     "zh_CN.GB18030"; // Linux下的locale名是"zh_CN.GB18030"
 #endif
+static VString StrEncoding("你好VLibuv!");
+static VString::Encoding encoding = StrEncoding.detectEncoding();
+
 
 VString::VString(const std::string &str) : data(str) {}
 VString::VString(const char *str, size_t count) : data(str, count) {}
@@ -188,7 +191,7 @@ std::string VString::urlDecode(const std::string &str) {
   return strTemp;
 }
 
-    // Convert UTF-8 to ASCII
+// Convert UTF-8 to ASCII
 std::string VString::utf8ToAscll() const {
   std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
   std::u32string utf32String = converter.from_bytes(data);
@@ -210,6 +213,9 @@ std::u32string VString::utf8ToUtf32() const {
 }
 
 std::string VString::gbkToUtf8() const {
+  if (this->isUtf8String()) {
+    return data;
+  }
   std::wstring_convert<std::codecvt_byname<wchar_t, char, mbstate_t>> convert(
       new std::codecvt_byname<wchar_t, char, mbstate_t>(GBK_LOCALE_NAME));
   std::wstring tmp_wstr = convert.from_bytes(data);
@@ -217,6 +223,9 @@ std::string VString::gbkToUtf8() const {
   return cv2.to_bytes(tmp_wstr);
 }
 std::string VString::utf8ToGbk() const {
+  if (!isUtf8String()) {
+    return data;
+  }
   std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
   std::wstring tmp_wstr = conv.from_bytes(data);
   std::wstring_convert<std::codecvt_byname<wchar_t, char, mbstate_t>> convert(
@@ -234,22 +243,19 @@ std::wstring VString::gbkToUnicode() const {
   return convert.from_bytes(data);
 }
 
-VString::Encoding VString::detectEncoding() {
-	if (isUtf8String()) {
-		return VString::Encoding::UTF8;
-	}
-	else if (isGbkString()) {
-		return VString::Encoding::GBK;
-	}
-	else if (isAscllString()) {
-		return VString::Encoding::ASCII;
-	}
-	else {
-		return VString::Encoding::UNKNOWN;
-	}
+VString::Encoding VString::detectEncoding() const {
+  if (isUtf8String()) {
+    return VString::Encoding::UTF8;
+  } else if (isGbkString()) {
+    return VString::Encoding::GBK;
+  } else if (isAscllString()) {
+    return VString::Encoding::ASCII;
+  } else {
+    return VString::Encoding::UNKNOWN;
+  }
 }
 
-bool VString::isUtf8String() {
+bool VString::isUtf8String() const {
   int i = 0;
   while (i < data.size()) {
     unsigned char ch = data[i];
@@ -275,7 +281,7 @@ bool VString::isUtf8String() {
   return true;
 }
 
-bool VString::isGbkString() {
+bool VString::isGbkString() const {
   for (unsigned char c : data) {
     if (c >= 0x81 && c <= 0xFE) {
       return true;
@@ -284,13 +290,84 @@ bool VString::isGbkString() {
   return false;
 }
 
-bool VString::isAscllString() {
+bool VString::isAscllString() const {
   for (unsigned char c : data) {
     if (c >= 0x80) {
       return false;
     }
   }
   return true;
+}
+
+std::string VString::toString(VString::Encoding encoding) {
+  switch (encoding) {
+  case VString::Encoding::ASCII: {
+    switch (this->detectEncoding()) {
+    case VString::Encoding::ASCII:
+      return data;
+    case VString::Encoding::UTF8:
+      return this->utf8ToAscll();
+    case VString::Encoding::GBK:
+      return data;
+    case VString::Encoding::UNKNOWN:
+      return data;
+    default:
+      return data;
+    }
+  } break;
+  case VString::Encoding::UTF8: {
+    switch (this->detectEncoding()) {
+    case VString::Encoding::ASCII:
+      return ANSIToUTF8(data);
+    case VString::Encoding::UTF8:
+      return data;
+    case VString::Encoding::GBK:
+      return this->gbkToUtf8();
+    case VString::Encoding::UNKNOWN:
+      return data;
+    default:
+      return data;
+    }
+  } break;
+  case VString::Encoding::GBK: {
+    switch (this->detectEncoding()) {
+    case VString::Encoding::ASCII:
+      return data;
+    case VString::Encoding::UTF8:
+      return this->utf8ToGbk();
+    case VString::Encoding::GBK:
+      return data;
+    case VString::Encoding::UNKNOWN:
+      return data;
+    default:
+      return data;
+    }
+  } break;
+  case VString::Encoding::UNKNOWN:
+    return data;
+  default:
+    return data;
+  }
+}
+
+std::string VString::toUtf8String() {
+  return this->toString(VString::Encoding::UTF8);
+}
+
+std::string VString::toGbkString() {
+  return this->toString(VString::Encoding::GBK);
+}
+
+std::string VString::toAscllString() {
+  return this->toString(VString::Encoding::ASCII);
+}
+
+std::string VString::toSystemString() {
+  return this->toString(SystemEncoding());
+}
+
+VString::Encoding SystemEncoding() {
+  return encoding;
 }
 
 std::string UnicodeToUTF8(const std::wstring &wstr) {
@@ -328,6 +405,9 @@ std::string ANSIToUTF8(const std::string &str) {
 }
 
 std::string GBKToUTF8(const std::string &str) {
+  if (IsUtf8String(str)) {
+    return str;
+  }
   std::wstring_convert<std::codecvt_byname<wchar_t, char, mbstate_t>> convert(
       new std::codecvt_byname<wchar_t, char, mbstate_t>(GBK_LOCALE_NAME));
   std::wstring tmp_wstr = convert.from_bytes(str);
@@ -336,6 +416,9 @@ std::string GBKToUTF8(const std::string &str) {
 }
 
 std::string UTF8ToGBK(const std::string &str) {
+  if (!IsUtf8String(str)) {
+    return str;
+  }
   std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
   std::wstring tmp_wstr = conv.from_bytes(str);
   std::wstring_convert<std::codecvt_byname<wchar_t, char, mbstate_t>> convert(
@@ -355,18 +438,15 @@ std::string replaceAll(const std::string &str, const std::string &search,
 }
 
 VString::Encoding DetectEncoding(const std::string &str) {
-	if (IsUtf8String(str)) {
-		return VString::Encoding::UTF8;
-	}
-	else if (IsGbkString(str)) {
-		return VString::Encoding::GBK;
-	}
-	else if (IsAscllString(str)) {
-		return VString::Encoding::ASCII;
-	}
-	else {
-		return VString::Encoding::UNKNOWN;
-	}
+  if (IsUtf8String(str)) {
+    return VString::Encoding::UTF8;
+  } else if (IsGbkString(str)) {
+    return VString::Encoding::GBK;
+  } else if (IsAscllString(str)) {
+    return VString::Encoding::ASCII;
+  } else {
+    return VString::Encoding::UNKNOWN;
+  }
 }
 
 bool IsUtf8String(const std::string &str) {
@@ -413,6 +493,75 @@ bool IsAscllString(const std::string &str) {
     }
   }
   return true;
+}
+
+std::string ToString(const std::string &str, VString::Encoding encoding) {
+  const VString &vstr = str;
+
+  switch (encoding) {
+  case VString::Encoding::ASCII: {
+    switch (vstr.detectEncoding()) {
+    case VString::Encoding::ASCII:
+      return str;
+    case VString::Encoding::UTF8:
+      return UTF8ToANSI(str);
+    case VString::Encoding::GBK:
+      return str;
+    case VString::Encoding::UNKNOWN:
+      return str;
+    default:
+      return str;
+    }
+  } break;
+  case VString::Encoding::UTF8: {
+    switch (vstr.detectEncoding()) {
+    case VString::Encoding::ASCII:
+      return ANSIToUTF8(str);
+    case VString::Encoding::UTF8:
+      return str;
+    case VString::Encoding::GBK:
+      return GBKToUTF8(str);
+    case VString::Encoding::UNKNOWN:
+      return str;
+    default:
+      return str;
+    }
+  } break;
+  case VString::Encoding::GBK: {
+    switch (vstr.detectEncoding()) {
+    case VString::Encoding::ASCII:
+      return str;
+    case VString::Encoding::UTF8:
+      return UTF8ToGBK(str);
+    case VString::Encoding::GBK:
+      return str;
+    case VString::Encoding::UNKNOWN:
+      return str;
+    default:
+      return str;
+    }
+  } break;
+  case VString::Encoding::UNKNOWN:
+    return str;
+  default:
+    return str;
+  }
+}
+
+std::string ToUtf8String(const std::string &str) {
+  return ToString(str, VString::Encoding::UTF8);
+}
+
+std::string ToGbkString(const std::string &str) {
+  return ToString(str, VString::Encoding::GBK);
+}
+
+std::string ToAscllString(const std::string &str) {
+  return ToString(str, VString::Encoding::ASCII);
+}
+
+std::string ToSystemString(const std::string &str) {
+  return ToString(str, SystemEncoding());
 }
 
 VString::iterator::iterator(std::string::iterator iter) : it(iter) {}

@@ -75,7 +75,7 @@ class VThreadPool : public VObject {
     std::mutex workLock;
     std::unique_lock<std::mutex> qlock;
     std::thread::id threadID;
-    size_t workeNumber;
+	std::atomic<size_t> workeNumber;
     bool isStop;
     TaskType task;
   };
@@ -96,7 +96,7 @@ class VThreadPool : public VObject {
               size_t maxTaskQueueSize = VTHREADPOOL_MAX_TASK_QUEUE_SIZE);
 
   template <class F, class... Args>
-  void enqueue(F&& f, Args&&... args) {
+  bool enqueue(F&& f, Args&&... args) {
     std::unique_lock<std::mutex> locked(task_queue_push_lock_);
     if (statistics.taskQueueSize > statistics.maxTaskQueueSize) {
       Log->logDebug(
@@ -110,10 +110,15 @@ class VThreadPool : public VObject {
       std::chrono::milliseconds(10);
     }
 
-    auto task = std::bind(std::forward<F>(f), std::forward<Args>(args)...);
-    statistics.taskQueueSize.fetch_add(1);
-    this->push(std::move(task));
-    this->sendWorkingSingal();
+    TaskType task = std::bind(std::forward<F>(f), std::forward<Args>(args)...);
+    if (task) {
+      statistics.taskQueueSize.fetch_add(1);
+      this->push(std::move(task));
+      this->sendWorkingSingal();
+      return true;
+    }
+
+    return false;
   }
 
   ~VThreadPool();

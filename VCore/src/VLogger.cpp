@@ -14,9 +14,12 @@ VLogger::VLogger() : close_file(false), enable(false){
     curpath = std::string(buffer, size);
   } 
 
+  this->log_encoding = SystemEncoding();
+
   this->setLogFileDirectory(curpath + "/logs");
   delete buffer;
 
+  this->setLogTypes(VLOGGER_TYPE::VLOGGER_TYPE_ALL);
 
  #ifdef WIN32
   HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -64,8 +67,13 @@ std::string VLogger::getCurrentDateTime()
 }
 
 void VLogger::setEnable(bool eb){
-    enable = eb;
-}
+    enable = eb; }
+
+bool VLogger::getEnable() const { return enable; }
+
+void VLogger::setLogTypes(VLOGGER_TYPE type) { log_types = type; }
+
+VLOGGER_TYPE VLogger::getLogTypes() const { return log_types; }
 
 void VLogger::setCloseFile(bool closefile) {
   close_file = closefile;
@@ -118,6 +126,11 @@ void VLogger::setLogFileDirectory(const std::string& directory) {
   }
 }
 
+void VLogger::setEncoding(VString::Encoding encoding)
+{
+
+}
+
 void VLogger::log(const std::string& filepath,
                   std::ofstream& logfile,
                   const std::string& level,
@@ -136,9 +149,13 @@ void VLogger::log(const std::string& filepath,
     return;
   }
   time_now = std::time(nullptr);
+ 
   logMessage =
       getDate(time_now) + " " + getTime(time_now) + " " + level + " " + message;
-  std::cout << colour << logMessage.c_str() << VCORE_ANSI_COLOR_RESET << std::endl;
+  VString vlogMessage = ((VString)logMessage).toString(log_encoding);
+  std::cout << colour << vlogMessage.c_str()
+            << VCORE_ANSI_COLOR_RESET
+            << std::endl;
 
   if (!enable)
       return;
@@ -149,7 +166,7 @@ void VLogger::log(const std::string& filepath,
   } 
 
   if (logfile.is_open()) {
-    logfile.write(logMessage.c_str(), logMessage.size());
+    logfile.write(vlogMessage.c_str(), vlogMessage.size());
     logfile.put('\n');  // 写入日志文件
     if (close_file)
     close(logfile);

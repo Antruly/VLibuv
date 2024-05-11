@@ -179,7 +179,7 @@ void VTcpServer::on_new_connection(VStream* tcp, int status) {
       tcpservice_wait_callback_mutex.unlock();
 
       // 挂起队列回调
-      threadpool->enqueue([this, tcpClient] {
+     bool isOk = threadpool->enqueue([this, tcpClient] {
         tcpservice_wait_callback_mutex.lock();
            tcpservice_wait_callback_client.erase(
             std::remove_if(tcpservice_wait_callback_client.begin(),
@@ -189,6 +189,21 @@ void VTcpServer::on_new_connection(VStream* tcp, int status) {
         tcpservice_wait_callback_mutex.unlock();
         this->newClient(tcpClient);  // For multi-threaded client mode
           });
+      if (!isOk) {
+       Log->logWarn("threadpool enqueue is callback false, when use new thread!\n");
+       std::thread newTD([this, tcpClient] {
+         tcpservice_wait_callback_mutex.lock();
+         tcpservice_wait_callback_client.erase(
+             std::remove_if(tcpservice_wait_callback_client.begin(),
+                            tcpservice_wait_callback_client.end(),
+                            [&](VTcpClient *x) { return x == tcpClient; }),
+             tcpservice_wait_callback_client.end());
+         tcpservice_wait_callback_mutex.unlock();
+         this->newClient(tcpClient); // For multi-threaded client mode
+       });
+       newTD.detach();
+      }
+
     } catch (std::exception& e) {
      
       if (tcpClient != nullptr) {

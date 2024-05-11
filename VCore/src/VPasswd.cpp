@@ -34,8 +34,12 @@ int VPasswd::init() {
   return 0;
 }
 int VPasswd::getOsPasswd() { return uv_os_get_passwd(passwd); }
+
+#if UV_VERSION_MINOR >= 45
 int VPasswd::getOsPasswd(uv_uid_t uid) { return uv_os_get_passwd2(passwd, uid); }
+#endif
 void VPasswd::freePasswd() { uv_os_free_passwd(passwd); }
 uv_passwd_t *VPasswd::getPasswd() const { return this->passwd; }
+
 #endif
 #endif

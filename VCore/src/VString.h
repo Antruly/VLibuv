@@ -87,18 +87,27 @@ public:
   std::wstring utf8ToUnicode() const;
   std::wstring gbkToUnicode() const;
 
-  Encoding detectEncoding();
+  VString::Encoding detectEncoding() const;
 
-  bool isUtf8String();
+  bool isUtf8String() const;
 
-  bool isGbkString();
+  bool isGbkString() const;
 
-  bool isAscllString();
+  bool isAscllString() const;
+
+  std::string toString(VString::Encoding encoding);
+  std::string toUtf8String();
+  std::string toGbkString();
+  std::string toAscllString();
+  std::string toSystemString();
 
 protected:
 private:
   std::string data;
 };
+
+VString::Encoding SystemEncoding();
+
 std::string UnicodeToUTF8(const std::wstring &wstr);
 
 std::wstring UTF8ToUnicode(const std::string &str);
@@ -124,3 +133,9 @@ bool IsUtf8String(const std::string &str);
 bool IsGbkString(const std::string &str);
 
 bool IsAscllString(const std::string &str);
+
+std::string ToString(const std::string &str, VString::Encoding encoding);
+std::string ToUtf8String(const std::string &str);
+std::string ToGbkString(const std::string &str);
+std::string ToAscllString(const std::string &str);
+std::string ToSystemString(const std::string &str);

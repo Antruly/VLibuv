@@ -46,6 +46,7 @@ class VMemory : public VObject {
 
     if (ptr == nullptr) {
       Log->logError("malloc error size: %zu\n", sz);
+      if (error_callback)
       error_callback(&sz);
     }
     return ptr;
@@ -67,6 +68,7 @@ class VMemory : public VObject {
 
     if (ptr == nullptr) {
       Log->logError("realloc error size: %zu\n", sz);
+      if (error_callback)
       error_callback(&sz);
     }
     return ptr;

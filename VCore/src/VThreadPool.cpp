@@ -126,10 +126,14 @@ size_t VThreadPool::createThread(size_t num) {
 
 				if (haveTask) {
 					statistics.taskQueueSize.fetch_sub(1);
-
+					
+					if (workeStatistics.task)
 					workeStatistics.task();
-					++workeStatistics.workeNumber;
-					++statistics.workedNumber;
+                                        else {
+                                          void *ptr = &workeStatistics.task;              
+					}
+					workeStatistics.workeNumber.fetch_add(1);;
+					statistics.workedNumber.fetch_add(1);
 				}
 				else {
 					if (stop)
@@ -174,6 +178,7 @@ void VThreadPool::setMaxThreadNum(size_t num) {
 
 bool VThreadPool::pop(TaskType& task) {
 	if (task_queue.size() > 0) {
+    std::unique_lock<std::mutex> locked(task_queue_push_lock_);
 		task = task_queue.front();
 		task_queue.pop();
 		return true;

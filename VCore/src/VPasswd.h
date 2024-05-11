@@ -16,7 +16,9 @@ class VPasswd :
   int init();
 
   int getOsPasswd();
+#if UV_VERSION_MINOR >= 45
   int getOsPasswd(uv_uid_t uid);
+#endif
   void freePasswd();
 
   uv_passwd_t *getPasswd() const;
