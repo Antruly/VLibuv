@@ -5,7 +5,7 @@
 <a href="https://github.com/Antruly/VLibuv/blob/master/README.md" class="github-button" data-color-scheme="no-preference: dark; light: dark; dark: dark;" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star ntkme/github-buttons on GitHub">English</a>
 
 # VLibuv
-
+<img alt="Static Badge" src="https://github.com/Antruly/VLibuv/blob/master/VLibuv.webp" width="300" height="300">
 ## 前言
 
 现有C++对于事件驱动的底层库并不多，或者是说，很多都是高级封装，如Qt，Qt库过于庞大，且基本上有自己的一套事件循环机制，很多后台项目和高性能服务等项目使用起来并不是很方便，由此使用偏向底层的事件驱动库尤为重要。
