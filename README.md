@@ -1,4 +1,4 @@
-<img alt="Static Badge" src="https://img.shields.io/badge/VLibuv-master?style=flat&label=MIT-License&labelColor=rgb(23%2C33%2C73)&color=rgb(33%2C193%2C33)">  <img alt="Static Badge" src="https://img.shields.io/badge/Release-Latest?logo=gitlab&label=Latest&color=rgb(235%2C55%2C55)">
+<img alt="Static Badge" src="https://img.shields.io/badge/VLibuv-master?style=flat&label=MIT-License&labelColor=rgb(23%2C33%2C73)&color=rgb(33%2C193%2C33)">  <img alt="Static Badge" src="https://img.shields.io/badge/Release1.4.0-Latest?logo=gitlab&label=Latest&color=rgb(235%2C55%2C55)">
 
 
 
