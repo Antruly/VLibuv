@@ -1,11 +1,11 @@
-<img alt="Static Badge" src="https://img.shields.io/badge/VLibuv-master?style=flat&label=MIT-License&labelColor=rgb(23%2C33%2C73)&color=rgb(33%2C193%2C33)">  <img alt="Static Badge" src="https://img.shields.io/badge/Release-Latest?logo=gitlab&label=Latest&color=rgb(235%2C55%2C55)">
+<img alt="Static Badge" src="https://img.shields.io/badge/VLibuv-master?style=flat&label=MIT-License&labelColor=rgb(23%2C33%2C73)&color=rgb(33%2C193%2C33)">  <img alt="Static Badge" src="https://img.shields.io/badge/Release1.4.0-Latest?logo=gitlab&label=Latest&color=rgb(235%2C55%2C55)">
 
 <a href="https://github.com/Antruly/VLibuv/blob/master/README_zn-CN.md" class="github-button" data-color-scheme="no-preference: dark; light: dark; dark: dark;" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star ntkme/github-buttons on GitHub">中文简体</a>
  
 <a href="https://github.com/Antruly/VLibuv/blob/master/README.md" class="github-button" data-color-scheme="no-preference: dark; light: dark; dark: dark;" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star ntkme/github-buttons on GitHub">English</a>
 
 # VLibuv
-
+<img alt="Static Badge" src="https://github.com/Antruly/VLibuv/blob/master/VLibuv.webp" width="300" height="300">
 ## 前言
 
 现有C++对于事件驱动的底层库并不多，或者是说，很多都是高级封装，如Qt，Qt库过于庞大，且基本上有自己的一套事件循环机制，很多后台项目和高性能服务等项目使用起来并不是很方便，由此使用偏向底层的事件驱动库尤为重要。
