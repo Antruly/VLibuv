@@ -15,6 +15,7 @@ class VTcpClient : public VObject {
 
  public:
   virtual int run(uv_run_mode md = UV_RUN_DEFAULT);
+  void stop();
   void close();
   void idleStart();
   void idleClose();
@@ -43,6 +44,9 @@ class VTcpClient : public VObject {
 
   sockaddr_storage getLocalAddrs(std::string& ip, int& port);
   sockaddr_storage getPeerAddrs(std::string& ip, int& port);
+
+  int setData(void *pdata);
+  void *getData();
 
  protected:
   VIdle* getVIdle();
@@ -78,6 +82,7 @@ class VTcpClient : public VObject {
   int64_t buffer_num = 0L;
   
  private:
+  void* vdata = nullptr;
   VLoop* loop = nullptr;
   VTcp* tcp = nullptr;
   VIdle* idle = nullptr;

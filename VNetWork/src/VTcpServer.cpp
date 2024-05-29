@@ -68,8 +68,12 @@ VTcp* VTcpServer::getVTcp() {
   return this->tcp;
 }
 VLoop* VTcpServer::getVLoop() {
-  return this->loop;
+  return this->loop; }
+int VTcpServer::setData(void *pdata) {
+  vdata = pdata;
+  return 0;
 }
+void *VTcpServer::getData() { return vdata; }
 VIdle* VTcpServer::getVIdle() {
   return this->idle;
 }
@@ -95,12 +99,22 @@ void VTcpServer::setCloseCb(std::function<void(VTcp*)> close_cb) {
 }
 
 void VTcpServer::close() {
-  if (!this->tcp->isClosing()) {
-    this->tcp->close(
-        std::bind(&VTcpServer::on_close, this, std::placeholders::_1));
+  if (this->tcp != nullptr && !this->tcp->isClosing()) {
+	  this->setStatus(VTCP_WORKER_STATUS_CLOSING, true);
+	  this->tcp->close(
+		  std::bind(&VTcpServer::on_close, this, std::placeholders::_1));
+	  return;
+  }
+  else {
+	  if (this->loop != nullptr && loop->isActive()) {
+		  loop->stop();
+	  }
   }
   this->setStatus(VTCP_WORKER_STATUS_CLOSED, true);
+  
 }
+
+void VTcpServer::stop() { this->loop->stop(); }
 
 VTCP_WORKER_STATUS VTcpServer::getStatus() {
   return this->status;
@@ -135,8 +149,12 @@ void VTcpServer::on_idle(VIdle* vidle) {
 }
 
 void VTcpServer::on_close(VHandle* client) {
+
   if (tcp_close_cb)
-    tcp_close_cb(reinterpret_cast<VTcp*>(client));
+    tcp_close_cb(reinterpret_cast<VTcp *>(client));
+
+  this->setStatus(VTCP_WORKER_STATUS_CLOSED, true);
+  this->loop->stop();
 }
 
 void VTcpServer::on_async_callback(VAsync *handle){

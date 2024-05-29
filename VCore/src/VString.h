@@ -70,6 +70,8 @@ public:
 
   const char *c_str();
 
+
+
   std::string replaceAll(const std::string &search, const std::string &replace);
 
   std::string urlEncode(const std::string &value);
@@ -100,6 +102,9 @@ public:
   std::string toGbkString();
   std::string toAscllString();
   std::string toSystemString();
+
+  std::string toUpper();
+  std::string toLower();
 
 protected:
 private:
@@ -139,3 +144,6 @@ std::string ToUtf8String(const std::string &str);
 std::string ToGbkString(const std::string &str);
 std::string ToAscllString(const std::string &str);
 std::string ToSystemString(const std::string &str);
+
+std::string ToUpper(const std::string &str);
+std::string ToLower(const std::string &str);

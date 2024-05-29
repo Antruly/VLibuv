@@ -1,4 +1,5 @@
 ﻿#include "VString.h"
+#include <algorithm>
 #include <assert.h>
 #include <cctype>
 #include <codecvt>
@@ -16,7 +17,6 @@ const char *GBK_LOCALE_NAME =
 #endif
 static VString StrEncoding("你好VLibuv!");
 static VString::Encoding encoding = StrEncoding.detectEncoding();
-
 
 VString::VString(const std::string &str) : data(str) {}
 VString::VString(const char *str, size_t count) : data(str, count) {}
@@ -366,9 +366,21 @@ std::string VString::toSystemString() {
   return this->toString(SystemEncoding());
 }
 
-VString::Encoding SystemEncoding() {
-  return encoding;
+std::string VString::toUpper() {
+  std::string strRet = data;
+  transform(strRet.begin(), strRet.end(), strRet.begin(),
+            (int (*)(int))toupper);
+  return strRet;
 }
+
+std::string VString::toLower() {
+  std::string strRet = data;
+  transform(strRet.begin(), strRet.end(), strRet.begin(),
+            (int (*)(int))tolower);
+  return strRet;
+}
+
+VString::Encoding SystemEncoding() { return encoding; }
 
 std::string UnicodeToUTF8(const std::wstring &wstr) {
   std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> convert;
@@ -562,6 +574,20 @@ std::string ToAscllString(const std::string &str) {
 
 std::string ToSystemString(const std::string &str) {
   return ToString(str, SystemEncoding());
+}
+
+std::string ToUpper(const std::string &str) {
+  std::string strRet = str;
+  transform(strRet.begin(), strRet.end(), strRet.begin(),
+            (int (*)(int))toupper);
+  return strRet;
+}
+
+std::string ToLower(const std::string &str) {
+  std::string strRet = str;
+  transform(strRet.begin(), strRet.end(), strRet.begin(),
+            (int (*)(int))tolower);
+  return strRet;
 }
 
 VString::iterator::iterator(std::string::iterator iter) : it(iter) {}

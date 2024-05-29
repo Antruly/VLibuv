@@ -17,6 +17,7 @@ class VTcpServer : public VObject {
  public:
   virtual int run(uv_run_mode md = UV_RUN_DEFAULT);
   void close();
+  void stop();
   void idleStart();
   void idleClose();
 
@@ -36,6 +37,9 @@ class VTcpServer : public VObject {
   VThreadPool* getVThreadPool();
   VTcp* getVTcp();
   VLoop* getVLoop();
+
+  int setData(void *pdata);
+  void *getData();
 
  protected:
   VIdle* getVIdle();
@@ -61,6 +65,7 @@ class VTcpServer : public VObject {
   std::function<void(VTcpClient*)> new_client_cb;
 
  private:
+  void *vdata = nullptr;
   // 事件循环池
   //VLoopPool* loopPool = nullptr;
   VThreadPool* threadpool = nullptr;
