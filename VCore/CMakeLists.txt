@@ -45,6 +45,12 @@ if(ENABLE_VMEMORY_THREAD_SAFETY)
     add_definitions(-DVMEMORY_THREAD_SAFETY)
 endif()
 
+set(ENABLE_CRT_NO_VA_START_VALIDATION ON CACHE BOOL "will define _CRT_NO_VA_START_VALIDATION")
+if(ENABLE_CRT_NO_VA_START_VALIDATION)
+    add_definitions(-_CRT_NO_VA_START_VALIDATION)
+endif()
+
+
 
 if(MSVC)
     add_compile_options("/Zi")
