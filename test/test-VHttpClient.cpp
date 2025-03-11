@@ -28,7 +28,7 @@ int test1() {
   VBuf recvBody;
   size_t index = client.waitRecvResponse();
   int statusCode = pResponse->getStatusCode();
-  std::map<std::string, std::string> responseHeaders = pResponse->getHeaders();
+  HttpHeaders responseHeaders = pResponse->getHeaders();
 
   Log->logDebug("response Headers:%d\n", statusCode);
   for (auto header : responseHeaders) {
@@ -72,7 +72,7 @@ int test1() {
     Log->logDebug("%s", str.c_str());
     recvBody.clear();
   }
-  Log->logDebug("\nresponse body size:%zu\n", index);
+  Log->logDebug("\nresponse body size:%ull\n", index);
 
   client.getVTcpClient()->close();
   return 0;
@@ -90,13 +90,13 @@ int test2() {
  
 
   VHttpMultiPart httpMultiPart;
-  pRequest->setContentType("multipart/form-data; boundary=" +
+  pRequest->setContentType( VString("multipart/form-data; boundary=")+
                            httpMultiPart.getMuitiPartString());
 
   
-  VHttpPart httpPart1{"name1", "value1", ""};
-  VHttpPart httpPart2{"name2", "value2", ""};
-  VHttpPart httpPart3{"name3", "value3", ""};
+  VHttpPart httpPart1{"name1", VBuf("value1"), ""};
+  VHttpPart httpPart2{"name2", VBuf("value2"), ""};
+  VHttpPart httpPart3{"name3", VBuf("value3"), ""};
 
   httpMultiPart.append(httpPart1);
   httpMultiPart.append(httpPart2);
@@ -120,7 +120,7 @@ int test2() {
   VBuf recvBody;
   size_t index = client.waitRecvResponse();
   int statusCode = pResponse->getStatusCode();
-  std::map<std::string, std::string> responseHeaders = pResponse->getHeaders();
+  HttpHeaders responseHeaders = pResponse->getHeaders();
 
   Log->logDebug("response Headers:%d\n", statusCode);
   for (auto header : responseHeaders) {
@@ -169,13 +169,13 @@ int test2() {
     Log->logDebug("%s", str.c_str());
     recvBody.clear();
   }
-  Log->logDebug("\nresponse body size:%zu\n", index);
+  Log->logDebug("\nresponse body size:%llu\n", index);
 
   client.getVTcpClient()->close();
   return 0;
 }
 int main() {
-  //test1();
-  test2();
+  test1();
+  //test2();
   return 0;
 }

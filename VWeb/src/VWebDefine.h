@@ -19,3 +19,8 @@ enum METHOD_TYPE {
   TRACE = 6,
   CONNECT = 7
 };
+
+class VWebRouter;
+class VWebInterface;
+class VHttpClientObject;
+class VWebServer;

@@ -7,8 +7,9 @@
 
 struct VHttpPart {
   std::string key;
-  std::string value;
-  std::string content_type;
+  VBuf value;
+  std::string content_type;     // application/octet-stream
+  std::string file_name;
 };
 
 class VHttpMultiPart {
@@ -23,20 +24,44 @@ public:
 
   const VBuf &getConstData()const;
 
-  const std::string getMuitiPartString() const;
+  const VString getMuitiPartString() const;
 
-  std::string generateBoundary();
+  VString generateBoundary();
+
+  // 辅助函数：解析 Content-Disposition 参数
+  static void parseContentDisposition(const VString &header_value,
+                                      VString &name, VString &filename);
+
+  // 新增方法：从 Content-Type 中解析 boundary
+  static VString parseBoundaryFromContentType(const VString &contentType);
+
+  // 解析单个Part的头部和内容
+  void VHttpMultiPart::processPart(const VString &partData);
+
+ // 主解析方法（新增 contentType 参数）
+  bool VHttpMultiPart::parseFromBodyData(const VBuf &bodyData,
+                                         const VString &contentType);
+
+  // 设置Boundary
+  void VHttpMultiPart::setBoundary(const VString &boundary);
+
+  std::vector<VHttpPart> &getHttpParts();
 
 private:
-  std::string multi_boundary = "";
+  VString multi_boundary = "";
   VBuf data;
+  std::vector<VHttpPart> http_parts;
 };
 
 class VHttpClient : public VObject {
  public:
   VHttpClient();
-  VHttpClient(VTcpClient* tcp_client);
+  VHttpClient(VTcpClient* tcp_client, bool is_own_tcp_client = false);
   virtual ~VHttpClient();
+
+  void setId(int64_t id);
+  int64_t getId();
+
   VHttpRequest* getVHttpRequest()const;
   VHttpResponse* getVHttpResponse() const;
   VTcpClient* getVTcpClient() const;
@@ -48,22 +73,33 @@ class VHttpClient : public VObject {
 
   std::string getUrlFileName();
 
+    // 等待请求解析完成,返回请求数据长度，通过
+  size_t waitRecvRequest(const uint64_t &maxTimeout = 5000);
+  size_t waitRecvRequestBody(const uint64_t &maxTimeout = 30000);
+
+  // 发送响应（还需要调用sendBody）
+  bool sendResponse(int code = 200, const VBuf &body = VBuf());
+  // 发送body需要调用）
+  bool sendResponseBody(const VBuf &body, bool isEnd = false);
+
+
   // 同步请求
   bool sendRequest(const METHOD_TYPE& method,
                    const std::string& url,
-                   const std::map<std::string, std::string>& headers =
-                       std::map<std::string, std::string>(),
+                   const HttpHeaders& headers =
+                       HttpHeaders(),
                    const VBuf& body = VBuf(),
                    const uint64_t& maxTimeout = 30000);
 
   // 发送请求（请求方法和报头,post和put 方法还需要调用sendBody）
   bool sendRequest(const std::string& url, const VBuf& body = VBuf());
   // 发送body（仅post和put方法需要调用）
-  bool sendRequestBody(const VBuf& body);
+  bool sendRequestBody(const VBuf &body, bool isEnd = false);
   // 开始读取数据
   void readStart();
   // 等待响应,返回响应数据长度，通过
-  size_t waitRecvResponse(const uint64_t& maxTimeout = 30000);
+  size_t waitRecvResponse(const uint64_t& maxTimeout = 5000);
+  size_t waitRecvResponseBody(const uint64_t &maxTimeout = 30000);
   // 取出已解析的body, 0 表示当前所有
   VBuf getRecvResponseBody(size_t count = 0);
   // 清除所有缓冲区响应缓冲区数据
@@ -72,8 +108,8 @@ class VHttpClient : public VObject {
   // 异步请求
   void sendRequestAsync(const METHOD_TYPE& method,
                         const std::string& url,
-                        const std::map<std::string, std::string>& headers =
-                            std::map<std::string, std::string>(),
+                        const HttpHeaders& headers =
+                            HttpHeaders(),
                         const VBuf& body = VBuf(),
                         const uint64_t& maxTimeout = 30000);
 
@@ -89,13 +125,13 @@ class VHttpClient : public VObject {
       std::function<void(VHttpResponse*, int)> response_parser_finish_cb);
 
   void setRequestParserHeadersFinishCb(
-      std::function<void(VHttpRequest*, std::map<std::string, std::string>*)>
+      std::function<void(VHttpRequest*, HttpHeaders*)>
           request_parser_headers_finish_cb);
   void setRequestRecvBodyCb(
       std::function<bool(VHttpRequest*, const VBuf*)> request_recv_body_cb);
 
   void setResponseParserHeadersFinishCb(
-      std::function<void(VHttpResponse*, std::map<std::string, std::string>*)>
+      std::function<void(VHttpResponse*, HttpHeaders*)>
           response_parser_headers_finish_cb);
   void setResponseRecvBodyCb(
       std::function<bool(VHttpResponse*, const VBuf*)> response_recv_body_cb);
@@ -104,7 +140,7 @@ class VHttpClient : public VObject {
 
   void close();
 
- protected:
+ public:
   virtual bool connect(const std::string& url);
 
  protected:
@@ -118,6 +154,7 @@ class VHttpClient : public VObject {
   VHttpResponse* response_ = nullptr;
   VOpenSsl* openssl_ = nullptr;
 
+  int64_t client_id = 0;
   VBuf cache_body_;
 
   bool own_tcp_client_ = false;

@@ -43,7 +43,7 @@ RESTRAT:
 #ifdef _DEBUG
     Log->logDebug(
         "compression succed, before compression size is %d, after compressione "
-        "size is %zu\n",
+        "size is %llu\n",
         zstrm.total_in, compressedData.size() - zstrm.avail_out);
 #endif
     // 压缩结束
@@ -112,7 +112,7 @@ RESTRAT:
 #ifdef _DEBUG
     Log->logDebug(
         "decompress succed, before decompress size is %d, after decompress "
-        "size is %zu\n",
+        "size is %llu\n",
         zstrm.total_in, decompressedData.size() - zstrm.avail_out);
 #endif
     // 解压缩结束
@@ -219,7 +219,7 @@ bool VZlib::gzipCompressChunked(const VBuf& data,
         Log->logDebug(
           "compression succed, before compression size is %d, after "
           "compressione "
-          "size is %zu\n",
+          "size is %llu\n",
             zstrm_compress_->total_in,
             tempCompressed_.size() - zstrm_compress_->avail_out);
 #endif
@@ -273,7 +273,7 @@ bool VZlib::gzipDecompressChunked(const VBuf& compressedData,
 #ifdef _DEBUG
       Log->logDebug(
           "decompress succed, before decompress size is %d, after decompress "
-          "size is %zu\n",
+          "size is %llu\n",
           zstrm_decompress_->total_in,
           tempDecompressed_.size() - zstrm_decompress_->avail_out);
 #endif

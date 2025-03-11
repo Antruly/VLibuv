@@ -24,7 +24,6 @@ class VTcpServer : public VObject {
   int listenIpv4(const char* addripv4, int port, int flags);
 
   void closeClient(VTcpClient* tcpClient);
-  void releaseClient(VTcpClient* tcpClient);
 
  public:
   void setIdleCb(std::function<void()> idle_cb);
@@ -53,9 +52,6 @@ class VTcpServer : public VObject {
   void on_close(VHandle* client);
   void on_new_connection(VStream* tcp, int status);
 
-  // 异步回调函数
-  void on_async_callback(VAsync* handle);
-
  protected:
   virtual void newClient(VTcpClient* client);
 
@@ -66,22 +62,13 @@ class VTcpServer : public VObject {
 
  private:
   void *vdata = nullptr;
-  // 事件循环池
-  //VLoopPool* loopPool = nullptr;
   VThreadPool* threadpool = nullptr;
   VLoop* loop = nullptr;
   VTcp* tcp = nullptr;
   VIdle* idle = nullptr;
   VTimer* timer = nullptr;
- 
 
-  sockaddr_in addr;
   VTCP_WORKER_STATUS status = VTCP_WORKER_STATUS_NONE;
-  VAsync* tcpService_async;
-  std::vector<VTcpClient*> tcpservice_wait_close_client;
-  std::vector<VTcpClient*> tcpservice_wait_callback_client;
-  std::mutex tcpservice_wait_close_mutex;
-  std::mutex tcpservice_wait_callback_mutex;
   bool idle_run = false;
  
 };

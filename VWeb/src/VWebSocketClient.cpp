@@ -250,7 +250,7 @@ bool VWebSocketClient::websocketConnect(const std::string& url) {
   VBuf recvBody;
   size_t index = this->waitRecvResponse();
   int statusCode = this->getVHttpResponse()->getStatusCode();
-  std::map<std::string, std::string> responseHeaders =
+  HttpHeaders responseHeaders =
       this->getVHttpResponse()->getHeaders();
 
   // Log->logDebug("response Headers:%d\n", statusCode);

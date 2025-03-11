@@ -108,6 +108,8 @@ set(CORE_FILES
     ${VCORE_SRC_DIR}/VSha256.cpp
     ${VCORE_SRC_DIR}/VMutex.h
     ${VCORE_SRC_DIR}/VMutex.cpp
+    ${VCORE_SRC_DIR}/VFile.h
+    ${VCORE_SRC_DIR}/VFile.cpp
 )
 source_group(Core FILES ${CORE_FILES})
 

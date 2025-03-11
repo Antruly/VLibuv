@@ -7,7 +7,6 @@ VTcpServer::VTcpServer(size_t numThreads,
                        size_t maxIdleThreads,
                        size_t maxTaskQueueSize)
     : VObject(),
-      tcpService_async(nullptr),
       threadpool(nullptr),
       tcp(nullptr),
       loop(nullptr),
@@ -20,26 +19,13 @@ VTcpServer::VTcpServer(size_t numThreads,
 
   this->threadpool = new VThreadPool(
       numThreads, maxThreads, minIdleThreads, maxIdleThreads, maxTaskQueueSize);
-  this->tcpService_async = new VAsync();
-  this->tcpService_async->init(
-      std::bind(&VTcpServer::on_async_callback, this, std::placeholders::_1),
-      this->getVLoop());
-
    this->timer->start(
       std::bind(&VTcpServer::on_timer, this, std::placeholders::_1), 0, 500);
 }
 
 VTcpServer::~VTcpServer() {
-  while (this->tcpservice_wait_close_client.size() > 0) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
-  }
   this->timer->stop();
 
-  if (!this->tcpService_async->isClosing())
-  {
-    this->tcpService_async->close();
-  }
-  delete this->tcpService_async;
   delete this->threadpool;
   
   delete this->timer;
@@ -49,19 +35,6 @@ VTcpServer::~VTcpServer() {
   delete this->idle;
   delete this->tcp;
   delete this->loop;
-
-
-  // 防止队列客户端未释放内存
-  if (tcpservice_wait_callback_client.size() > 0) {
-    tcpservice_wait_callback_mutex.lock();
-    for (auto& tcpClient : tcpservice_wait_callback_client) {
-      delete tcpClient;
-      tcpClient = nullptr;
-    }
-    tcpservice_wait_callback_client.clear();
-
-    tcpservice_wait_callback_mutex.unlock();
-  }
 }
 
 VTcp* VTcpServer::getVTcp() {
@@ -140,7 +113,6 @@ void VTcpServer::removStatus(VTCP_WORKER_STATUS vstatus) {
 
 void VTcpServer::on_timer(VTimer* vtimer) {
 
-    tcpService_async->send();
 }
 
 void VTcpServer::on_idle(VIdle* vidle) {
@@ -155,20 +127,6 @@ void VTcpServer::on_close(VHandle* client) {
 
   this->setStatus(VTCP_WORKER_STATUS_CLOSED, true);
   this->loop->stop();
-}
-
-void VTcpServer::on_async_callback(VAsync *handle){
-
-	if (tcpservice_wait_close_client.size() > 0){
-		tcpservice_wait_close_mutex.lock();
-		for (auto& tcpClient : tcpservice_wait_close_client){
-			delete tcpClient;
-			tcpClient = nullptr;
-		}
-		tcpservice_wait_close_client.clear();
-
-		tcpservice_wait_close_mutex.unlock();
-	}
 }
 
 void VTcpServer::on_new_connection(VStream* tcp, int status) {
@@ -192,31 +150,16 @@ void VTcpServer::on_new_connection(VStream* tcp, int status) {
       client->setData(tcpClient);
       if (tcp->accept(client) != 0)
         throw std::runtime_error("Failed to accept new client");
-      tcpservice_wait_callback_mutex.lock();
-      tcpservice_wait_callback_client.push_back(tcpClient);
-      tcpservice_wait_callback_mutex.unlock();
+
+      tcpClient->setStatus(VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CONNECTED);
 
       // 挂起队列回调
      bool isOk = threadpool->enqueue([this, tcpClient] {
-        tcpservice_wait_callback_mutex.lock();
-           tcpservice_wait_callback_client.erase(
-            std::remove_if(tcpservice_wait_callback_client.begin(),
-                           tcpservice_wait_callback_client.end(),
-                           [&](VTcpClient* x) { return x == tcpClient; }),
-            tcpservice_wait_callback_client.end());
-        tcpservice_wait_callback_mutex.unlock();
         this->newClient(tcpClient);  // For multi-threaded client mode
           });
       if (!isOk) {
        Log->logWarn("threadpool enqueue is callback false, when use new thread!\n");
        std::thread newTD([this, tcpClient] {
-         tcpservice_wait_callback_mutex.lock();
-         tcpservice_wait_callback_client.erase(
-             std::remove_if(tcpservice_wait_callback_client.begin(),
-                            tcpservice_wait_callback_client.end(),
-                            [&](VTcpClient *x) { return x == tcpClient; }),
-             tcpservice_wait_callback_client.end());
-         tcpservice_wait_callback_mutex.unlock();
          this->newClient(tcpClient); // For multi-threaded client mode
        });
        newTD.detach();
@@ -228,7 +171,6 @@ void VTcpServer::on_new_connection(VStream* tcp, int status) {
         delete tcpClient;  // Safely delete if it was created
       }
       STD_L_ZERO_ERROR_SHOW(-1, e.what());
-      tcpservice_wait_callback_mutex.unlock();
     }
   } else {
     return;
@@ -295,17 +237,6 @@ int VTcpServer::listenIpv4(const char* addripv4, int port, int flags) {
 
 void VTcpServer::closeClient(VTcpClient* tcpClient) {
   tcpClient->close();
-  this->releaseClient(tcpClient);
-}
-
-void VTcpServer::releaseClient(VTcpClient* tcpClient) {
-	tcpservice_wait_close_mutex.lock();
-	tcpservice_wait_close_client.push_back(tcpClient);
-	tcpservice_wait_close_mutex.unlock();
-    
-	if (tcpservice_wait_close_client.size() > 5) {
-          tcpService_async->send();
-        }
 }
 
 

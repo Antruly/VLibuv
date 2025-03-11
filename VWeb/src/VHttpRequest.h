@@ -1,18 +1,18 @@
 ﻿#pragma once
-#include "VHttpParser.h"
-#include "VTcpClient.h"
-#include "VZlib.h"
-#include "VThreadPool.h"
 #include "VGetaddrinfo.h"
+#include "VHttpParser.h"
 #include "VOpenSsl.h"
+#include "VTcpClient.h"
+#include "VThreadPool.h"
 #include "VWebDefine.h"
+#include "VZlib.h"
 #include <regex>
 
 class VHttpRequest : public VObject {
- public:
+public:
   // Constructors
   VHttpRequest();
-  VHttpRequest(VTcpClient* vtcp_client);
+  VHttpRequest(VTcpClient *vtcp_client);
 
   // Destructor
   ~VHttpRequest();
@@ -25,20 +25,20 @@ class VHttpRequest : public VObject {
 
   void initData();
 
-  void setSslPoint(VOpenSsl* ssl);
-  VOpenSsl* getSslPoint() const;
+  void setSslPoint(VOpenSsl *ssl);
+  VOpenSsl *getSslPoint() const;
 
   // Get the associated TCP client object
-  VTcpClient* getVTcpClient() const;
+  VTcpClient *getVTcpClient() const;
 
   // Get the HTTP parser object used for parsing HTTP requests
-  VHttpParser* getVHttpParser() const;
+  VHttpParser *getVHttpParser() const;
 
-    // Get the response HTTP version
+  // Get the response HTTP version
   std::string getHttpVersion() const;
 
   // Set the response HTTP version
-  void setHttpVersion(const std::string& httpVersion);
+  void setHttpVersion(const std::string &httpVersion);
 
   // Get the request method
   std::string getMethodName() const;
@@ -47,53 +47,57 @@ class VHttpRequest : public VObject {
   METHOD_TYPE getMethod() const;
 
   // Set the request method
-  void setMethodName(const std::string& method);
+  void setMethodName(const std::string &method);
 
   // Set the request method
-  void setMethod(const METHOD_TYPE& method);
+  void setMethod(const METHOD_TYPE &method);
 
   // Get the request URL
   std::string getUrl() const;
 
   // Set the request URL
-  void setUrl(const std::string& url);
+  void setUrl(const std::string &url);
 
-   // Get the request URL
+  // Get the request URL
   std::string getRawUrl() const;
 
   // get  the ParsedURL
   ParsedURL getParsedURL();
 
-   // Get the request Host
+  // Get the request Host
   std::string getHost() const;
 
   // Set the request Host
-  void setHost(const std::string& host);
+  void setHost(const std::string &host);
 
   // Get the request headers
-  std::map<std::string, std::string> getHeaders() const;
+  HttpHeaders getHeaders() const;
 
   // Add a request header
-  void addHeader(const std::string& key, const std::string& value);
+  void addHeader(const std::string &key, const std::string &value);
 
   // Set the request body
-  void setBody(const VBuf& body);
+  void setBody(const VBuf &body);
+  void setBodyCompress(const VBuf &body);
 
   // Get the request body
-  const VBuf& getBody() const;
+  const VBuf &getBody() const;
+  VBuf &recvBody();
+
+  VBuf popBody();
 
   // Set the request content type
-  void setContentType(const std::string& contentType);
+  void setContentType(const std::string &contentType);
 
   // Get the request content type
   std::string getContentType() const;
 
-  void setAccept(const std::string& accept);
+  void setAccept(const std::string &accept);
 
   std::string getAccept() const;
 
   // Set the request Referer
-  void setReferer(const std::string& referer);
+  void setReferer(const std::string &referer);
 
   // Get the request Referer
   std::string getReferer() const;
@@ -126,7 +130,9 @@ class VHttpRequest : public VObject {
   bool getHttpSsl() const;
 
   // Parse request data
-  void parseRequest(const VBuf* buf);
+  void parseRequest(const VBuf *buf);
+
+  void resetParser();
 
   // Check if the request is secure
   bool isSecure() const;
@@ -135,86 +141,110 @@ class VHttpRequest : public VObject {
   void closeConnection();
 
   size_t getContentLength() const;
-  void setContentLength(const size_t& length);
+  void setContentLength(const size_t &length);
 
-  void setMaxBodyCacheLength(const size_t& length);
-      
+  void setMaxBodyCacheLength(const size_t &length);
+
+  void addCookie(const Cookie &cookie) { cookies_.addCookie(cookie);
+  }
+  std::vector<Cookie> &getCookies() { return cookies_.getCookies();
+  }
+  
+
   // Send the HTTP request
   bool sendRequest(bool isSendBody = true);
 
-  bool sendRequestBegin(VBuf& sendBuf, bool isSend = false);
-  bool sendRequestHeader(VBuf& sendBuf, bool isSend = false);
-  bool sendRequestBody(VBuf& sendBuf, bool isSend = false);
-  bool sendRequestCRLF(VBuf& sendBuf, bool isSend = false);
- 
-  bool sendRequestChunked(VBuf& sendBuf, bool isEnd = false);
+  bool sendRequestBegin(VBuf &sendBuf, bool isSend = false);
+  bool sendRequestHeader(VBuf &sendBuf, bool isSend = false);
+  bool sendRequestBody(VBuf &sendBuf, bool isSend = false);
+  bool sendRequestCRLF(VBuf &sendBuf, bool isSend = false);
+
+  bool sendRequestChunked(VBuf &sendBuf, bool isEnd = false);
+  bool sendRequestChunkedEnd();
 
   bool isParser();
+  bool isHeaderParser();
 
-  bool connect(const std::string& addrs, int port);
+  bool connect(const std::string &addrs, int port);
+
+  void waitRecvHeadersFinish(const uint64_t &maxTimout = 5000);
+  size_t waitRecvBody(const uint64_t &maxTimout = 30000);
+
+  void setData(void *data);
+  void *getData();
 
   void setRequestSendFinishCb(
-      std::function<void(VHttpRequest*, int)> request_send_finish_cb);
+      std::function<void(VHttpRequest *, int)> request_send_finish_cb);
   void setRequestParserFinishCb(
-      std::function<void(VHttpRequest*, int)> request_parser_finish_cb);
+      std::function<void(VHttpRequest *, int)> request_parser_finish_cb);
 
   void setRequestParserHeadersFinishCb(
-      std::function<void(VHttpRequest*, std::map<std::string, std::string>*)>
+      std::function<void(VHttpRequest *, HttpHeaders *)>
           request_parser_headers_finish_cb);
   void setRequestRecvBodyCb(
-      std::function<bool(VHttpRequest*, const VBuf*)> request_recv_body_cb);
- protected:
+      std::function<bool(VHttpRequest *, const VBuf *)> request_recv_body_cb);
+  void setRequestChunkHeaderCb(
+      std::function<void(VHttpRequest *, int)> request_chunk_header_cb);
+  void setRequestChunkCompleteCb(
+      std::function<void(VHttpRequest *, int)> request_chunk_complete_cb);
+
+protected:
   // Extract the host from the URL
-  std::string getHostFromUrl(const std::string& url) const;
+  std::string getHostFromUrl(const std::string &url) const;
 
-  bool isValidIpAddress(const std::string& ipAddress);
+  bool isValidIpAddress(const std::string &ipAddress);
 
-  std::string getIPFromVGetaddrinfo(const std::string& host);
+  std::string getIPFromVGetaddrinfo(const std::string &host);
 
-  bool writeData(const VBuf& sendBuf);
-  
-  
-  protected:
-  std::function<void(VHttpRequest*, int)> http_request_send_finish_cb;
-   std::function<void(VHttpRequest*, int)> http_request_parser_finish_cb;
-  std::function<void(VHttpRequest*, std::map<std::string, std::string>*)>
+  bool writeData(const VBuf &sendBuf);
+
+protected:
+  std::function<void(VHttpRequest *, int)> http_request_send_finish_cb;
+  std::function<void(VHttpRequest *, int)> http_request_parser_finish_cb;
+  std::function<void(VHttpRequest *, HttpHeaders *)>
       http_request_parser_headers_finish_cb;
-   std::function<bool(VHttpRequest*, const VBuf*)> http_request_recv_body_cb;
- 
+  std::function<bool(VHttpRequest *, const VBuf *)> http_request_recv_body_cb;
+  std::function<void(VHttpRequest *, int)> http_request_chunk_header_cb;
+  std::function<void(VHttpRequest *, int)> http_request_chunk_complete_cb;
 
- private:
-  VTcpClient* tcp_client_ = nullptr;    // Associated TCP client object
-  VHttpParser* http_parser_ = nullptr;  // HTTP parser object
-  VZlib* zlib_ = nullptr;               // Zlib object for gzip compression
-  VGetaddrinfo* getaddrinfo_ = nullptr;
-  VOpenSsl* openssl_ = nullptr;
+private:
+  VTcpClient *tcp_client_ = nullptr;   // Associated TCP client object
+  VHttpParser *http_parser_ = nullptr; // HTTP parser object
+  VZlib *zlib_ = nullptr;              // Zlib object for gzip compression
+  VGetaddrinfo *getaddrinfo_ = nullptr;
+
+  VOpenSsl *openssl_ = nullptr;
+  void *vdata = nullptr;
 
   std::string error_message;
-  std::string http_version_;            // HTTP version
+  std::string http_version_; // HTTP version
   std::string host_;
-  std::string url_;      // Request URL
-  std::string url_raw_;      // Request URL
-  std::string referer_;  // Request Referer
-  std::string user_agent_;  
+  std::string url_;     // Request URL
+  std::string url_raw_; // Request URL
+  std::string referer_; // Request Referer
+  std::string user_agent_;
   std::string accept_language_;
   std::string header_cache_;
-  std::string contentType_;             // Request content type
+  std::string contentType_; // Request content type
   std::string accept_;
   std::string location_;
 
-  ParsedURL url_parser_;                // Parsed URL components
-  
-  std::map<std::string, std::string> headers_;  // Request headers
-  VBuf body_;                                   // Request body
-  VBuf request_data_;                           // Request data buffer
- 
-   METHOD_TYPE method_;  // Request method
+  ParsedURL url_parser_; // Parsed URL components
+
+  HttpHeaders headers_;                        // Request headers
+  VBuf body_;                                  // Request body
+  VBuf body_compress_;                         // Request body_compress_
+  VBuf request_data_;                          // Request data buffer
+  CookieJar cookies_;
+  METHOD_TYPE method_; // Request method
   size_t content_length_;
-   size_t max_body_cache_length_;
-  bool use_gzip_ = false;   // Control whether to use gzip compression
+  size_t max_body_cache_length_;
+  bool use_gzip_ = false; // Control whether to use gzip compression
   bool use_chunked_ = false;
-  bool keep_alive_ = true;  // Control whether to keep the connection alive
-  bool parser_finish_ = false;
+  bool keep_alive_ = true; // Control whether to keep the connection alive
   bool http_ssl_ = false;
   bool own_tcp_client_ = false;
+  std::atomic<bool> parser_finish_ = false;
+  std::atomic<bool> parser_header_finish_ = false;
+  std::atomic<bool> async_recv_ = false;
 };

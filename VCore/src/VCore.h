@@ -9,3 +9,4 @@
 #include "VMemoryCache.h"
 #include "VSha256.h"
 #include "VLogger.h"
+#include "VFile.h"

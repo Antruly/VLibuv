@@ -33,6 +33,12 @@ int64_t tcpServer_readIndex = 0;
 int64_t tcpServer_writeIndex = 0;
 int64_t tcpServer_userMaxIndex = 0;
 
+// 默认值
+std::string listenIp = "0.0.0.0";
+int listenPort = 8075;
+std::string forwardIp = "127.0.0.1";
+int forwardPort = 8080;
+
 void tcpServer_close(VTcp* client) {
   Log->logInfo("server close !\n");
 }
@@ -52,7 +58,8 @@ void tcpClient_write(VTcpClient* client, const VBuf* data, int status) {
 
 void tcpClient_read(VTcpClient* client, const VBuf* data) {
   tcpServer_readIndex++;
-  //Log->logInfo("client data:%s\n", data->getData());
+
+  Log->logInfo("client data:%s\n", data->getData());
   if (data->size() == 1) {
       //VBuf* newdata = new VBuf(data->getData(), data->size());
       VBuf* newdata = new VBuf(getTestData);
@@ -69,53 +76,292 @@ void tcpClient_read(VTcpClient* client, const VBuf* data) {
  
 }
 
-void newClient(VTcpClient* client) {
+void idleCallback() {
+	std::this_thread::sleep_for(std::chrono::milliseconds(1));
+}
+
+void connectiondCallback(int status) {
+	STD_L_ZERO_ERROR_SHOW(status, "connectiondCallback is error");
+}
+
+
+void send_tcpClient_close(VTcpClient* client) {
+	//std::string perIP;
+	//int perPort;
+	//client->getPeerAddrs(perIP, perPort);
+	//Log->logInfo("send_client close(%s:%d) !\n", perIP.c_str(), perPort);
+	Log->logInfo("send_client close !\n");
+}
+
+void send_tcpClient_write(VTcpClient* client, const VBuf* data, int status) {
+
+	STD_L_ZERO_ERROR_SHOW(status, "writeCallback is error");
+}
+
+void send_tcpClient_read(VTcpClient* client, const VBuf* data) {
+	std::string perIP;
+	int perPort;
+	client->getPeerAddrs(perIP, perPort);
+
+	Log->logInfo("send_client(%s:%d) data:%s\n", perIP.c_str(), perPort, data->getData());
+	size_t dataSize = data->size();
+	const unsigned char* rawData = reinterpret_cast<const unsigned char*>(data->getData());
+
+	// 预分配足够的内存
+	std::string hexString;
+	hexString.reserve(dataSize * 3); // 每个字节 2 个字符 + 空格
+
+	for (size_t i = 0; i < dataSize; ++i) {
+		// 直接将16进制字符串附加到 hexString
+		char buffer[4]; // 包含两个字符和一个空格
+		std::sprintf(buffer, "%02x ", rawData[i]);
+		hexString.append(buffer);
+	}
+
+	// 日志输出
+	Log->logVerbose("send_client(%s:%d) data (hex): %s\n", perIP.c_str(), perPort, hexString.c_str());
+
+	if (client->getData() == nullptr)
+	{
+		client->close();
+		return;
+	}
+	((VTcpClient*)client->getData())->writeNewData(*data);
+
+}
+
+
+void recv_tcpClient_close(VTcpClient* client) {
+	tcpServer_index--;
+	/*std::string perIP;
+	int perPort;
+	client->getPeerAddrs(perIP, perPort);
+	Log->logInfo("recv_client close(%s:%d) !\n", perIP.c_str(), perPort);*/
+	Log->logInfo("recv_client close !\n");
+
+}
+
+void recv_tcpClient_write(VTcpClient* client, const VBuf* data, int status) {
+	tcpServer_writeIndex++;
+
+}
+
+void recv_tcpClient_read(VTcpClient* client, const VBuf* data) {
+	tcpServer_readIndex++;
+	std::string perIP;
+	int perPort;
+	client->getPeerAddrs(perIP, perPort);
+
+	Log->logInfo("recv_client(%s:%d) data:%s\n", perIP.c_str(), perPort, data->getData());
+	size_t dataSize = data->size();
+	const unsigned char* rawData = reinterpret_cast<const unsigned char*>(data->getData());
+
+	// 预分配足够的内存
+	std::string hexString;
+	hexString.reserve(dataSize * 3); // 每个字节 2 个字符 + 空格
+
+	for (size_t i = 0; i < dataSize; ++i) {
+		// 直接将16进制字符串附加到 hexString
+		char buffer[4]; // 包含两个字符和一个空格
+		std::sprintf(buffer, "%02x ", rawData[i]);
+		hexString.append(buffer);
+	}
+
+	// 日志输出
+	
+	Log->logVerbose("recv_client(%s:%d) data (hex): %s\n", perIP.c_str(), perPort, hexString.c_str());
+
+	if (client->getData() == nullptr)
+	{
+		tcpServer.closeClient(client);
+		return;
+	}
+	((VTcpClient*)client->getData())->writeNewData(*data);
+}
+
+
+void newClient(VTcpClient* recv_client) {
   tcpServer_index++;
   tcpServer_maxIndex++;
   if (tcpServer_userMaxIndex < tcpServer_index) {
     tcpServer_userMaxIndex = tcpServer_index;
   }
 
-  client->setCloseCb(tcpClient_close);
-  client->setReadCb(tcpClient_read);
-  client->setWriteCb(tcpClient_write);
-  client->clientReadStart();
-  //Log->logInfo("new client connect !\n");
-  //VBuf* newdata = new VBuf("");
-  //VBuf* newdata2 = new VBuf("");
-  //client->writeData(*newdata);
-  //client->writeData(*newdata2);
-  client->run();
+
+  std::string recvPerIP;
+  int recvPerPort;
+  recv_client->getPeerAddrs(recvPerIP, recvPerPort);
+
+  recv_client->setCloseCb(recv_tcpClient_close);
+  recv_client->setReadCb(recv_tcpClient_read);
+  recv_client->setWriteCb(recv_tcpClient_write);
+  recv_client->clientReadStart();
+  Log->logInfo("new recv_client(%s:%d) connect !\n", recvPerIP.c_str(), recvPerPort);
+
+  VTcpClient send_client_;
+  VTcpClient* send_client = new VTcpClient();
+  send_client->setIdleCb(idleCallback);
+  send_client->setCloseCb(send_tcpClient_close);
+  send_client->setWriteCb(send_tcpClient_write);
+  send_client->setReadCb(send_tcpClient_read);
+  send_client->setConnectiondCb(connectiondCallback);
+
+  int ret = send_client->connect(forwardIp.c_str(), forwardPort);
+  if (ret) {
+	  tcpServer.closeClient(recv_client);
+	  delete send_client;
+	  return;
+  }
+  send_client->run(UV_RUN_ONCE);
+
+  send_client->clientReadStart();
+
+  send_client->setData(recv_client);
+  recv_client->setData(send_client);
+
+  bool send_tcp_closed = false;
+  bool recv_tcp_closed = false;
+
+
+  std::string sendPerIP;
+  int sendPerPort;
+  send_client->getLocalAddrs(sendPerIP, sendPerPort);
+  
+  Log->logInfo("new recv_client(%s:%d) connect to send_client(local:%s:%d peer:%s:%d) !\n",
+	  recvPerIP.c_str(), recvPerPort, sendPerIP.c_str(), sendPerPort, forwardIp.c_str(), forwardPort);
+
+
+
+  while (true)
+  {
+	  if (send_client != nullptr)
+	  {
+		  send_client->run(UV_RUN_NOWAIT);
+	  }
+	  
+
+	  if (send_client != nullptr && (send_client->getStatus() &
+		  VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CLOSED) > 0) {
+
+		  send_client->setData(nullptr);
+		  send_client->getVTcp()->readStop();
+		  delete send_client;
+		  send_client = nullptr;
+		  send_tcp_closed = true;
+	  }
+	  
+	  if (recv_client != nullptr)
+	  {
+		  recv_client->run(UV_RUN_NOWAIT);
+	  }
+	  if (recv_client != nullptr && (recv_client->getStatus() &
+		  VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CLOSED) > 0) {
+
+		  recv_client->setData(nullptr);
+
+		  recv_client = nullptr;
+		  recv_tcp_closed = true;
+	  }
+
+	  if (!send_tcp_closed && recv_client == nullptr && send_client != nullptr)
+	  {
+		  send_client->getVTcp()->readStop();
+		  send_client->getVTcp()->close();
+		  send_client->close();
+		  
+		  send_tcp_closed = true;
+	  }
+	  else if (!recv_tcp_closed && recv_client != nullptr && send_client == nullptr)
+	  {
+		  recv_client->getVTcp()->readStop();
+		  recv_client->getVTcp()->close();
+		  tcpServer.closeClient(recv_client);
+		  recv_tcp_closed = true;
+	  }
+	  else if (recv_client == nullptr && send_client == nullptr)
+	  {
+		  return;
+	  }
+  }
+ 
 }
 
-int main() {
+void printUsage(const char* progName) {
+	std::cout << "Usage: " << progName << " <listen_ip> <listen_port> <forward_ip> <forward_port>\n";
+	std::cout << "Example: " << progName << " 0.0.0.0 8075 192.168.1.100 8080\n";
+}
+
+bool isValidIp(const std::string& ip) {
+	// 简单验证IP地址格式（你可以根据需要扩展验证）
+	unsigned int a, b, c, d;
+	return sscanf(ip.c_str(), "%u.%u.%u.%u", &a, &b, &c, &d) == 4 &&
+		a <= 255 && b <= 255 && c <= 255 && d <= 255;
+}
+
+int main(int argc, char* argv[]) {
+
+	try {
+		// 参数格式检查
+		if (argc != 5) {
+			throw std::invalid_argument("Invalid number of arguments.");
+		}
+
+		listenIp = argv[1];
+		listenPort = std::stoi(argv[2]);
+		forwardIp = argv[3];
+		forwardPort = std::stoi(argv[4]);
+
+		// 验证 IP 地址格式
+		if (!isValidIp(listenIp)) {
+			throw std::invalid_argument("Invalid listen IP address.");
+		}
+		if (!isValidIp(forwardIp)) {
+			throw std::invalid_argument("Invalid forward IP address.");
+		}
+
+		// 验证端口号
+		if (listenPort < 1 || listenPort > 65535 || forwardPort < 1 || forwardPort > 65535) {
+			throw std::invalid_argument("Port numbers must be between 1 and 65535.");
+		}
+
+	}
+	catch (const std::invalid_argument& e) {
+		// 捕获无效参数的异常，输出错误并给出正确的用法
+		std::cerr << "Error: " << e.what() << "\n";
+		printUsage(argv[0]);
+		return 1;
+	}
+
   Log->setLogTypes(VLOGGER_TYPE::VLOGGER_TYPE_NO_DEBUG);
+  Log->setEnable(true);
+  Log->setCloseFile(true);
+  Log->setFastLog(true);
   tcpServer.setCloseCb(tcpServer_close);
   tcpServer.setNewClientCb(newClient);
 
   VThread td;
   td.start(
       [&](void* data) {
-        Log->logInfo("listenIpv4:%s port:8075\n\n", "0.0.0.0");
-        tcpServer.listenIpv4("0.0.0.0", 8075, 0);
+	  Log->logInfo("listenIpv4:%s port:%d\n\n", listenIp.c_str(), listenPort);
+		tcpServer.listenIpv4(listenIp.c_str(), listenPort, 0);
         tcpServer.run();
       },
       nullptr);
 
   while (true) {
-	  std::cout << "\033[2J\033[1;1H"; // ANSI escape code to clear screen
-    Log->logInfo("new client  curruntClient:%lld userMaxIndex:%lld maxClient:%lld\n",
-           tcpServer_index, tcpServer_userMaxIndex, tcpServer_maxIndex);
-    Log->logInfo("new client  readIndex:%lld writeIndex:%lld\n\n",
-           tcpServer_readIndex, tcpServer_writeIndex);
+	  //std::cout << "\033[2J\033[1;1H"; // ANSI escape code to clear screen
+   // Log->logInfo("new client  curruntClient:%lld userMaxIndex:%lld maxClient:%lld\n",
+   //        tcpServer_index, tcpServer_userMaxIndex, tcpServer_maxIndex);
+   // Log->logInfo("new client  readIndex:%lld writeIndex:%lld\n\n",
+   //        tcpServer_readIndex, tcpServer_writeIndex);
 
-   VThreadPool::Statistics info = tcpServer.getVThreadPool()->getStatistics();
-    Log->logInfo("idleThreads:%ld\n", info.idleThreads.load());
-   Log->logInfo("numThreads:%ld\n", info.numThreads.load());
-    Log->logInfo("taskQueueSize:%ld\n", info.taskQueueSize.load());
-   Log->logInfo("closedThreads:%ld\n", info.closedThreads.load());
-   Log->logInfo("workingThreads:%ld\n", info.workingThreads.load());
-    Log->logInfo("workedNumber:%ld\n", info.workedNumber.load());
+   //VThreadPool::Statistics info = tcpServer.getVThreadPool()->getStatistics();
+   // Log->logInfo("idleThreads:%ld\n", info.idleThreads.load());
+   //Log->logInfo("numThreads:%ld\n", info.numThreads.load());
+   // Log->logInfo("taskQueueSize:%ld\n", info.taskQueueSize.load());
+   //Log->logInfo("closedThreads:%ld\n", info.closedThreads.load());
+   //Log->logInfo("workingThreads:%ld\n", info.workingThreads.load());
+   // Log->logInfo("workedNumber:%ld\n", info.workedNumber.load());
   
 
     

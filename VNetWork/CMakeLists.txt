@@ -57,6 +57,8 @@ set(NETWORK_FILES
     ${VNETWORK_SRC_DIR}/VTcpServer.cpp
     ${VNETWORK_SRC_DIR}/VTcpClient.h
     ${VNETWORK_SRC_DIR}/VTcpClient.cpp
+    ${VNETWORK_SRC_DIR}/VTimerInfo.h
+    ${VNETWORK_SRC_DIR}/VTimerInfo.cpp
 )
 source_group(NetWork FILES ${NETWORK_FILES})
 

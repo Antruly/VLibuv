@@ -4,6 +4,34 @@
 #include <sstream>
 #include "VLogger.h"
 #include "VSha256.h"
+#include <cassert>
+
+void testTrimAuto() {
+  // UTF-8测试（含全角空格）
+  VString utf8Str = "\xE3\x80\x80UTF8test\xE3\x80\x80";
+  utf8Str.trimAuto();
+  assert(utf8Str == "UTF8test");
+
+  // GBK测试（GBK编码全角空格）
+  VString gbkStr = "\xA1\xA1GBKtest\xA1\xA1";
+  gbkStr.trimAuto();
+  assert(gbkStr == "GBKtest");
+
+  // ASCII测试
+  VString asciiStr = "  ASCII Test\t\n";
+  asciiStr.trimAuto();
+  assert(asciiStr == "ASCII Test");
+
+  // 混合编码测试（自动回退基础trim）
+  VString mixedStr = " \t\xA1\xA1混合编码　";
+  mixedStr.trimAuto();
+  assert(mixedStr == "\xA1\xA1混合编码"); // 仅去除ASCII空白
+
+  // 未知编码测试
+  VString unknownStr = "\x80\x81test\x82";
+  unknownStr.trimAuto();
+  assert(unknownStr == "test"); // 依赖基础trim实现
+}
 
 void testString() {
   // 测试字符串
@@ -68,6 +96,7 @@ void testFile() {
 }
 
 int main() {
+  testTrimAuto();
   testString();
   testFile();
   return 0;

@@ -15,6 +15,7 @@ class VTcpClient : public VObject {
 
  public:
   virtual int run(uv_run_mode md = UV_RUN_DEFAULT);
+  void initCallBackup();
   void stop();
   void close();
   void idleStart();
@@ -38,6 +39,8 @@ class VTcpClient : public VObject {
 
  public:
   VTCP_WORKER_STATUS getStatus();
+   void setStatus(VTCP_WORKER_STATUS vstatus, bool isOnce = false);
+   void removStatus(VTCP_WORKER_STATUS vstatus);
 
   VTcp* getVTcp();
   VLoop* getVLoop();
@@ -51,8 +54,7 @@ class VTcpClient : public VObject {
  protected:
   VIdle* getVIdle();
 
-  void setStatus(VTCP_WORKER_STATUS vstatus, bool isOnce = false);
-  void removStatus(VTCP_WORKER_STATUS vstatus);
+  
   virtual void readData(VTcp* client, const VBuf& data);
 
  protected:
@@ -86,9 +88,9 @@ class VTcpClient : public VObject {
   VLoop* loop = nullptr;
   VTcp* tcp = nullptr;
   VIdle* idle = nullptr;
-  VAsync* async_connect = nullptr;
-  VAsync* async_close = nullptr;
-  VAsync* async_write = nullptr;
+  bool async_connect = false;
+  bool async_close = false;
+  bool async_write = false;
   VBuf* buffer_cache = nullptr;
  
   bool idle_run = false;

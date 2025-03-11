@@ -136,6 +136,14 @@ set(VWEB_FILES
     ${VWEB_SRC_DIR}/VZlib.h
     ${VWEB_SRC_DIR}/VOpenSsl.cpp
     ${VWEB_SRC_DIR}/VOpenSsl.h
+    ${VWEB_SRC_DIR}/VHttpClientObject.cpp
+    ${VWEB_SRC_DIR}/VHttpClientObject.h
+    ${VWEB_SRC_DIR}/VWebInterface.cpp
+    ${VWEB_SRC_DIR}/VWebInterface.h
+    ${VWEB_SRC_DIR}/VWebRouter.cpp
+    ${VWEB_SRC_DIR}/VWebRouter.h
+    ${VWEB_SRC_DIR}/VWebServer.cpp
+    ${VWEB_SRC_DIR}/VWebServer.h
 )
 source_group(VWeb FILES ${VWEB_FILES})
 

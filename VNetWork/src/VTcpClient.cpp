@@ -17,6 +17,7 @@ VTcpClient::VTcpClient()
   this->tcp = new VTcp(loop);
   this->idle = new VIdle(loop);
   this->buffer_cache = new VBuf();
+  this->initCallBackup();
   // buffer_cache->resize(65536);
 }
 
@@ -39,23 +40,33 @@ VTcpClient::VTcpClient(VLoop* externalLoop)
     this->buffer_cache = new VBuf();
     // buffer_cache->resize(65536);
   }
+  this->initCallBackup();
 }
 
 VTcpClient::~VTcpClient() {
   this->setStatus(VTCP_WORKER_STATUS_CLOSED, true);
 
-   if (own_loop && loop) {
-    loop->walk(
-        [this](VHandle* handle, void* data) {
-          if (!handle->isClosing() && handle->isActive()) {
-            handle->close();
-          }
-        },
-        nullptr);
+  if (own_loop && loop) {
+	 /* loop->walk(
+		  [this](VHandle* handle, void* data) {
+		  if (handle == this->tcp)
+		  {
+			  if (this->tcp_run) {
+				  this->close();
+			  }
+			  else{
+				  loop->stop();
+			  }
+		  }
+		  else{
+			  handle->close();
+		  }
+	  },
+		  nullptr);
 
-    if (!loop->isActive()) {
-      loop->run();
-    }
+	  if (!loop->isActive()) {
+		  loop->run();
+	  }*/
 
     // 如果是自管理的VLoop，需要在这里释放资源
     if (!this->loop->isClosing() && this->loop->isActive()) {
@@ -75,6 +86,7 @@ VTcpClient::~VTcpClient() {
   if (this->tcp != nullptr) {
     if (this->tcp_run) {
       this->close();
+	  this->tcp_run = false;
     }
 	delete this->tcp;
 	this->tcp = nullptr;
@@ -97,6 +109,12 @@ VTcpClient::~VTcpClient() {
 
 }
 void VTcpClient::on_idle(VIdle* vidle) {
+  if ((this->getStatus() & VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CLOSING) ==
+      VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CLOSING) {
+    if (this->idle_run) {
+      this->idleClose();
+    }
+  }
   if (tcp_idle_cb)
     tcp_idle_cb();
 }
@@ -104,14 +122,10 @@ void VTcpClient::on_idle(VIdle* vidle) {
 void VTcpClient::on_close(VHandle* client) {
   this->read_start = false;
   this->tcp_run = false;
+  this->async_close = true;
+  this->setStatus(VTCP_WORKER_STATUS_CLOSED, true);
   if (tcp_close_cb)
     tcp_close_cb(this);
-
-   if (this->async_close != nullptr)
-    this->async_close->send();
-
-  this->setStatus(VTCP_WORKER_STATUS_CLOSED, true);
-  this->loop->stop();
 }
 
 void VTcpClient::echo_write(VWrite* req, int status) {
@@ -127,8 +141,7 @@ void VTcpClient::echo_write(VWrite* req, int status) {
     delete req->getBuf();
   delete req;
 
-  if (this->async_write != nullptr)
-    this->async_write->send();
+  this->async_write = true;
 }
 
 void VTcpClient::alloc_buffer(VHandle* handle,
@@ -244,8 +257,11 @@ void *VTcpClient::getData() { return vdata; }
 VIdle* VTcpClient::getVIdle() {
   return this->idle;
 }
-int VTcpClient::run(uv_run_mode md) {
-  return this->loop->run(md); }
+int VTcpClient::run(uv_run_mode md) { return this->loop->run(md); }
+void VTcpClient::initCallBackup() {
+ 
+
+}
 void VTcpClient::stop() { this->loop->stop(); }
 void VTcpClient::idleStart() {
   this->idle_run = true;
@@ -278,23 +294,45 @@ void VTcpClient::setReadCb(
 }
 
 void VTcpClient::close() {
+  this->async_close = false;
+  if (this->tcp != nullptr && this->tcp->isClosing()) {
+    this->setStatus(VTCP_WORKER_STATUS_CLOSING, true);
+    if (this->loop != nullptr && loop->isActive()) {
+      loop->stop();
+    }
+    this->setStatus(VTCP_WORKER_STATUS_CLOSED, true);
+    this->async_close = true;
+    if (tcp_close_cb)
+      tcp_close_cb(this);
+    return;
+  } else if (this->tcp != nullptr && !this->tcp->isClosing()) {
+    this->setStatus(VTCP_WORKER_STATUS_CLOSING, true);
+    this->tcp->close(
+        std::bind(&VTcpClient::on_close, this, std::placeholders::_1));
+    while (true) {
+      if (!this->loop->isActive())
+        this->run(uv_run_mode::UV_RUN_NOWAIT);
 
-	if (this->loop != nullptr && loop->isActive()) {
-		this->setStatus(VTCP_WORKER_STATUS_CLOSING, true);
-	}
+      if (((this->getStatus() & VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CLOSED) >
+           0) ||
+          this->getStatus() >
+              VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_ERROR_NONE) {
+        break;
+      }
 
-	if (this->tcp != nullptr && !this->tcp->isClosing()) {
-		this->setStatus(VTCP_WORKER_STATUS_CLOSING, true);
-		this->tcp->close(
-			std::bind(&VTcpClient::on_close, this, std::placeholders::_1));
-		return;
-	}
-	else {
-		if (this->loop != nullptr && loop->isActive()) {
-			loop->stop();
-		}
-	}
-	this->setStatus(VTCP_WORKER_STATUS_CLOSED, true);
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    return;
+  } else {
+    this->setStatus(VTCP_WORKER_STATUS_CLOSING, true);
+    if (this->loop != nullptr && loop->isActive()) {
+      loop->stop();
+    }
+    this->setStatus(VTCP_WORKER_STATUS_CLOSED, true);
+    this->async_close = true;
+    if (tcp_close_cb)
+      tcp_close_cb(this);
+  }
 }
 
 VTCP_WORKER_STATUS VTcpClient::getStatus() {
@@ -373,14 +411,14 @@ void VTcpClient::on_connection(VConnect* req, int status) {
   this->connectiond(status);
   delete req;
 
-    if (this->async_connect != nullptr)
-    this->async_connect->send();
+    this->async_connect = true;
 }
 
 int VTcpClient::connect(const char* addripv4, int port) {
   this->removStatus(static_cast<VTCP_WORKER_STATUS>(
 	  VTCP_WORKER_STATUS_DISCONNECTED | VTCP_WORKER_STATUS_CLOSED | VTCP_WORKER_STATUS_CLOSING |
       VTCP_WORKER_STATUS_NONE));
+  this->async_connect = false;
   this->setStatus(VTCP_WORKER_STATUS_CONNECTING, true);
   int ret;
   tcp->init(loop);
@@ -396,6 +434,7 @@ int VTcpClient::connect(const char* addripv4, int port) {
 }
 
 int VTcpClient::writeData(const VBuf& data) {
+  this->async_write = false;
   if ((this->getStatus() & VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CLOSED) ==
       VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CLOSED) {
     if (tcp_write_cb)
@@ -414,6 +453,7 @@ int VTcpClient::writeData(const VBuf& data) {
 }
 
 int VTcpClient::writeNewData(const VBuf& data) {
+  this->async_write = false;
   if ((this->getStatus() & VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CLOSED) ==
       VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CLOSED) {
     if (tcp_write_cb)
@@ -452,61 +492,45 @@ void VTcpClient::waitConnectFinish() {
     return;
   }
 
-  assert(this->async_connect == nullptr);
+  while (true) {
+     if (!this->loop->isActive())
+       this->run(uv_run_mode::UV_RUN_NOWAIT);
 
-  VLoop vloop;
-  this->async_connect = new VAsync();
-  VAsync* vasync = this->async_connect;
-  VTimer vtimer(&vloop);
-  vtimer.start(
-      [this, &vloop](VTimer* vtimer) {
-        if (((this->getStatus() &
-			VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CONNECTING) == 0) || this->getStatus() > VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_ERROR_NONE) {
-          vtimer->stop();
-          vloop.close();
-        }
-      }, 0ULL, 1ULL);
-  
-  this->async_connect->init(
-      [this, &vtimer](VAsync* vasync) {
-        vtimer.stop();
-        vasync->close();
-      }, &vloop);
-  vloop.run();
-  this->async_connect = nullptr;
-  delete vasync;
-  
+     if (((this->getStatus() &
+           VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CONNECTING) == 0) ||
+         this->getStatus() > VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_ERROR_NONE) {
+     break;
+     }
+
+     if (this->async_connect) {
+       this->async_connect = false;
+       break;
+     }
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  }
 }
 
 void VTcpClient::waitCloseFinish() {
   if ((this->getStatus() & VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CLOSED) > 0) {
     return;
   }
-  assert(this->async_close == nullptr);
 
-  VLoop vloop;
-  this->async_close = new VAsync();
-  VAsync* vasync = this->async_close;
-  VTimer vtimer(&vloop);
-  vtimer.start(
-      [this, &vloop](VTimer* vtimer) {
-        if (((this->getStatus() &
-			VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CLOSED) > 0) || this->getStatus() > VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_ERROR_NONE) {
-          vtimer->stop();
-          vloop.close();
-        }
-      },
-      0ULL, 1ULL);
- 
-  this->async_close->init(
-      [this, &vtimer](VAsync* vasync) {
-        vtimer.stop();
-        vasync->close();
-      },
-      &vloop);
-  vloop.run();
-  this->async_close = nullptr;
-  delete vasync;
+   while (true) {
+    if (!this->loop->isActive())
+      this->run(uv_run_mode::UV_RUN_NOWAIT);
+
+    if (((this->getStatus() & VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CLOSED) >
+         0) ||
+        this->getStatus() > VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_ERROR_NONE) {
+      break;
+    }
+
+    if (this->async_close) {
+      this->async_close = false;
+      break;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  }
 }
 
 
@@ -517,31 +541,23 @@ void VTcpClient::waitWriteFinish() {
     return;
   }
 
-  assert(this->async_write == nullptr);
+  while (true) {
+    if (!this->loop->isActive())
+      this->run(uv_run_mode::UV_RUN_NOWAIT);
 
-  VLoop vloop;
-  this->async_write = new VAsync();
-  VTimer vtimer(&vloop);
-  vtimer.start(
-      [this, &vloop](VTimer* vtimer) {
-	  if (((this->getStatus() &
-             (VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CONNECTED |
-			 VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_PROCESSING)) == 0) || this->getStatus() > VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_ERROR_NONE) {
-          vtimer->stop();
-          vloop.close();
-        }
-      },
-      0ULL, 1ULL);
-  VAsync* vasync = this->async_write;
-  this->async_write->init(
-      [this, &vtimer](VAsync* vasync) {
-        vtimer.stop();
-        vasync->close();
-      },
-      &vloop);
-  vloop.run();
-  this->async_write = nullptr;
-  delete vasync;
+    if (((this->getStatus() &
+          (VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_CONNECTED |
+           VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_PROCESSING)) == 0) ||
+        this->getStatus() > VTCP_WORKER_STATUS::VTCP_WORKER_STATUS_ERROR_NONE) {
+      break;
+    }
+
+    if (this->async_write) {
+      this->async_write = false;
+      break;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  }
 }
 
 void VTcpClient::connectiond(int status) {

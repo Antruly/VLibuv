@@ -65,23 +65,32 @@ public:                                                                        \
   void log##TypeName(const char *format, ...) {                                \
     if ((log_types & Type) == 0) {                                             \
       return;                                                                  \
-    }                                                                          \
+		    }                                                                          \
     va_list args;                                                              \
     va_start(args, format);                                                    \
     int size = _vscprintf(format, args);                                       \
     if (size < 0) {                                                            \
       va_end(args);                                                            \
       return;                                                                  \
-    }                                                                          \
+		    }                                                                          \
     char *buffer = new char[size + 1];                                         \
     vsnprintf_s(buffer, size + 1, _TRUNCATE, format, args);                    \
     std::string filename;                                                      \
     std::string logMessage;                                                    \
-    log(logFileDirectory + std::string("/") + #TypeName, logfile_##TypeName,   \
+	if(fast_log)\
+			{\
+		fastLog(logFileDirectory + std::string("/") + #TypeName, logfile_##TypeName, \
         Name, buffer, Colour, filename, logMessage);                           \
+			}\
+				else\
+    		{\
+			log(logFileDirectory + std::string("/") + #TypeName, logfile_##TypeName, \
+        Name, buffer, Colour, filename, logMessage); \
+    		}\
+                          \
     delete[] buffer;                                                           \
     va_end(args);                                                              \
-  }
+      }
 
 #define VLOGGER_DEFINE_LOG_TYPE_DEBUG(TypeName)                                \
 public:                                                                        \
@@ -109,6 +118,10 @@ public:
 
   bool getEnable() const;
 
+  void setFastLog(bool fslog);
+
+  void setCloseFile(bool closefile);
+
   void setLogTypes(VLOGGER_TYPE type);
 
   VLOGGER_TYPE getLogTypes() const;
@@ -120,8 +133,8 @@ private:
   std::string logFileDirectory;
   bool close_file;
   bool enable;
+  bool fast_log;
 
-  void setCloseFile(bool closefile);
   // 获取完整的日志文件路径
   std::string getLogFilePath(const std::string &filename);
 
@@ -181,6 +194,11 @@ public:
            const std::string &level, const std::string &message,
            const std::string &colour, std::string &filename,
            std::string &logMessage);
+  // 快速记录日志
+  void fastLog(const std::string &filepath, std::ofstream &logfile,
+	  const std::string &level, const std::string &message,
+	  const std::string &colour, std::string &filename,
+	  std::string &logMessage);
 
   // 关闭日志文件
   void close(std::ofstream &logfile);

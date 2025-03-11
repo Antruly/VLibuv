@@ -61,7 +61,7 @@ int main() {
   setCallback(websocketClient);
   
   std::string websocketUrl = "ws://127.0.0.1:8085";
-  std::string websocketUrl2 = "ws://192.168.1.210:8085/detection-admin/vklWebSocket";
+  std::string websocketUrl2 = "ws://127.0.0.1:8085/detection-admin/vklWebSocket";
   
   
   if (!websocketClient.websocketConnect(websocketUrl2)) {

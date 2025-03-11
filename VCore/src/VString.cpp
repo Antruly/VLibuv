@@ -8,131 +8,388 @@
 #include <locale>
 #include <memory> // For std::unique_ptr
 #include <string>
+#include <sstream>
 
+//#ifdef _WIN32
+//const char *GBK_LOCALE_NAME = ".936"; // GBK在Windows下的locale name
+//#else
+//const char *GBK_LOCALE_NAME =
+//    "zh_CN.GB18030"; // Linux下的locale名是"zh_CN.GB18030"
+//#endif
 #ifdef _WIN32
-const char *GBK_LOCALE_NAME = ".936"; // GBK在Windows下的locale name
+#define GBK_LOCALE_NAME "CHS"
 #else
-const char *GBK_LOCALE_NAME =
-    "zh_CN.GB18030"; // Linux下的locale名是"zh_CN.GB18030"
+#define GBK_LOCALE_NAME "zh_CN.GBK"
 #endif
 static VString StrEncoding("你好VLibuv!");
 static VString::Encoding encoding = StrEncoding.detectEncoding();
 
-VString::VString(const std::string &str) : data(str) {}
-VString::VString(const char *str, size_t count) : data(str, count) {}
+VString::VString() : vdata() {}
+VString::VString(const std::string &str) : vdata(str) {}
+VString::VString(const VString &str) : vdata(str.vdata) {}
+VString::VString(const char ch) : vdata() {
+  char chs[2]{ch, '\0'};
+  vdata = chs;
+}
+VString::VString(const char *str) : vdata(str) {}
+VString::VString(const char *str, size_t count) : vdata(str, count) {}
 VString::~VString() {}
 
-VString::operator std::string() const { return data; }
+VString::operator std::string() const { return vdata; }
+
+const std::string &VString::stdString() const { return vdata; }
+
+void VString::push_back(char _Ch) { vdata.push_back(_Ch); }
+
+void VString::pop_back() { vdata.pop_back(); }
+
+char &VString::front() { return vdata.front(); }
+
+const char &VString::front() const { return vdata.front(); }
+
+char &VString::back() { return vdata.back(); }
+
+const char &VString::back() const { return vdata.back(); }
+
+const char *VString::c_str() const { return vdata.c_str(); }
+
+const char *VString::data() const { return vdata.data(); }
+
+size_t VString::length() const { return vdata.length(); }
 
 // begin 方法
 
-VString::iterator VString::begin() { return iterator(data.begin()); }
+VString::iterator VString::begin() { return iterator(vdata.begin()); }
 
 // end 方法
 
-VString::iterator VString::end() { return iterator(data.end()); }
+VString::iterator VString::end() { return iterator(vdata.end()); }
+
+// 私有辅助方法
+size_t VString::utf8CharLength(unsigned char c) const {
+  if (c < 0x80)
+    return 1;
+  if ((c & 0xE0) == 0xC0)
+    return 2;
+  if ((c & 0xF0) == 0xE0)
+    return 3;
+  if ((c & 0xF8) == 0xF0)
+    return 4;
+  return 0;
+}
+
+size_t VString::gbkCharLength(unsigned char c) const {
+  return (c >= 0x81 && c <= 0xFE) ? 2 : 1;
+}
 
 // 重载常用方法
 
-size_t VString::size() const { return data.size(); }
+size_t VString::size() const { return vdata.size(); }
+
+size_t VString::max_size() const { return vdata.max_size(); }
+
+void VString::resize(size_t _Newsize) { vdata.resize(_Newsize); }
+void VString::resize(size_t _Newsize, char _Ch) { vdata.resize(_Newsize, _Ch); }
+
+size_t VString::capacity() const { return vdata.capacity(); }
+
+
+void VString::reserve(size_t _Newcap) {}
+
+// 字符串操作
+char &VString::operator[](size_t index) { return vdata[index]; }
+
+const char &VString::operator[](size_t index) const { return vdata[index]; }
 
 VString &VString::operator=(const VString &other) {
   if (this != &other) {
-    data = other.data;
+    vdata = other.vdata;
   }
   return *this;
 }
 
-VString &VString::operator=(const std::string &str) {
-  data = str;
-  return *this;
-}
-
 VString VString::operator+(const VString &other) const {
-  return data + other.data;
+  return vdata + other.vdata;
 }
 
 VString &VString::operator+=(const VString &other) {
-  data += other.data;
+  vdata += other.vdata;
   return *this;
 }
 
-// Comparison operators
-
 bool VString::operator==(const VString &other) const {
-  return data == other.data;
+  return vdata == other.vdata;
 }
 
 bool VString::operator!=(const VString &other) const {
   return !(*this == other);
 }
 
-// Overload [] operator to access characters by index
+bool VString::operator<(const VString &other) const {
+  return vdata < other.vdata;
+}
 
-char &VString::operator[](size_t index) { return data[index]; }
+bool VString::operator>(const VString &other) const {
+  return vdata > other.vdata;
+}
 
-// Substring method
-
-// Overload [] operator for const objects
-
-const char &VString::operator[](size_t index) const { return data[index]; }
-
+bool VString::operator>=(const VString &other) const {
+  return vdata >= other.vdata;
+}
+bool VString::operator<=(const VString &other) const {
+  return vdata <= other.vdata;
+}
 VString VString::substr(size_t pos, size_t count) const {
-  return data.substr(pos, count);
+  return vdata.substr(pos, count);
 }
 
 // Check if string is empty
 
-bool VString::empty() const { return data.empty(); }
+bool VString::empty() const { return vdata.empty(); }
 
 size_t VString::find(const VString &str, size_t pos) const {
-  return data.find(str.data, pos);
+  return vdata.find(str.vdata, pos);
+}
+
+size_t VString::find(const char ch, size_t pos) const {
+  return vdata.find(ch, pos);
+}
+
+size_t VString::rfind(const VString &str, size_t pos) const {
+  return vdata.rfind(str.vdata, pos);
+}
+
+size_t VString::rfind(char ch, size_t pos) const {
+  return vdata.rfind(ch, pos);
+}
+
+void VString::trim() {
+  if (vdata.empty())
+    return;
+
+  // 查找第一个非空白字符
+  size_t start = 0;
+  while (start < vdata.size() &&
+         std::isspace(static_cast<unsigned char>(vdata[start]))) {
+    ++start;
+  }
+
+  // 查找最后一个非空白字符
+  size_t end = vdata.size();
+  while (end > start &&
+         std::isspace(static_cast<unsigned char>(vdata[end - 1]))) {
+    --end;
+  }
+
+  vdata = vdata.substr(start, end - start);
+}
+
+void VString::trimUtf8() {
+  if (!isUtf8String())
+    return; // 使用已有编码检测方法
+
+  // UTF-8空白字符定义（包含全角空格）
+  const std::vector<std::string> UTF8_WHITESPACE = {
+      "\x20",        // Space
+      "\x09",        // Tab
+      "\x0A",        // LF
+      "\x0D",        // CR
+      "\xC2\xA0",    // No-break space
+      "\xE3\x80\x80" // 全角空格(U+3000)
+  };
+
+  size_t byteStart = 0;
+  size_t totalLen = vdata.size();
+
+  // Trim start
+  while (byteStart < totalLen) {
+    bool found = false;
+    for (const auto &ws : UTF8_WHITESPACE) {
+      if (vdata.substr(byteStart, ws.size()) == ws) {
+        byteStart += ws.size();
+        found = true;
+        break;
+      }
+    }
+    if (!found)
+      break;
+  }
+
+  // Trim end
+  size_t byteEnd = totalLen;
+  while (byteEnd > byteStart) {
+    bool found = false;
+    for (const auto &ws : UTF8_WHITESPACE) {
+      size_t wsSize = ws.size();
+      if (byteEnd >= wsSize && vdata.substr(byteEnd - wsSize, wsSize) == ws) {
+        byteEnd -= wsSize;
+        found = true;
+        break;
+      }
+    }
+    if (!found)
+      break;
+  }
+
+  vdata = vdata.substr(byteStart, byteEnd - byteStart);
+}
+
+VString VString::trimmedUtf8() const {
+  VString result(*this);
+  result.trimUtf8();
+  return result;
+}
+void VString::trimGbk() {
+  if (!isGbkString())
+    return; // 使用已有编码检测方法
+
+  // GBK空白字符定义
+  const std::vector<std::string> GBK_WHITESPACE = {
+      "\x20",     // 空格
+      "\xA1\xA1", // 全角空格(GBK编码)
+      "\xA3\xA0", // 中文制表符
+  };
+
+  size_t byteStart = 0;
+  size_t totalLen = vdata.size();
+
+  // Trim start
+  while (byteStart < totalLen) {
+    bool found = false;
+    for (const auto &ws : GBK_WHITESPACE) {
+      size_t wsSize = ws.size();
+      if (byteStart + wsSize <= totalLen &&
+          vdata.substr(byteStart, wsSize) == ws) {
+        byteStart += wsSize;
+        found = true;
+        break;
+      }
+    }
+    if (!found)
+      break;
+  }
+
+  // Trim end
+  size_t byteEnd = totalLen;
+  while (byteEnd > byteStart) {
+    bool found = false;
+    for (const auto &ws : GBK_WHITESPACE) {
+      size_t wsSize = ws.size();
+      if (byteEnd >= wsSize && vdata.substr(byteEnd - wsSize, wsSize) == ws) {
+        byteEnd -= wsSize;
+        found = true;
+        break;
+      }
+    }
+    if (!found)
+      break;
+  }
+
+  vdata = vdata.substr(byteStart, byteEnd - byteStart);
+}
+
+VString VString::trimmedGbk() const {
+  VString result(*this);
+  result.trimGbk();
+  return result;
+}
+
+void VString::trimAuto() {
+  switch (detectEncoding()) {
+  case Encoding::UTF8:
+    trimUtf8();
+    break;
+  case Encoding::GBK:
+    trimGbk();
+    break;
+  case Encoding::ASCII:   // 明确包含ASCII类型
+  case Encoding::UNKNOWN: // 未知编码按基础处理
+  default:
+    trim();
+  }
+}
+
+VString VString::trimmedAuto() const {
+  VString result(*this);
+  result.trimAuto();
+  return result;
+}
+
+// 支持自定义trim字符集的版本
+
+VString &VString::trimChars(const VString &chars) {
+  size_t start = 0;
+  while (start < length() && chars.contains(vdata[start])) {
+    ++start;
+  }
+
+  size_t end = length();
+  while (end > start && chars.contains(vdata[end - 1])) {
+    --end;
+  }
+
+  return *this = substr(start, end - start);
+}
+
+
+// 返回新对象的trim版本
+
+VString VString::trimmed() const {
+  VString result(*this);
+  result.trim();
+  return result;
 }
 
 bool VString::contains(const VString &str) const {
   return find(str) != std::string::npos;
 }
 
+bool VString::startsWith(const VString &prefix) const {
+  if (prefix.size() > vdata.size())
+    return false;
+  return std::equal(prefix.vdata.begin(), prefix.vdata.end(), vdata.begin());
+}
+
+bool VString::endsWith(const VString &suffix) const {
+  if (suffix.size() > vdata.size())
+    return false;
+  return std::equal(suffix.vdata.rbegin(), suffix.vdata.rend(), vdata.rbegin());
+}
+
 std::vector<VString> VString::split(char delimiter) const {
   std::vector<VString> tokens;
-  std::istringstream iss(data);
-  VString token;
+  std::string token;
+  std::istringstream iss(vdata);
 
-  while (std::getline(iss, token.data, delimiter)) {
-    tokens.push_back(token);
+  while (std::getline(iss, token, delimiter)) {
+    tokens.emplace_back(token); // 使用VString的隐式构造函数
   }
-
   return tokens;
 }
 
 std::vector<VString> VString::split(const VString &delimiter) const {
   std::vector<VString> tokens;
-  std::istringstream iss(data);
-  VString token;
-  std::string tempData = data; // 创建数据的临时副本
-  size_t pos = 0;
-  while ((pos = tempData.find(delimiter.data, pos)) != std::string::npos) {
-    token = tempData.substr(0, pos);
-    tokens.push_back(token);
-    tempData.erase(0, pos + delimiter.size());
-    pos = 0; // 为下一次搜索重置位置
-  }
-  tokens.push_back(tempData); // 在最后一个分隔符后添加剩余的子字符串
+  const std::string &delim = delimiter; // 假设有str()方法
+  size_t start = 0;
+  size_t end = vdata.find(delim);
 
+  while (end != std::string::npos) {
+    tokens.emplace_back(vdata.substr(start, end - start));
+    start = end + delim.length();
+    end = vdata.find(delim, start);
+  }
+  tokens.emplace_back(vdata.substr(start));
   return tokens;
 }
 
 // replace 方法
 
-void VString::replace(size_t pos, size_t count, const std::string &str) {
-  data.replace(pos, count, str);
+void VString::replace(size_t pos, size_t count, const VString &str) {
+  vdata.replace(pos, count, str);
 }
 
-const char *VString::c_str() { return data.c_str(); }
-
-std::string VString::replaceAll(const std::string &search,
-                                const std::string &replace) {
-  std::string result = data;
+VString VString::replaceAll(const VString &search, const VString &replace) {
+  std::string result = vdata;
   size_t pos = 0;
   while ((pos = result.find(search, pos)) != std::string::npos) {
     result.replace(pos, search.length(), replace);
@@ -141,22 +398,44 @@ std::string VString::replaceAll(const std::string &search,
   return result;
 }
 
-unsigned char ToHex(unsigned char x) { return x > 9 ? x + 55 : x + 48; }
-
-unsigned char FromHex(unsigned char x) {
-  unsigned char y;
-  if (x >= 'A' && x <= 'Z')
-    y = x - 'A' + 10;
-  else if (x >= 'a' && x <= 'z')
-    y = x - 'a' + 10;
-  else if (x >= '0' && x <= '9')
-    y = x - '0';
-  else
-    assert(0);
-  return y;
+VString& VString::urlEncode() {
+  std::string strTemp = "";
+  size_t length = vdata.length();
+  for (size_t i = 0; i < length; i++) {
+    if (isalnum((unsigned char)vdata[i]) || (vdata[i] == '-') ||
+        (vdata[i] == '_') || (vdata[i] == '.') || (vdata[i] == '~'))
+      strTemp += vdata[i];
+    else if (vdata[i] == ' ')
+      strTemp += "+";
+    else {
+      strTemp += '%';
+      strTemp += ToHex((unsigned char)vdata[i] >> 4);
+      strTemp += ToHex((unsigned char)vdata[i] % 16);
+    }
+  }
+  vdata = strTemp;
+  return *this;
 }
 
-std::string VString::urlEncode(const std::string &str) {
+VString& VString::urlDecode() {
+  std::string strTemp = "";
+  size_t length = vdata.length();
+  for (size_t i = 0; i < length; i++) {
+    if (vdata[i] == '+')
+      strTemp += ' ';
+    else if (vdata[i] == '%') {
+      assert(i + 2 < length);
+      unsigned char high = FromHex((unsigned char)vdata[++i]);
+      unsigned char low = FromHex((unsigned char)vdata[++i]);
+      strTemp += high * 16 + low;
+    } else
+      strTemp += vdata[i];
+  }
+  vdata = strTemp;
+  return *this;
+}
+
+VString VString::UrlEncode(const VString &str) {
   std::string strTemp = "";
   size_t length = str.length();
   for (size_t i = 0; i < length; i++) {
@@ -174,7 +453,7 @@ std::string VString::urlEncode(const std::string &str) {
   return strTemp;
 }
 
-std::string VString::urlDecode(const std::string &str) {
+VString VString::UrlDecode(const VString &str) {
   std::string strTemp = "";
   size_t length = str.length();
   for (size_t i = 0; i < length; i++) {
@@ -191,89 +470,35 @@ std::string VString::urlDecode(const std::string &str) {
   return strTemp;
 }
 
-// Convert UTF-8 to ASCII
-std::string VString::utf8ToAscll() const {
-  std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
-  std::u32string utf32String = converter.from_bytes(data);
-  return std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t>{}.to_bytes(
-      utf32String);
-}
 
-// Convert UTF-8 to UTF-16
-std::u16string VString::utf8ToUtf16() const {
-  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> converter;
-  std::string utf8String = reinterpret_cast<const char *>(data.c_str());
-  return converter.from_bytes(utf8String);
-}
-
-// Convert UTF-8 to UTF-32
-std::u32string VString::utf8ToUtf32() const {
-  std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
-  return converter.from_bytes(data);
-}
-
-std::string VString::gbkToUtf8() const {
-  if (this->isUtf8String()) {
-    return data;
-  }
-  std::wstring_convert<std::codecvt_byname<wchar_t, char, mbstate_t>> convert(
-      new std::codecvt_byname<wchar_t, char, mbstate_t>(GBK_LOCALE_NAME));
-  std::wstring tmp_wstr = convert.from_bytes(data);
-  std::wstring_convert<std::codecvt_utf8<wchar_t>> cv2;
-  return cv2.to_bytes(tmp_wstr);
-}
-std::string VString::utf8ToGbk() const {
-  if (!isUtf8String()) {
-    return data;
-  }
-  std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-  std::wstring tmp_wstr = conv.from_bytes(data);
-  std::wstring_convert<std::codecvt_byname<wchar_t, char, mbstate_t>> convert(
-      new std::codecvt_byname<wchar_t, char, mbstate_t>(GBK_LOCALE_NAME));
-  return convert.to_bytes(tmp_wstr);
-}
-std::wstring VString::utf8ToUnicode() const {
-  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> convert;
-  return convert.from_bytes(data);
-}
-std::wstring VString::gbkToUnicode() const {
-  std::wstring_convert<std::codecvt_byname<wchar_t, char, std::mbstate_t>>
-      convert(new std::codecvt_byname<wchar_t, char, std::mbstate_t>(
-          GBK_LOCALE_NAME));
-  return convert.from_bytes(data);
-}
-
-VString::Encoding VString::detectEncoding() const {
-  if (isUtf8String()) {
-    return VString::Encoding::UTF8;
-  } else if (isGbkString()) {
-    return VString::Encoding::GBK;
-  } else if (isAscllString()) {
-    return VString::Encoding::ASCII;
-  } else {
-    return VString::Encoding::UNKNOWN;
-  }
-}
-
+// 编码检测方法
 bool VString::isUtf8String() const {
-  int i = 0;
-  while (i < data.size()) {
-    unsigned char ch = data[i];
-    if (ch >= 0 && ch <= 127) { // 0x00 - 0x7F
-      i++;
-      continue;
-    }
-    if ((ch & 0xE0) == 0xC0) { // 0xC0 - 0xDF
-      if (i + 1 >= data.size() || (data[i + 1] & 0xC0) != 0x80) {
+  size_t i = 0;
+  while (i < vdata.size()) {
+    unsigned char ch = vdata[i];
+    if (ch <= 0x7F) {
+      ++i;
+    } else if ((ch & 0xE0) == 0xC0) {
+      if (i + 1 >= vdata.size() || (vdata[i + 1] & 0xC0) != 0x80 || ch < 0xC2)
         return false;
-      }
       i += 2;
-    } else if ((ch & 0xF0) == 0xE0) { // 0xE0 - 0xEF
-      if (i + 2 >= data.size() || (data[i + 1] & 0xC0) != 0x80 ||
-          (data[i + 2] & 0xC0) != 0x80) {
+    } else if ((ch & 0xF0) == 0xE0) {
+      if (i + 2 >= vdata.size() || (vdata[i + 1] & 0xC0) != 0x80 ||
+          (vdata[i + 2] & 0xC0) != 0x80)
         return false;
-      }
+      unsigned char c1 = vdata[i + 1];
+      if ((ch == 0xE0 && c1 < 0xA0) || (ch == 0xED && c1 > 0x9F))
+        return false;
       i += 3;
+    } else if ((ch & 0xF8) == 0xF0) {
+      if (i + 3 >= vdata.size() || (vdata[i + 1] & 0xC0) != 0x80 ||
+          (vdata[i + 2] & 0xC0) != 0x80 || (vdata[i + 3] & 0xC0) != 0x80 ||
+          ch > 0xF4)
+        return false;
+      unsigned char c1 = vdata[i + 1];
+      if ((ch == 0xF0 && c1 < 0x90) || (ch == 0xF4 && c1 > 0x8F))
+        return false;
+      i += 4;
     } else {
       return false;
     }
@@ -282,102 +507,294 @@ bool VString::isUtf8String() const {
 }
 
 bool VString::isGbkString() const {
-  for (unsigned char c : data) {
+  size_t i = 0;
+  while (i < vdata.size()) {
+    unsigned char c = vdata[i];
     if (c >= 0x81 && c <= 0xFE) {
-      return true;
-    }
-  }
-  return false;
-}
-
-bool VString::isAscllString() const {
-  for (unsigned char c : data) {
-    if (c >= 0x80) {
+      if (i + 1 >= vdata.size())
+        return false;
+      unsigned char c2 = vdata[i + 1];
+      if ((c2 >= 0x40 && c2 <= 0x7E) || (c2 >= 0x80 && c2 <= 0xFE)) {
+        i += 2;
+      } else {
+        return false;
+      }
+    } else if (c <= 0x7F) {
+      ++i;
+    } else {
       return false;
     }
   }
   return true;
 }
 
-std::string VString::toString(VString::Encoding encoding) {
+bool VString::isAsciiString() const {
+  for (unsigned char c : vdata) {
+    if (c > 0x7F) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// 编码转换方法
+VString VString::utf8ToAscii() const {
+  try {
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
+    std::u32string utf32 = converter.from_bytes(vdata);
+
+    std::string result;
+    result.reserve(vdata.size());
+    for (auto c : utf32) {
+      result += (c <= 0x7F) ? static_cast<char>(c) : '?';
+    }
+    return result;
+  } catch (const std::exception &) {
+    return VString();
+  }
+}
+
+std::u16string VString::utf8ToUtf16() const {
+  try {
+    std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> converter;
+    return converter.from_bytes(vdata);
+  } catch (const std::exception &) {
+    return {};
+  }
+}
+
+std::u32string VString::utf8ToUtf32() const {
+  try {
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
+    return converter.from_bytes(vdata);
+  } catch (const std::exception &) {
+    return {};
+  }
+}
+
+VString VString::gbkToUtf8() const {
+  try {
+    if (isUtf8String())
+      return vdata;
+
+    static std::wstring_convert<std::codecvt_byname<wchar_t, char, mbstate_t>>
+        gbk_converter(
+            new std::codecvt_byname<wchar_t, char, mbstate_t>(GBK_LOCALE_NAME));
+
+    std::wstring wstr = gbk_converter.from_bytes(vdata);
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_converter;
+    return utf8_converter.to_bytes(wstr);
+  } catch (const std::exception &) {
+    return VString();
+  }
+}
+
+VString VString::utf8ToGbk() const {
+  try {
+    if (!isUtf8String())
+      return vdata;
+
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_converter;
+    std::wstring wstr = utf8_converter.from_bytes(vdata);
+
+    static std::wstring_convert<std::codecvt_byname<wchar_t, char, mbstate_t>>
+        gbk_converter(
+            new std::codecvt_byname<wchar_t, char, mbstate_t>(GBK_LOCALE_NAME));
+
+    return gbk_converter.to_bytes(wstr);
+  } catch (const std::exception &) {
+    return VString();
+  }
+}
+
+
+std::wstring VString::utf8ToUnicode() const {
+  try {
+// 使用UTF-8到UTF-16的转换器（Windows平台wchar_t为2字节）
+#ifdef _WIN32
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+#else
+    std::wstring_convert<std::codecvt_utf8<wchar_t>>
+        converter; // Linux/Mac使用4字节wchar_t
+#endif
+    return converter.from_bytes(vdata);
+  } catch (const std::exception &e) {
+    return L""; // 返回空字符串或抛出异常
+  }
+}
+
+std::wstring VString::gbkToUnicode() const {
+  try {
+    // 使用GBK到宽字符的转换器
+    static std::wstring_convert<std::codecvt_byname<wchar_t, char, mbstate_t>>
+        converter(
+            new std::codecvt_byname<wchar_t, char, mbstate_t>(GBK_LOCALE_NAME));
+
+    return converter.from_bytes(vdata);
+  } catch (const std::exception &e) {
+    return L"";
+  }
+}
+
+VString::Encoding VString::detectEncoding() const {
+  if (isUtf8String())
+    return VString::Encoding::UTF8;
+  if (isGbkString())
+    return VString::Encoding::GBK;
+  if (isAsciiString())
+    return VString::Encoding::ASCII;
+  return VString::Encoding::UNKNOWN;
+}
+
+VString VString::toString(VString::Encoding encoding) const {
   switch (encoding) {
   case VString::Encoding::ASCII: {
     switch (this->detectEncoding()) {
     case VString::Encoding::ASCII:
-      return data;
+      return vdata;
     case VString::Encoding::UTF8:
-      return this->utf8ToAscll();
+      return this->utf8ToAscii();
     case VString::Encoding::GBK:
-      return data;
+      return vdata;
     case VString::Encoding::UNKNOWN:
-      return data;
+      return vdata;
     default:
-      return data;
+      return vdata;
     }
   } break;
   case VString::Encoding::UTF8: {
     switch (this->detectEncoding()) {
     case VString::Encoding::ASCII:
-      return ANSIToUTF8(data);
+      return ANSIToUTF8(vdata);
     case VString::Encoding::UTF8:
-      return data;
+      return vdata;
     case VString::Encoding::GBK:
       return this->gbkToUtf8();
     case VString::Encoding::UNKNOWN:
-      return data;
+      return vdata;
     default:
-      return data;
+      return vdata;
     }
   } break;
   case VString::Encoding::GBK: {
     switch (this->detectEncoding()) {
     case VString::Encoding::ASCII:
-      return data;
+      return vdata;
     case VString::Encoding::UTF8:
       return this->utf8ToGbk();
     case VString::Encoding::GBK:
-      return data;
+      return vdata;
     case VString::Encoding::UNKNOWN:
-      return data;
+      return vdata;
     default:
-      return data;
+      return vdata;
     }
   } break;
   case VString::Encoding::UNKNOWN:
-    return data;
+    return vdata;
   default:
-    return data;
+    return vdata;
   }
 }
 
-std::string VString::toUtf8String() {
+VString VString::toUtf8String() const {
   return this->toString(VString::Encoding::UTF8);
 }
 
-std::string VString::toGbkString() {
+VString VString::toGbkString() const {
   return this->toString(VString::Encoding::GBK);
 }
 
-std::string VString::toAscllString() {
+VString VString::toAsciiString() const {
   return this->toString(VString::Encoding::ASCII);
 }
 
-std::string VString::toSystemString() {
+VString VString::toSystemString() const {
   return this->toString(SystemEncoding());
 }
 
-std::string VString::toUpper() {
-  std::string strRet = data;
+VString VString::toUpper() const {
+  std::string strRet = vdata;
   transform(strRet.begin(), strRet.end(), strRet.begin(),
             (int (*)(int))toupper);
   return strRet;
 }
 
-std::string VString::toLower() {
-  std::string strRet = data;
+VString VString::toLower() const {
+  std::string strRet = vdata;
   transform(strRet.begin(), strRet.end(), strRet.begin(),
             (int (*)(int))tolower);
   return strRet;
+}
+
+VString VString::Format(const char *fmt, ...) {
+  va_list args;
+  va_start(args, fmt);
+  va_list args_copy;
+  va_copy(args_copy, args);
+
+  // 计算所需缓冲区大小（不包括终止符）
+  int size = vsnprintf(nullptr, 0, fmt, args_copy);
+  va_end(args_copy);
+
+  if (size <= 0) {
+    va_end(args);
+    return VString();
+  }
+
+  // 分配缓冲区（size + 1 用于容纳终止符）
+  std::string buffer;
+  buffer.resize(size + 1);
+
+  // 填充实际内容
+  int written = vsnprintf(&buffer[0], size + 1, fmt, args);
+  va_end(args);
+
+  if (written != size) { // 确保写入长度一致
+    return VString();
+  }
+
+  buffer.resize(size); // 移除终止符
+  return buffer;
+}
+
+VString VString::Format(const VString &sfmt, ...) {
+  const char *fmt = sfmt.c_str();
+  va_list args;
+
+  // 计算所需缓冲区大小
+  va_start(args, sfmt);
+  int size = vsnprintf(nullptr, 0, fmt, args);
+  va_end(args);
+
+  if (size < 0) {
+    return VString(); // 返回空字符串表示失败
+  }
+
+  // 分配缓冲区并填充数据
+  std::vector<char> buffer(size + 1);
+  va_start(args, sfmt);
+  vsnprintf(buffer.data(), buffer.size(), fmt, args);
+  va_end(args);
+
+  return VString(buffer.data());
+}
+
+// 输出运算符 <<
+std::ostream &operator<<(std::ostream &os, const VString &str) {
+  os << str.vdata;
+  return os;
+}
+
+const std::ostream &operator<<(const std::ostream &os, const VString &str) {
+  os << str.vdata;
+  return os;
+}
+
+// 输入运算符 >>
+std::istream &operator>>(std::istream &is, VString &str) {
+  is >> str.vdata;
+  return is;
 }
 
 VString::Encoding SystemEncoding() { return encoding; }
@@ -416,28 +833,24 @@ std::string ANSIToUTF8(const std::string &str) {
   return UnicodeToUTF8(ANSIToUnicode(str));
 }
 
-std::string GBKToUTF8(const std::string &str) {
-  if (IsUtf8String(str)) {
-    return str;
-  }
-  std::wstring_convert<std::codecvt_byname<wchar_t, char, mbstate_t>> convert(
-      new std::codecvt_byname<wchar_t, char, mbstate_t>(GBK_LOCALE_NAME));
-  std::wstring tmp_wstr = convert.from_bytes(str);
-  std::wstring_convert<std::codecvt_utf8<wchar_t>> cv2;
-  return cv2.to_bytes(tmp_wstr);
-}
+unsigned char ToHex(unsigned char x) { return x > 9 ? x + 55 : x + 48; }
 
-std::string UTF8ToGBK(const std::string &str) {
-  if (!IsUtf8String(str)) {
-    return str;
-  }
-  std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-  std::wstring tmp_wstr = conv.from_bytes(str);
-  std::wstring_convert<std::codecvt_byname<wchar_t, char, mbstate_t>> convert(
-      new std::codecvt_byname<wchar_t, char, mbstate_t>(GBK_LOCALE_NAME));
-  return convert.to_bytes(tmp_wstr);
+unsigned char FromHex(unsigned char x) {
+  if (x >= 'A' && x <= 'Z')
+    return x - 'A' + 10;
+  if (x >= 'a' && x <= 'z')
+    return x - 'a' + 10;
+  if (x >= '0' && x <= '9')
+    return x - '0';
+  throw std::invalid_argument("Invalid hex character");
 }
-
+size_t CountVarArgs(const char *fmt, va_list args) {
+  va_list args_copy;
+  va_copy(args_copy, args);
+  int count = vsnprintf(nullptr, 0, fmt, args_copy);
+  va_end(args_copy);
+  return (count >= 0) ? static_cast<size_t>(count) : 0;
+}
 std::string replaceAll(const std::string &str, const std::string &search,
                        const std::string &replace) {
   std::string result = str;
@@ -447,147 +860,6 @@ std::string replaceAll(const std::string &str, const std::string &search,
     pos += replace.length();
   }
   return result;
-}
-
-VString::Encoding DetectEncoding(const std::string &str) {
-  if (IsUtf8String(str)) {
-    return VString::Encoding::UTF8;
-  } else if (IsGbkString(str)) {
-    return VString::Encoding::GBK;
-  } else if (IsAscllString(str)) {
-    return VString::Encoding::ASCII;
-  } else {
-    return VString::Encoding::UNKNOWN;
-  }
-}
-
-bool IsUtf8String(const std::string &str) {
-  int i = 0;
-  while (i < str.size()) {
-    unsigned char ch = str[i];
-    if (ch >= 0 && ch <= 127) { // 0x00 - 0x7F
-      i++;
-      continue;
-    }
-    if ((ch & 0xE0) == 0xC0) { // 0xC0 - 0xDF
-      if (i + 1 >= str.size() || (str[i + 1] & 0xC0) != 0x80) {
-        return false;
-      }
-      i += 2;
-    } else if ((ch & 0xF0) == 0xE0) { // 0xE0 - 0xEF
-      if (i + 2 >= str.size() || (str[i + 1] & 0xC0) != 0x80 ||
-          (str[i + 2] & 0xC0) != 0x80) {
-        return false;
-      }
-      i += 3;
-    } else {
-      return false;
-    }
-  }
-  return true;
-}
-
-bool IsGbkString(const std::string &str) {
-  for (unsigned char c : str) {
-    if (c >= 0x81 && c <= 0xFE) {
-      return true;
-    } else if (c >= 0x80) {
-      continue;
-    }
-  }
-  return false;
-}
-
-bool IsAscllString(const std::string &str) {
-  for (unsigned char c : str) {
-    if (c >= 0x80) {
-      return false;
-    }
-  }
-  return true;
-}
-
-std::string ToString(const std::string &str, VString::Encoding encoding) {
-  const VString &vstr = str;
-
-  switch (encoding) {
-  case VString::Encoding::ASCII: {
-    switch (vstr.detectEncoding()) {
-    case VString::Encoding::ASCII:
-      return str;
-    case VString::Encoding::UTF8:
-      return UTF8ToANSI(str);
-    case VString::Encoding::GBK:
-      return str;
-    case VString::Encoding::UNKNOWN:
-      return str;
-    default:
-      return str;
-    }
-  } break;
-  case VString::Encoding::UTF8: {
-    switch (vstr.detectEncoding()) {
-    case VString::Encoding::ASCII:
-      return ANSIToUTF8(str);
-    case VString::Encoding::UTF8:
-      return str;
-    case VString::Encoding::GBK:
-      return GBKToUTF8(str);
-    case VString::Encoding::UNKNOWN:
-      return str;
-    default:
-      return str;
-    }
-  } break;
-  case VString::Encoding::GBK: {
-    switch (vstr.detectEncoding()) {
-    case VString::Encoding::ASCII:
-      return str;
-    case VString::Encoding::UTF8:
-      return UTF8ToGBK(str);
-    case VString::Encoding::GBK:
-      return str;
-    case VString::Encoding::UNKNOWN:
-      return str;
-    default:
-      return str;
-    }
-  } break;
-  case VString::Encoding::UNKNOWN:
-    return str;
-  default:
-    return str;
-  }
-}
-
-std::string ToUtf8String(const std::string &str) {
-  return ToString(str, VString::Encoding::UTF8);
-}
-
-std::string ToGbkString(const std::string &str) {
-  return ToString(str, VString::Encoding::GBK);
-}
-
-std::string ToAscllString(const std::string &str) {
-  return ToString(str, VString::Encoding::ASCII);
-}
-
-std::string ToSystemString(const std::string &str) {
-  return ToString(str, SystemEncoding());
-}
-
-std::string ToUpper(const std::string &str) {
-  std::string strRet = str;
-  transform(strRet.begin(), strRet.end(), strRet.begin(),
-            (int (*)(int))toupper);
-  return strRet;
-}
-
-std::string ToLower(const std::string &str) {
-  std::string strRet = str;
-  transform(strRet.begin(), strRet.end(), strRet.begin(),
-            (int (*)(int))tolower);
-  return strRet;
 }
 
 VString::iterator::iterator(std::string::iterator iter) : it(iter) {}
@@ -602,3 +874,5 @@ VString::iterator &VString::iterator::operator++() {
 bool VString::iterator::operator!=(const iterator &other) const {
   return it != other.it;
 }
+
+
