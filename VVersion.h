@@ -3,9 +3,25 @@
 #define VLIBUV_VERSION_MAJOR 1
 #define VLIBUV_VERSION_MINOR 5
 #define VLIBUV_VERSION_PATCH 0
-#define VLIBUV_VERSION_IS_RELEASE 0
+#define VLIBUV_VERSION_IS_RELEASE 1          // 0=非发布版，1=发布版
 #define VLIBUV_VERSION_SUFFIX ""
 
+// 辅助宏：双展开字符串化
+#define VLIBUV_STRINGIFY_HELPER(x) #x
+#define VLIBUV_STRINGIFY(x) VLIBUV_STRINGIFY_HELPER(x)
+
+// 根据是否为发布版定义 RELEASE_TAG
+#if VLIBUV_VERSION_IS_RELEASE
+    #define VLIBUV_RELEASE_TAG
+#else
+    #define VLIBUV_RELEASE_TAG -dev
+#endif
+
+// 最终版本字符串
+#define VLIBUV_VERSION_STRING \
+    VLIBUV_STRINGIFY(VLIBUV_VERSION_MAJOR.VLIBUV_VERSION_MINOR.VLIBUV_VERSION_PATCH VLIBUV_RELEASE_TAG) 
+
+// 版本号十六进制表示
 #define VLIBUV_VERSION_HEX  ((VLIBUV_VERSION_MAJOR << 16) | \
-                         (VLIBUV_VERSION_MINOR <<  8) | \
-                         (VLIBUV_VERSION_PATCH))
+                             (VLIBUV_VERSION_MINOR <<  8) | \
+                             (VLIBUV_VERSION_PATCH))

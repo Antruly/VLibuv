@@ -69,8 +69,7 @@ int main() {
   }
 
   uint64_t times = websocketClient.websocketPing();
-  Log->logDebug("%s ping times %" PRIu64 " ms \n",
-                         websocketUrl2.c_str(), times);
+  Log->logDebug("%s ping times %" PRIu64 " ms \n", websocketUrl2.c_str(), times);
  
 
   

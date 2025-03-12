@@ -3,6 +3,7 @@
 #include <VTimer.h>
 #include <VTimerInfo.h>
 #include <cassert>
+#include <../VVersion.h>
 
 VHttpResponse::VHttpResponse(VTcpClient *vtcp_client)
     : tcp_client_(vtcp_client), own_tcp_client_(false),
@@ -457,7 +458,7 @@ bool VHttpResponse::sendResponseHeader(VBuf &sendBuf, bool isSend) {
   std::string response;
   // Add the client identifier
   if (server_.empty()) {
-    this->setServer("VHttpServer/1.0");
+    this->setServer("VHttpServer/" + std::string(VLIBUV_VERSION_STRING));
   }
 
   // Add content length information

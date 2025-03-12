@@ -1,6 +1,7 @@
 ﻿#include "VHttpRequest.h"
 #include <cassert>
 #include <VTimerInfo.h>
+#include <../VVersion.h>
 
 VHttpRequest::VHttpRequest()
     : tcp_client_(new VTcpClient()), own_tcp_client_(true),
@@ -491,7 +492,7 @@ bool VHttpRequest::sendRequestHeader(VBuf &sendBuf, bool isSend) {
   std::string request;
   // Add the client identifier
   if (user_agent_.empty())
-    this->setUserAgent("VHttpClient/1.0");
+    this->setUserAgent("VHttpClient/" + std::string(VLIBUV_VERSION_STRING));
 
   if (host_.empty() && headers_.find("Host") != headers_.end()) {
     host_ = headers_["Host"];
