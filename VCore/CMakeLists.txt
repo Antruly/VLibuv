@@ -47,9 +47,8 @@ endif()
 
 set(ENABLE_CRT_NO_VA_START_VALIDATION ON CACHE BOOL "will define _CRT_NO_VA_START_VALIDATION")
 if(ENABLE_CRT_NO_VA_START_VALIDATION)
-    add_definitions(-_CRT_NO_VA_START_VALIDATION)
+    add_definitions(-D_CRT_NO_VA_START_VALIDATION)
 endif()
-
 
 
 if(MSVC)
