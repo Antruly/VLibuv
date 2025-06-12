@@ -2,8 +2,8 @@
 
 #define VLIBUV_VERSION_MAJOR 1
 #define VLIBUV_VERSION_MINOR 5
-#define VLIBUV_VERSION_PATCH 0
-#define VLIBUV_VERSION_IS_RELEASE 1          // 0=非发布版，1=发布版
+#define VLIBUV_VERSION_PATCH 1
+#define VLIBUV_VERSION_IS_RELEASE 0          // 0=非发布版，1=发布版
 #define VLIBUV_VERSION_SUFFIX ""
 
 // 辅助宏：双展开字符串化

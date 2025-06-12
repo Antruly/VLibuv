@@ -81,21 +81,6 @@
   return true;
 }
 
-// 创建目录
-
- bool VFile::createDirectory(const VString &dirPath) {
-  VLoop loop;
-  VFs fs;
-
-  // 创建目录
-  int result = fs.mkdir(&loop, dirPath.c_str(), 0755);
-  if (result < 0) {
-    Log->logDebugError("Failed to create directory: %s\n", uv_strerror(result));
-    return false;
-  }
-  return true;
-}
-
 // 删除文件
 
  bool VFile::removeFile(const VString &filePath) {
@@ -166,4 +151,89 @@
   // 删除当前目录
   fs.closedir(&loop, &entry);
   return removeDirectory(dirPath);
-}
+ }
+
+ // 递归创建目录
+
+ bool VFile::createDirectory(const VString &path) {
+   if (path.empty())
+     return true;
+   VLoop loop;
+   VFs req;
+   int ret;
+
+   // 检查路径是否存在
+   ret = req.access(&loop, path.c_str(), F_OK);
+   req.reqCleanup();
+
+   if (ret == 0) {
+     // 路径已存在
+     return true;
+   }
+
+   // 找父目录
+   size_t pos = path.stdString().find_last_of("/\\");
+   if (pos == std::string::npos) {
+     // 没有父目录，直接创建当前目录
+     ret = req.mkdir(&loop, path.c_str(), 0755);
+     req.reqCleanup();
+     return ret == 0;
+   }
+
+   // 递归创建父目录
+   std::string parent = path.substr(0, pos);
+   if (parent.empty()) {
+     // 根目录，应该已经存在
+     return true;
+   }
+
+   if (!createDirectory(parent)) {
+     return false;
+   }
+
+   // 创建当前目录
+   ret = req.mkdir(&loop, path.c_str(), 0755);
+   req.reqCleanup();
+
+   if (ret != 0) {
+     // 处理EEXIST错误（可能其他线程/进程已经创建）
+     ret = req.access(&loop, path.c_str(), F_OK);
+     req.reqCleanup();
+     return ret == 0;
+   }
+
+   return true;
+ }
+
+ // 提取目录路径
+
+ VString VFile::extractDirectory(const VString &file_path) {
+   size_t pos = file_path.stdString().find_last_of("/\\");
+   if (pos == std::string::npos) {
+     return "."; // 当前目录
+   }
+   return file_path.substr(0, pos);
+ }
+
+ // 创建文件目录
+
+ bool VFile::createFileDirectory(const VString &output_file) {
+   if (output_file.empty()) {
+     Log->logError("Error: Output file path is empty");
+     return false;
+   }
+
+   // 提取文件所在目录
+   std::string dir_path = extractDirectory(output_file);
+   if (dir_path.empty()) {
+     dir_path = ".";
+   }
+
+   // 递归创建目录
+   if (!createDirectory(dir_path)) {
+     Log->logError("Error: Failed to create directory: %s", dir_path.c_str());
+     return false;
+   }
+
+   return true;
+ }

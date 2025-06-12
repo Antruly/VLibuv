@@ -24,6 +24,7 @@ extern "C" {
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <map>
 
 #if __cplusplus >= 201103L
 #define NOEXCEPT noexcept
@@ -244,7 +245,7 @@ struct Cookie {
   bool httpOnly = false;
   bool isSession = false; // 会话Cookie（无过期时间）
 
-  VString Cookie::toHeaderString() const {
+  VString toHeaderString() const {
     // 基础 name=value 部分（强制URL编码）
     VString result = VString::UrlEncode(name) + "=" + VString::UrlEncode(value);
 
@@ -395,6 +396,7 @@ public:
   ParsedURL parseUrl(const std::string &url);
   Cookie parseSetCookieHeader(const VString &header,
                               const VString &requestDomain = VString());
+  std::map<VString, VString> parseUrlEncoded(const VString& body);
 
   std::string getMethodName(const METHOD_TYPE &method_type);
   METHOD_TYPE getMethodType(const std::string &method_name);

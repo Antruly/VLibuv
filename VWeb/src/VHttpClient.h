@@ -36,14 +36,14 @@ public:
   static VString parseBoundaryFromContentType(const VString &contentType);
 
   // 解析单个Part的头部和内容
-  void VHttpMultiPart::processPart(const VString &partData);
+  void processPart(const VString &partData);
 
  // 主解析方法（新增 contentType 参数）
-  bool VHttpMultiPart::parseFromBodyData(const VBuf &bodyData,
+  bool parseFromBodyData(const VBuf &bodyData,
                                          const VString &contentType);
 
   // 设置Boundary
-  void VHttpMultiPart::setBoundary(const VString &boundary);
+  void setBoundary(const VString &boundary);
 
   std::vector<VHttpPart> &getHttpParts();
 
