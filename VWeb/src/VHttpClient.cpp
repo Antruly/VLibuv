@@ -747,7 +747,7 @@ bool VHttpMultiPart::parseFromBodyData(const VBuf &bodyData,
     if (partEnd == VString::npos)
       partEnd = endPos;
 
-    VString partData = body.substr(partStart, partEnd - partStart);
+    VString partData = body.substr(partStart, partEnd - partStart - 2);
     processPart(partData);
 
     currentPos = partEnd;

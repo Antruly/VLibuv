@@ -74,8 +74,8 @@ public:
   size_t find(char ch, size_t pos = 0) const;
   size_t rfind(const VString &str, size_t pos = 0) const;
   size_t rfind(char ch, size_t pos = 0) const;
-  void VString::trim();
-  void VString::trimUtf8();
+  void trim();
+  void trimUtf8();
   VString trimmedUtf8() const;
   void trimGbk();
   VString trimmedGbk() const;
@@ -119,6 +119,11 @@ public:
   VString toSystemString() const;
   VString toUpper() const;
   VString toLower() const;
+  int toInt() const;
+  unsigned int toUInt() const;
+  double toDouble() const;
+  int64_t toInt64() const;
+  uint64_t toUInt64() const;
 
   // 工具方法
   static VString Format(const char *fmt, ...);

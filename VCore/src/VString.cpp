@@ -727,6 +727,129 @@ VString VString::toLower() const {
   return strRet;
 }
 
+int VString::toInt() const {
+    char* end = nullptr;
+    errno = 0; // 重置错误标志
+
+    long value = strtol(vdata.c_str(), &end, 10);
+
+    // 检查转换错误
+    if (errno == ERANGE || value < INT_MIN || value > INT_MAX) {
+        return 0; // 溢出时返回0
+    }
+
+    // 检查是否有无效字符
+    if (end == vdata.c_str() || *end != '\0') {
+        // 尝试允许末尾空格
+        while (*end != '\0' && std::isspace(static_cast<unsigned char>(*end))) {
+            end++;
+        }
+        if (*end != '\0') return 0; // 还有额外字符
+    }
+
+    return static_cast<int>(value);
+}
+
+unsigned int VString::toUInt() const {
+    char* end = nullptr;
+    errno = 0; // 重置错误标志
+
+    unsigned long value = strtoul(vdata.c_str(), &end, 10);
+
+    // 检查转换错误
+    if (errno == ERANGE || value > UINT_MAX) {
+        return 0; // 溢出时返回0
+    }
+
+    // 检查是否有无效字符
+    if (end == vdata.c_str() || *end != '\0') {
+        // 尝试允许末尾空格
+        while (*end != '\0' && std::isspace(static_cast<unsigned char>(*end))) {
+            end++;
+        }
+        if (*end != '\0') return 0; // 还有额外字符
+    }
+
+    return static_cast<unsigned int>(value);
+}
+
+double VString::toDouble() const {
+    char* end = nullptr;
+    errno = 0; // 重置错误标志
+
+    double value = strtod(vdata.c_str(), &end);
+
+    // 检查转换错误
+    if (errno == ERANGE) {
+        if (std::isinf(value)) {
+            return value; // 返回±∞
+        }
+        return 0.0; // 精度丢失等错误返回0.0
+    }
+
+    // 检查是否有无效字符
+    if (end == vdata.c_str()) {
+        return 0.0; // 无有效数字
+    }
+
+    // 允许末尾空格
+    while (*end != '\0' && std::isspace(static_cast<unsigned char>(*end))) {
+        end++;
+    }
+
+    if (*end != '\0') {
+        return 0.0; // 还有额外字符
+    }
+
+    return value;
+}
+
+int64_t VString::toInt64() const {
+    char* end = nullptr;
+    errno = 0; // 重置错误标志
+
+    int64_t value = strtoll(vdata.c_str(), &end, 10);
+
+    // 检查转换错误
+    if (errno == ERANGE) {
+        return 0; // 溢出时返回0
+    }
+
+    // 检查是否有无效字符
+    if (end == vdata.c_str() || *end != '\0') {
+        // 尝试允许末尾空格
+        while (*end != '\0' && std::isspace(static_cast<unsigned char>(*end))) {
+            end++;
+        }
+        if (*end != '\0') return 0; // 还有额外字符
+    }
+
+    return value;
+}
+
+uint64_t VString::toUInt64() const {
+    char* end = nullptr;
+    errno = 0; // 重置错误标志
+
+    uint64_t value = strtoull(vdata.c_str(), &end, 10);
+
+    // 检查转换错误
+    if (errno == ERANGE) {
+        return 0; // 溢出时返回0
+    }
+
+    // 检查是否有无效字符
+    if (end == vdata.c_str() || *end != '\0') {
+        // 尝试允许末尾空格
+        while (*end != '\0' && std::isspace(static_cast<unsigned char>(*end))) {
+            end++;
+        }
+        if (*end != '\0') return 0; // 还有额外字符
+    }
+
+    return value;
+}
+
 VString VString::Format(const char *fmt, ...) {
   va_list args;
   va_start(args, fmt);

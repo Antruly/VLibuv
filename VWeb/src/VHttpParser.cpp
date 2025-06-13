@@ -304,6 +304,39 @@ Cookie VHttpParser::parseSetCookieHeader(const VString &header,
   return cookie;
 }
 
+std::map<VString, VString> VHttpParser::parseUrlEncoded(const VString& body)
+{
+    std::map<VString, VString> params;
+
+    // 空字符串直接返回空结果
+    if (body.empty()) {
+        return params;
+    }
+
+    // 分割键值对
+    std::vector<VString> pairs = body.split('&');
+
+    for (const VString& pair : pairs) {
+        // 分割键和值（只分割第一个'='）
+        size_t pos = pair.find('=');
+        if (pos == VString::npos) {
+            // 没有等号，作为没有值的键处理
+            VString key = pair;
+            params[key.urlDecode()] = VString();
+        }
+        else {
+            // 分割键和值
+            VString key = pair.substr(0, pos);
+            VString value = pair.substr(pos + 1);
+
+            // URL 解码后存入 map
+            params[key.urlDecode()] = value.urlDecode();
+        }
+    }
+
+    return params;
+}
+
 std::string VHttpParser::getMethodName(const METHOD_TYPE &method_type) {
 
   switch (method_type) {
