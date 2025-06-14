@@ -124,6 +124,7 @@ public:
   double toDouble() const;
   int64_t toInt64() const;
   uint64_t toUInt64() const;
+  bool toBool() const;
 
   // 工具方法
   static VString Format(const char *fmt, ...);

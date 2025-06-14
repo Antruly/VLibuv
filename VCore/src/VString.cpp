@@ -850,6 +850,48 @@ uint64_t VString::toUInt64() const {
     return value;
 }
 
+bool VString::toBool() const {
+  // 处理空字符串和空白字符串
+  if (vdata.empty()) {
+    return false;
+  }
+
+  // 移除前后空格
+  size_t start = vdata.find_first_not_of(" \t\n\r\f\v");
+  if (start == std::string::npos) { // 全是空白字符
+    return false;
+  }
+  size_t end = vdata.find_last_not_of(" \t\n\r\f\v");
+  std::string trimmed = vdata.substr(start, end - start + 1);
+
+  // 转换为小写便于比较（不改变原数据）
+  std::string lower;
+  std::transform(trimmed.begin(), trimmed.end(), std::back_inserter(lower),
+                 [](unsigned char c) { return std::tolower(c); });
+
+  // 检查 true 值表示
+  if (lower == "true" || lower == "yes" || lower == "on" || lower == "1") {
+    return true;
+  }
+
+  // 检查 false 值表示
+  if (lower == "false" || lower == "no" || lower == "off" || lower == "0") {
+    return false;
+  }
+
+  // 尝试转换为数字检测非零值
+  try {
+    // 复用现有的 toUInt64 方法
+    uint64_t num = VString(trimmed).toUInt64();
+    return (num != 0);
+  } catch (...) {
+    // 转换失败不处理
+  }
+
+  // 默认情况：任何非零数字或无法识别的值都返回 false
+  return false;
+}
+
 VString VString::Format(const char *fmt, ...) {
   va_list args;
   va_start(args, fmt);

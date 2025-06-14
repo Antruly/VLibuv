@@ -300,6 +300,7 @@ bool isValidIp(const std::string& ip) {
 
 int main(int argc, char* argv[]) {
 
+	Log->setEnable(true);
 	try {
 		// 参数格式检查
 		if (argc != 5) {

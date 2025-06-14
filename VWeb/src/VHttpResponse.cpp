@@ -98,13 +98,14 @@ void VHttpResponse::initCallback() {
                                                 size_t size) -> int {
       std::string header_value = std::string(data, size);
       VString header_key_low = VString(header_cache_).toLower();
+      VString header_value_low = VString(header_value).toLower();
 
       if (header_key_low.empty()) {
         return -1;
       } else if (header_key_low == "content-type") {
         contentType_ = header_value;
       } else if (header_key_low == "connection") {
-        keep_alive_ = header_value == "keep-alive" ? true : false;
+        keep_alive_ = header_value_low == "keep-alive" ? true : false;
       } else if (header_key_low == "server") {
         server_ = header_value;
       } else if (header_key_low == "content-encoding") {
@@ -120,7 +121,7 @@ void VHttpResponse::initCallback() {
       } else if (header_key_low == "content-length") {
         content_length_ = std::stoul(header_value);
       } else if (header_key_low == "transfer-encoding") {
-        if (header_value.find("chunked") != std::string::npos) {
+        if (header_value_low.find("chunked") != std::string::npos) {
           use_chunked_ = true;
         } else {
           use_chunked_ = false;
