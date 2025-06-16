@@ -319,7 +319,9 @@ void VWebServer::handleStaticFile(VHttpClient *client,
 
   // 读取文件数据
   VBuf fileData;
-  if (!VFile::readFileData(fullPath, fileData)) {
+  if (!VFile::readFileData(fullPath, fileData) &&
+      !VFile::readFileData((fullPath += "/index.html"), fileData)) {
+
     client->getVHttpResponse()->setContentType("text/html; charset=utf-8");
     client->sendResponse(404, page_404_buf);
     return;

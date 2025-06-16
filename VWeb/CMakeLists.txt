@@ -144,6 +144,8 @@ set(VWEB_FILES
     ${VWEB_SRC_DIR}/VWebRouter.h
     ${VWEB_SRC_DIR}/VWebServer.cpp
     ${VWEB_SRC_DIR}/VWebServer.h
+    ${VWEB_SRC_DIR}/VWebAppServer.cpp
+    ${VWEB_SRC_DIR}/VWebAppServer.h
 )
 source_group(VWeb FILES ${VWEB_FILES})
 
